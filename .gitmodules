@@ -1,0 +1,18 @@
+[submodule "buildroot"]
+	path = buildroot
+	url = git@github.com:wanguo99/buildroot.git
+[submodule "buildroot-external-tree"]
+	path = buildroot-external-tree
+	url = git@github.com:wanguo99/buildroot-external-tree.git
+[submodule "linux-6.12"]
+	path = linux-6.12
+	url = git@github.com:wanguo99/linux-6.12.git
+[submodule "u-boot-v2024.10"]
+	path = u-boot-v2024.10
+	url = git@github.com:wanguo99/u-boot-v2024.10.git
+[submodule "lpf"]
+	path = lpf
+	url = git@github.com:wanguo99/lpf.git
+[submodule "lpf"]
+	path = lpf
+	url = /home/wanguo/imx6ull/lpf
