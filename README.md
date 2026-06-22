@@ -4,6 +4,28 @@
 
 ## 子模块常用命令
 
+### 按平台初始化工作区
+
+使用 `scripts/setup-platform.sh` 只初始化或更新目标平台需要的子模块：
+
+```bash
+./scripts/setup-platform.sh imx6ull
+```
+
+`imx6ull` 会更新 `buildroot`、`br2-external`、`lpf`、`linux/linux-7.0` 和 `uboot/uboot-2024.10`，不会拉取 `linux/ti-linux-kernel-6.18.13` 或 `uboot/ti-u-boot-2025.10`。
+
+如需更新到 `.gitmodules` 中配置的远端 `master` 最新提交：
+
+```bash
+./scripts/setup-platform.sh --remote imx6ull
+```
+
+查看支持的平台和子模块映射：
+
+```bash
+./scripts/setup-platform.sh --list
+```
+
 ### 克隆与初始化
 
 ```bash
