@@ -1,20 +1,20 @@
 [submodule "buildroot"]
 	path = buildroot
-	url = git@github.com:wanguo99/buildroot.git
+	url = git@github.com:linux-bsp/buildroot.git
 	branch = master
 [submodule "br2-external"]
 	path = br2-external
-	url = git@github.com:wanguo99/br2-external.git
+	url = git@github.com:linux-bsp/br2-external.git
 	branch = master
 [submodule "lpf"]
 	path = lpf
-	url = git@github.com:wanguo99/lpf.git
+	url = git@github.com:linux-bsp/lpf.git
 	branch = master
 [submodule "uboot-2024.10"]
 	path = uboot-2024.10
-	url = git@github.com:wanguo99/uboot-2024.10.git
+	url = git@github.com:linux-bsp/uboot-2024.10.git
 	branch = master
 [submodule "linux-7.0"]
 	path = linux-7.0
-	url = git@github.com:wanguo99/linux-7.0.git
+	url = git@github.com:linux-bsp/linux-7.0.git
 	branch = master

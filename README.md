@@ -7,7 +7,7 @@
 ### 克隆与初始化
 
 ```bash
-git clone git@github.com:wanguo99/bsp.git
+git clone git@github.com:linux-bsp/bsp.git
 cd bsp
 git submodule update --init --recursive
 ```
@@ -99,7 +99,7 @@ git submodule update --init -- linux-7.0
 ### 添加子模块
 
 ```bash
-git submodule add git@github.com:wanguo99/example.git example
+git submodule add git@github.com:linux-bsp/example.git example
 git add .gitmodules example
 git commit -m "chore: add example submodule"
 ```
@@ -107,7 +107,7 @@ git commit -m "chore: add example submodule"
 添加较大的仓库时可以使用浅克隆：
 
 ```bash
-git submodule add --depth 1 git@github.com:wanguo99/example.git example
+git submodule add --depth 1 git@github.com:linux-bsp/example.git example
 ```
 
 ### 删除子模块
