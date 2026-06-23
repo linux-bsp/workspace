@@ -26,3 +26,7 @@
 	path = uboot/ti-u-boot-2025.10
 	url = git@github.com:linux-bsp/ti-u-boot-2025.10.git
 	branch = master
+[submodule "uboot/u-boot-2026.04"]
+	path = uboot/u-boot-2026.04
+	url = git@github.com:linux-bsp/u-boot-2026.04.git
+	branch = master
