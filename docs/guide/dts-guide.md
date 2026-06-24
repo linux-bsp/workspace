@@ -1,8 +1,8 @@
-# i.MX6ULL 开发板 DTS 配置与硬件验证指导手册
+# DTS 配置与硬件验证指导手册
 
-本文以本仓库中的 ALIENTEK ATK-DL6Y2C i.MX6ULL 开发板为原型，说明从拿到硬件原理图和芯片手册，到编写 Linux DTS 节点，再到上板验证硬件功能的完整流程。
+本文是仓库级 DTS 配置与硬件验证通用指南，以 ALIENTEK ATK-DL6Y2C i.MX6ULL 开发板作为贯穿示例，说明从拿到硬件原理图和芯片手册，到编写 Linux DTS 节点，再到上板验证硬件功能的完整流程。
 
-当前主要参考文件：
+本文示例参考文件：
 
 - 原理图：`docs/imx6ull/schematics/Schematic.pdf`
 - i.MX6ULL 参考手册：`docs/imx6ull/reference-manuals/IMX6ULL参考手册.pdf`
