@@ -30,3 +30,7 @@
 	path = uboot/u-boot-2026.04
 	url = git@github.com:linux-bsp/u-boot-2026.04.git
 	branch = master
+[submodule "notes"]
+	path = notes
+	url = git@github.com:wanguo99/notes.git
+	branch = master
