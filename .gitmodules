@@ -10,21 +10,9 @@
 	path = paf
 	url = git@github.com:linux-bsp/paf.git
 	branch = master
-[submodule "uboot-2024.10"]
-	path = uboot/uboot-2024.10
-	url = git@github.com:linux-bsp/uboot-2024.10.git
-	branch = master
 [submodule "linux-7.0"]
 	path = linux/linux-7.0
 	url = git@github.com:linux-bsp/linux-7.0.git
-	branch = master
-[submodule "linux/ti-linux-kernel-6.18.13"]
-	path = linux/ti-linux-kernel-6.18.13
-	url = git@github.com:linux-bsp/ti-linux-kernel-6.18.13.git
-	branch = master
-[submodule "uboot/ti-u-boot-2025.10"]
-	path = uboot/ti-u-boot-2025.10
-	url = git@github.com:linux-bsp/ti-u-boot-2025.10.git
 	branch = master
 [submodule "uboot/u-boot-2026.04"]
 	path = uboot/u-boot-2026.04
