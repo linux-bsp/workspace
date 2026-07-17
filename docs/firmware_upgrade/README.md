@@ -11,7 +11,7 @@ GPT/MBR，eMMC、SD 和 SPI NOR 均使用固定 RAW 区域。
 - Linux 提供远程下载、升级策略、健康检查和完整 OTA。
 - 两层共享同一份布局定义和 deployment metadata。
 
-升级产物拆分为 boot.itb、kernel.itb、rootfs.itb，并使用可选的 release.itb
+升级产物拆分为 bootloader.itb、kernel.itb、rootfs.itb，并使用可选的 release.itb
 组织完整发布。单组件升级只下载对应 FIT。
 
 ## 2. 设计目标
@@ -265,7 +265,7 @@ fu provision <source> <factory-image>
 示例：
 
 ~~~text
-fu update tftp boot.itb
+fu update tftp bootloader.itb
 fu update tftp kernel.itb
 fu update tftp rootfs.itb
 fu update tftp release.itb all
@@ -296,7 +296,7 @@ output/images/
   Image.gz
   <board>.dtb
   rootfs.squashfs
-  release/boot.itb
+  release/bootloader.itb
   release/kernel.itb
   release/rootfs.itb
 ~~~
@@ -306,7 +306,7 @@ AM62x 的布局和打包配置统一放在 br2-external 的以下目录：
 ~~~text
 board/ti/am62x/layout/
   genimage_ti.cfg
-  boot.its
+  bootloader.its
   kernel.its
   rootfs.its
 ~~~
@@ -342,12 +342,12 @@ fu,rollback-index = <10>;
 还应包含硬件版本、介质约束、payload 长度、组件依赖和签名。fu 必须验证
 configuration signature、产品、layout-id、版本、rollback index 和区域容量。
 
-### 9.3 boot.itb
+### 9.3 bootloader.itb
 
-boot.itb 是完整 AM62x bootloader 升级容器，不是 Linux 启动 FIT：
+bootloader.itb 是完整 AM62x bootloader 升级容器，不是 Linux 启动 FIT：
 
 ~~~text
-boot.itb
+bootloader.itb
   tiboot3.bin
   tispl.bin
   u-boot.img
@@ -384,7 +384,7 @@ u-boot.img
 - eMMC：评估 boot0/boot1 和 AM62x ROM 的实际切换能力。
 - SD：需要 ROM 备用偏移或保持 tiboot3 不可变。
 - SPI NOR：若 ROM 只从 offset 0 启动，应保持第一阶段不可变或提供 ROM 级备份。
-- 不具备可靠回退能力时，完整 boot.itb 只能用于工厂和可救砖环境。
+- 不具备可靠回退能力时，完整 bootloader.itb 只能用于工厂和可救砖环境。
 
 ### 9.4 kernel.itb
 
@@ -410,7 +410,7 @@ rootfs 文件系统通常已有固定块布局或自身压缩，FIT compression 
 
 release.itb 是小型签名发布清单，记录：
 
-- boot.itb、kernel.itb、rootfs.itb 的文件名和整个文件 SHA-256。
+- bootloader.itb、kernel.itb、rootfs.itb 的文件名和整个文件 SHA-256。
 - 产品、硬件、介质和 layout-id。
 - release version、rollback index 和组件版本。
 - 允许的 deployment 组合。
@@ -569,7 +569,7 @@ bootloader 更新还必须保证更早启动阶段能够选择旧 bank。仅有 
 ### 阶段三：Bootloader
 
 - 确认每种介质的 AM62x ROM 启动和回退能力。
-- 实现 boot.itb 解析和三个阶段分区域写入。
+- 实现 bootloader.itb 解析和三个阶段分区域写入。
 - 实现可验证的 bootloader bank 切换。
 - 对不具备回退能力的阶段保持工厂模式限制。
 
