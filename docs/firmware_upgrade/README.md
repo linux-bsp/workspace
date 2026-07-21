@@ -153,14 +153,14 @@ regions:
 可启动 deployment：
 
 ~~~c
-enum fu_component {
-	FU_COMPONENT_BOOTLOADER,
-	FU_COMPONENT_KERNEL,
-	FU_COMPONENT_ROOTFS,
-	FU_COMPONENT_COUNT,
+enum fw_component {
+	FW_COMPONENT_BOOTLOADER,
+	FW_COMPONENT_KERNEL,
+	FW_COMPONENT_ROOTFS,
+	FW_COMPONENT_COUNT,
 };
 
-struct fu_component_slot {
+struct fw_component_slot {
 	u8 slot;
 	u8 valid;
 	u16 reserved;
@@ -168,8 +168,8 @@ struct fu_component_slot {
 	u32 rollback_index;
 };
 
-struct fu_deployment {
-	struct fu_component_slot component[FU_COMPONENT_COUNT];
+struct fw_deployment {
+	struct fw_component_slot component[FW_COMPONENT_COUNT];
 	u8 state;
 	u8 tries_remaining;
 	u8 successful;
@@ -177,7 +177,7 @@ struct fu_deployment {
 	u32 release_version;
 };
 
-struct fu_metadata {
+struct fw_metadata {
 	u32 magic;
 	u16 format_version;
 	u16 header_size;
@@ -188,7 +188,7 @@ struct fu_metadata {
 	u8 boot_once_deployment;
 	u8 update_state;
 	u8 reserved[3];
-	struct fu_deployment deployment[2];
+	struct fw_deployment deployment[2];
 	u32 crc32;
 };
 ~~~
@@ -244,36 +244,36 @@ Linux 健康检查通过后调用 mark-good。尝试次数耗尽后恢复 last-g
 bootloader 回退发生在 U-Boot 执行之前，必须由 ROM、不可变 selector 或更早启动
 阶段完成，不能只依靠本 metadata。
 
-## 8. U-Boot fu 命令
+## 8. U-Boot fw 命令
 
 建议接口：
 
 ~~~text
-fu status
-fu list
-fu verify <source> <fit-file>
-fu update <source> <fit-file>
-fu update <source> <release-file> all
-fu boot <deployment>|recovery [once]
-fu mark-good [deployment]
-fu mark-bad <deployment>
-fu rollback
-fu restore <component> <source> <fit-file>
-fu provision <source> <factory-image>
+fw status
+fw list
+fw verify <source> <fit-file>
+fw update <source> <fit-file>
+fw update <source> <release-file> all
+fw boot <deployment>|recovery [once]
+fw mark-good [deployment]
+fw mark-bad <deployment>
+fw rollback
+fw restore <component> <source> <fit-file>
+fw provision <source> <factory-image>
 ~~~
 
 示例：
 
 ~~~text
-fu update tftp bootloader.itb
-fu update tftp kernel.itb
-fu update tftp rootfs.itb
-fu update tftp release.itb all
-fu rollback
-fu restore rootfs tftp rootfs.itb
+fw update tftp bootloader.itb
+fw update tftp kernel.itb
+fw update tftp rootfs.itb
+fw update tftp release.itb all
+fw rollback
+fw restore rootfs tftp rootfs.itb
 ~~~
 
-fu 必须从已验证的 FIT configuration 中读取 fu,type，不能根据文件名判断类型。
+fw 必须从已验证的 FIT configuration 中读取 fw,type，不能根据文件名判断类型。
 
 单组件升级写入未被 active 或 last-good deployment 使用的区域。所有组件完成校验
 后才创建 pending deployment。普通 all 默认只包含 kernel 和 rootfs；bootloader
@@ -299,6 +299,8 @@ output/images/
   release/bootloader.itb
   release/kernel.itb
   release/rootfs.itb
+  release/release.itb
+  sdcard.img
 ~~~
 
 AM62x 的布局和打包配置统一放在 br2-external 的以下目录：
@@ -306,12 +308,14 @@ AM62x 的布局和打包配置统一放在 br2-external 的以下目录：
 ~~~text
 board/ti/am62x/layout/
   genimage_ti.cfg
+  genimage_sdcard.cfg
   bootloader.its
   kernel.its
   rootfs.its
+  release.its.in
 ~~~
 
-genimage_ti.cfg 是输入文件、组件分组、FIT 输出和 RAW offset/size 的唯一布局配置。
+genimage_ti.cfg 定义组件 FIT；genimage_sdcard.cfg 是 SD RAW offset/size 的唯一布局配置。
 每个组件使用一个短小且可独立阅读的 ITS，只描述该组件的 image 类型、启动属性、
 configuration 和签名策略，不重复 payload 路径和物理 offset。
 
@@ -323,23 +327,24 @@ BR2_ROOTFS_POST_IMAGE_SCRIPT_ARGS="-c $(BR2_EXTERNAL_LINUX_BSP_PATH)/board/ti/am
 ~~~
 
 通用脚本读取 genimage_ti.cfg 中任意数量的 its 项，从配置目录复制同名 ITS 到
-Buildroot images 目录，随后只调用一次 genimage。genimage 的 FIT backend 注入
-partition payload、调用 mkimage，并同时生成组件 ITB 和 sdcard.img。成功后删除
-临时 ITS。新增组件只需增加一个 genimage fit image 块和一个同名 ITS，脚本无需修改。
+Buildroot images 目录，第一阶段生成组件 ITB，随后计算完整文件 SHA-256 并生成
+release.itb。第二阶段使用 genimage_sdcard.cfg 将已经生成的 kernel.itb 和 rootfs
+写入 A/B RAW 槽。拆分阶段可以避免 genimage 在同一依赖图中把新生成 FIT 当作
+零长度 media 输入。成功后删除临时 ITS。
 
 ### 9.2 通用 FIT 属性
 
 每个签名 configuration 至少包含：
 
 ~~~dts
-fu,type = "bootloader";       /* 或 kernel、rootfs、release */
-fu,product = "am62x-board";
-fu,layout-id = "spinor-512m-v1";
-fu,version = <2>;
-fu,rollback-index = <10>;
+fw,type = "bootloader";       /* 或 kernel、rootfs、release */
+fw,product = "am62x-board";
+fw,layout-id = "spinor-512m-v1";
+fw,version = <2>;
+fw,rollback-index = <10>;
 ~~~
 
-还应包含硬件版本、介质约束、payload 长度、组件依赖和签名。fu 必须验证
+还应包含硬件版本、介质约束、payload 长度、组件依赖和签名。fw 必须验证
 configuration signature、产品、layout-id、版本、rollback index 和区域容量。
 
 ### 9.3 bootloader.itb
@@ -357,7 +362,7 @@ configuration 建议使用标准 firmware 和 loadables：
 
 ~~~dts
 conf-1 {
-	fu,type = "bootloader";
+	fw,type = "bootloader";
 	firmware = "tiboot3";
 	loadables = "tispl", "uboot";
 
@@ -369,7 +374,7 @@ conf-1 {
 };
 ~~~
 
-fu 将三个 payload 分别写入非活动 bootloader bank。推荐顺序：
+fw 将三个 payload 分别写入非活动 bootloader bank。推荐顺序：
 
 ~~~text
 u-boot.img
@@ -400,7 +405,7 @@ Kernel 模块必须纳入兼容性设计：
 
 ### 9.5 rootfs.itb
 
-rootfs.itb 是升级容器，包含 rootfs.ext4 或 rootfs.squashfs。fu 通过 FIT API 取得
+rootfs.itb 是升级容器，包含 rootfs.ext4 或 rootfs.squashfs。fw 通过 FIT API 取得
 rootfs image data，只把 payload 写入 rootfs_a/rootfs_b，不能把 FIT header 写入
 rootfs 区域。
 
@@ -408,9 +413,9 @@ rootfs 文件系统通常已有固定块布局或自身压缩，FIT compression 
 
 ### 9.6 release.itb
 
-release.itb 是小型签名发布清单，记录：
+release.itb 是小型发布清单，记录：
 
-- bootloader.itb、kernel.itb、rootfs.itb 的文件名和整个文件 SHA-256。
+- 清单所列组件的文件名和整个文件 SHA-256。
 - 产品、硬件、介质和 layout-id。
 - release version、rollback index 和组件版本。
 - 允许的 deployment 组合。
@@ -420,12 +425,19 @@ release.itb 是小型签名发布清单，记录：
 单组件升级只下载对应 FIT。完整升级先下载 release.itb，再按需下载组件 FIT，
 不下载包含所有 payload 的单体 FIT。
 
+当前 am62x-sd-ab-v1 模板包含 bootloader、kernel 和 rootfs。fw 在内存中构造新
+deployment，逐个下载、校验和写入组件，全部成功后只保存一次 pending metadata。
+bootloader 必须同时具有清单 fw,allow-bootloader 和可信设备布局
+allow-bootloader-update 才能进入事务。bootloader.itb 包含 tiboot3、tispl 和
+U-Boot，并按 U-Boot、tispl、tiboot3 的顺序写入。当前开发模板只有 hash；生产构建
+必须增加签名。
+
 ### 9.7 RAM 和流式接口
 
 rootfs 约 120 MiB 时，RAM 足够可先加载单个 rootfs.itb。内部接口仍按流式设计：
 
 ~~~c
-int begin(const struct fu_region *region, u64 image_size);
+int begin(const struct fw_region *region, u64 image_size);
 int write(u64 image_offset, const void *buf, size_t len);
 int finish(const u8 *expected_hash);
 void abort(void);
@@ -438,10 +450,10 @@ void abort(void);
 统一使用字节 offset：
 
 ~~~c
-struct fu_storage_ops {
+struct fw_storage_ops {
 	int (*probe)(void *ctx);
 	int (*get_region)(void *ctx, const char *name,
-			  struct fu_region *region);
+			  struct fw_region *region);
 	int (*erase)(void *ctx, u64 offset, u64 size);
 	int (*write)(void *ctx, u64 offset, const void *buf, size_t len);
 	int (*read)(void *ctx, u64 offset, void *buf, size_t len);
@@ -485,11 +497,11 @@ Linux OTA 可使用 SWUpdate 或自研 agent：
 Linux 提供共享 metadata 工具：
 
 ~~~text
-fuctl status
-fuctl set-pending <deployment>
-fuctl mark-good
-fuctl mark-bad <deployment>
-fuctl rollback
+fwctl status
+fwctl set-pending <deployment>
+fwctl mark-good
+fwctl mark-bad <deployment>
+fwctl rollback
 ~~~
 
 U-Boot 和 Linux 不得维护两套独立 deployment 状态。
@@ -550,6 +562,17 @@ bootloader 更新还必须保证更早启动阶段能够选择旧 bank。仅有 
 - bootloader bank 失败时的早期回退。
 - 普通包无法触发 provision 或未授权 bootloader 更新。
 
+### 当前实现状态
+
+- 已完成 SD/MMC 固定 RAW A/B 布局、双副本 metadata 和首次启动初始化。
+- 已完成 kernel、rootfs 和完整 bootloader 引导链单组件升级。
+- 已完成 release.itb 下载、整文件 SHA-256、组件 FIT 校验和单次 pending 提交。
+- 已完成 U-Boot RAW FIT 启动选择和 Linux fwctl 基础健康确认。
+- 尚未完成生产签名密钥注入、recovery/provision、流式下载和服务端 OTA agent。
+- SPI NOR 与 eMMC boot0/boot1 仍需各自布局和板级断电/回退验证，不能复用 SD 偏移。
+- SD ROM 固定加载 tiboot3_a，更新 A 槽不具备一级引导断电保护；当前能力定位为
+  调试升级，失败后通过重新烧录恢复。
+
 ## 17. 实施阶段
 
 ### 阶段一：格式和启动
@@ -575,7 +598,7 @@ bootloader 更新还必须保证更早启动阶段能够选择旧 bank。仅有 
 
 ### 阶段四：Linux OTA
 
-- 实现 fuctl 或共享 metadata 库。
+- 实现 fwctl 或共享 metadata 库。
 - 接入 SWUpdate 或自研 agent。
 - 实现健康检查和自动 mark-good。
 - 接入服务器版本、设备分组和发布策略。
