@@ -70,13 +70,14 @@ Buildroot post-image
     +-- rootfs.itb
     +-- release.itb
             |
-            v
-TFTP -> U-Boot fw command
-            |
-            +-- FIT/manifest verification
-            +-- trusted DT layout validation
-            +-- inactive region write + readback
-            +-- redundant metadata transaction
+            +-- TFTP ----------> U-Boot fw command --+
+            |                                          |
+            +-- local / HTTP(S) -> PAF fwctl update ---+
+                                                       |
+                                                       +-- FIT/manifest verification
+                                                       +-- trusted layout validation
+                                                       +-- inactive region write + readback
+                                                       +-- redundant metadata transaction
                          |
                          v
 ROM -> R5 SPL -> A53 SPL -> U-Boot -> Linux
@@ -97,7 +98,7 @@ ROM -> R5 SPL -> A53 SPL -> U-Boot -> Linux
 | SPL 平台层 | 在早期启动阶段选择下一 bootloader 槽 | <code>board/ti/am62x/evm.c</code> |
 | 可信布局 | 定义存储、产品、layout-id、region 和策略 | <code>arch/arm/dts/k3-am625-sk-u-boot.dtsi</code> |
 | 默认启动环境 | fw_boot、网络、分区、快捷升级命令 | <code>board/ti/am62x/am62x_raw_ab.env</code> |
-| Linux 工具 | 读取和修改同一份 FWMD metadata | <code>package/fwctl/src/fwctl.c</code> |
+| Linux 工具 | 下载、校验、写入 release 并管理 FWMD metadata | <code>paf/apps/fwctl</code> |
 | Buildroot 集成 | 生成 FIT、安装 fwctl 和启动服务 | <code>br2-external/board/ti/am62x</code> |
 
 ## 6. AM62x SD RAW 布局
@@ -245,7 +246,7 @@ Metadata 固定为 128 字节、小端格式：
 
 ## 11. 完整 Release 事务
 
-<code>release.itb</code> 只保存清单，不内嵌三个组件的大数据。当前清单包含：
+<code>release.itb</code> 只保存清单，不内嵌组件大数据。清单格式最多可描述三个组件。AM62x 默认远程 OTA 清单只包含 kernel 和 rootfs；bootloader FIT 仍会生成，但不进入默认 release：
 
 | 属性 | 内容 |
 |---|---|
@@ -254,19 +255,19 @@ Metadata 固定为 128 字节、小端格式：
 | fw,layout-id | am62x-sd-ab-v1 |
 | fw,version | release 版本 |
 | fw,rollback-index | 所有组件最低 rollback 要求 |
-| fw,components | bootloader、kernel、rootfs |
+| fw,components | 默认 kernel、rootfs；调试清单可显式加入 bootloader |
 | fw,*-file | TFTP 根目录中的组件文件名 |
 | fw,*-sha256 | 完整组件 ITB 文件 SHA-256 |
 | fw,allow-bootloader | release 对 bootloader 更新的授权 |
 
-<code>fw update tftp release.itb all</code> 流程：
+<code>fw update tftp release.itb all</code> 和 Linux <code>fwctl update release.itb</code> 使用相同的事务模型：
 
 1. 校验 release FIT configuration。
 2. 校验 product、layout-id、version 和 manifest image。
 3. 检查 component 不重复、数量不超过 3、文件名合法。
 4. 将目标 deployment 重建为 confirmed 基线的副本。
 5. 保存 <code>pending=none</code>、目标 state=writing 的 metadata。
-6. 按 manifest 下载每个组件。
+6. 按 manifest 从 TFTP、本地目录或相对 HTTP(S) URL 获取每个组件。
 7. 校验完整 ITB SHA-256。
 8. 校验组件自身 FIT 属性和所有 image hash。
 9. 检查组件 rollback-index 不低于 release rollback-index。
@@ -428,22 +429,26 @@ R5 SPL 配置 <code>SPL_FW_BOOT_SELECTOR_COMMIT</code>，负责唯一一次尝�
 
 ## 16. Linux fwctl
 
-Buildroot 安装：
+<code>fwctl</code> 是 <code>paf/apps</code> 中的可选用户态 app，不属于 PDM 内核层或 PDI 外设接口层。Buildroot 通过 PAF package 选择依赖并安装：
 
 | 文件 | 用途 |
 |---|---|
 | <code>/usr/sbin/fwctl</code> | metadata 管理工具 |
-| <code>/etc/default/fwctl</code> | device、offset、healthcheck 和自动确认配置 |
+| <code>/etc/fwctl.conf</code> | 可信设备、布局、region、下载和签名策略 |
+| <code>/etc/default/fwctl</code> | healthcheck、自动确认开关和配置路径 |
 | <code>/etc/init.d/S99fw-mark-good</code> | 启动后健康确认 |
 
 默认配置：
 
 ~~~text
-AUTO_MARK_GOOD=1
-FWCTL_DEVICE=/dev/mmcblk1
-FWCTL_META0=0x00500000
-FWCTL_META1=0x00510000
-FWCTL_HEALTHCHECK=""
+device=/dev/mmcblk1
+product=ti-am62x
+layout-id=am62x-sd-ab-v1
+boot-attempts=3
+work-dir=/tmp
+allow-bootloader-update=false
+require-signature=false
+signature-key=
 ~~~
 
 支持命令：
@@ -452,11 +457,13 @@ FWCTL_HEALTHCHECK=""
 |---|---|
 | <code>fwctl init a/b</code> | Linux 工厂初始化 metadata |
 | <code>fwctl status</code> | 显示 metadata 状态 |
+| <code>fwctl update &lt;release.itb&gt;</code> | 从本地目录执行 release 事务 |
+| <code>fwctl update &lt;HTTP(S) URL&gt;</code> | 下载 release 和相对路径组件并执行事务 |
 | <code>fwctl mark-good [id]</code> | 确认指定或 cmdline deployment |
 | <code>fwctl mark-bad id</code> | 标记失败 |
 | <code>fwctl rollback</code> | 回到 last-good |
 
-未指定 mark-good ID 时，fwctl 从 <code>/proc/cmdline</code> 解析 <code>fw.deployment</code>。U-Boot 和 fwctl 使用完全相同的 128 字节 FWMD 格式、CRC 和双副本选择规则。
+未指定 mark-good ID 时，fwctl 从 <code>/proc/cmdline</code> 解析 <code>fw.deployment</code>。U-Boot 和 fwctl 使用完全相同的 128 字节 FWMD 格式、CRC 和双副本选择规则。HTTPS 请求不能重定向降级到 HTTP；下载有超时、低速和大小上限，临时文件在事务结束后清理。
 
 ## 17. Buildroot 打包流程
 
@@ -486,7 +493,7 @@ release.itb
 | tiboot3.bin + tispl.bin + u-boot.img | bootloader.itb |
 | Image.gz + board.dtb | kernel.itb |
 | rootfs.squashfs | rootfs.itb |
-| 三个 ITB 的文件名和 SHA-256 | release.itb |
+| 默认 kernel/rootfs ITB 的文件名和 SHA-256 | release.itb |
 
 <code>firmware-image.sh</code> 在组件 ITB 生成后计算完整文件 SHA-256，并替换 release ITS 模板占位符。
 
@@ -533,6 +540,7 @@ release.itb
 | 软件防回滚 | component rollback-index 和 release version 比较 |
 | Bootloader 双重授权 | 可信 DT allow + release allow |
 | 发布真实性 | 依赖 FIT signature 和 control FDT 公钥 |
+| HTTPS 信任 | CA 根证书校验，禁止 HTTPS 重定向降级为 HTTP |
 
 生产要求：
 
@@ -565,7 +573,7 @@ release.itb
 4. 实现该平台从 selected deployment 到下一 boot stage 的槽位映射。
 5. 提供默认 fw_boot 环境和 rootfs 参数。
 6. 提供 Buildroot ITS 和 release 模板。
-7. 配置 Linux fwctl 设备和 metadata offset。
+7. 在 <code>/etc/fwctl.conf</code> 配置 Linux 可信布局、设备、region 和签名策略。
 8. 完成实机断电和回滚测试。
 
 当前仍然平台相关的部分：
@@ -592,7 +600,9 @@ release.itb
 | SPL_FW_METADATA1_OFFSET | SPL metadata 副本 1 offset |
 | SPL_FW_RAW_SECTOR_B | B 槽下一阶段 sector |
 | CONFIG_ENV_IS_IN_MMC | 将持久化环境保存到 MMC |
-| BR2_PACKAGE_FWCTL | 构建并安装 Linux fwctl |
+| CONFIG_FWCTL | 在 PAF 中构建 fwctl app |
+| BR2_PACKAGE_PAF_FWCTL | 选择 fwctl 的 libfdt、libcurl、OpenSSL 和 CA 证书依赖 |
+| BR2_PACKAGE_PAF_FWCTL_FIT_SIGNATURE | 安装 fit_check_sign 签名验证工具 |
 
 ## 23. 当前功能清单
 
@@ -603,7 +613,7 @@ release.itb
 | 包校验 | tftp/addr、FIT hash、product/layout | 已实现 |
 | 单组件 | bootloader/kernel/rootfs update | 已实现 |
 | 恢复 | 指定组件 restore | 已实现 |
-| 完整发布 | release manifest all | 已实现 |
+| 完整发布 | U-Boot TFTP 和 Linux 本地/HTTP(S) release | 已实现 |
 | Pending 替换 | 单组件覆盖、完整 release 重启 | 已实现 |
 | 防回滚 | version/rollback 检查 | 已实现，软件级 |
 | Metadata | 双副本、sequence、CRC、读回 | 已实现 |
@@ -624,7 +634,7 @@ release.itb
 4. 重复单组件更新的断电窗口弱于完整 release replacement。
 5. 当前 release 版本和 rollback index 由 ITS 模板维护，需要发布流程保证递增。
 6. 当前开发配置的 hash 不等同于生产签名。
-7. fwctl 直接写原始块设备，权限配置必须由系统负责。
+7. fwctl 直接写原始块设备，权限配置必须由系统负责；更新期间不得由其他工具并行改写同一设备。
 8. SPI NOR 后端已有实现，但当前完整实机验证集中在 AM62x MMC。
 9. Region 和 bootloader image mapping 尚未完全数据驱动。
 10. metadata 只有两个 deployment，当前设计不保存更长版本历史。
@@ -657,6 +667,15 @@ fwctl mark-good
 ~~~
 
 默认 AUTO_MARK_GOOD=1 时由启动脚本自动确认。
+
+Linux 也可直接安装下一版本，随后重启进入 boot-testing：
+
+~~~text
+fwctl update /mnt/upgrade/release.itb
+# 或
+fwctl update https://updates.example.com/am62x/release.itb
+reboot
+~~~
 
 ### 25.3 单组件调试升级
 
@@ -695,6 +714,7 @@ reset
 | AM62x 可信布局 | <code>arch/arm/dts/k3-am625-sk-u-boot.dtsi</code> |
 | U-Boot 使用文档 | <code>doc/usage/cmd/fw.rst</code> |
 | DT binding | <code>doc/device-tree-bindings/firmware/u-boot,firmware-manager.txt</code> |
-| Linux 工具 | <code>br2-external/package/fwctl</code> |
+| Linux 工具 | <code>paf/apps/fwctl</code> |
+| Linux 板级配置 | <code>br2-external/board/ti/am62x/rootfs-overlay/etc/fwctl.conf</code> |
 | FIT 模板 | <code>br2-external/board/ti/am62x/layout</code> |
 | 实机测试用例 | <code>docs/firmware_manager/TEST_CASES.md</code> |

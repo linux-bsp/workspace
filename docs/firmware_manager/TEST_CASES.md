@@ -20,7 +20,7 @@
 | 编号 | 准备项 | 要求 |
 |---|---|---|
 | PRE-01 | 串口 | 115200 8N1，完整保存 R5 SPL、A53 SPL、U-Boot 和 Linux 日志 |
-| PRE-02 | TFTP 根目录 | 包含 <code>release.itb</code>、<code>bootloader.itb</code>、<code>kernel.itb</code>、<code>rootfs.itb</code> |
+| PRE-02 | 发布目录 | 包含 <code>release.itb</code>、<code>kernel.itb</code>、<code>rootfs.itb</code>；bootloader.itb 单独用于调试恢复 |
 | PRE-03 | 正常包 | 每个 FIT 的 product、layout、version、rollback-index 和 SHA-256 正确 |
 | PRE-04 | 异常包 | 准备错误 product、错误 layout、错误 type、损坏 hash、低版本、低 rollback-index 等变体 |
 | PRE-05 | 恢复介质 | 准备可重新烧录的 SD 卡镜像和读卡器 |
@@ -118,20 +118,41 @@
 
 | 编号 | 测试功能 | 前置条件 | 测试步骤 | 预期结果 |
 |---|---|---|---|---|
-| REL-01 | 完整 release 升级 | 无 pending，四个 ITB 正常 | 执行 <code>run upa</code> | 依次下载并校验三个组件，全部成功后提交 pending |
-| REL-02 | release 文件路径 | TFTP 根目录直接存放四个 ITB | 执行 <code>run upa</code> | 下载文件名不包含 <code>release/</code> |
+| REL-01 | 完整 release 升级 | 无 pending，默认三个发布文件正常 | 执行 <code>run upa</code> | 依次下载并校验 kernel/rootfs，全部成功后提交 pending |
+| REL-02 | release 文件路径 | TFTP 根目录直接存放三个发布文件 | 执行 <code>run upa</code> | 下载文件名不包含 <code>release/</code> |
 | REL-03 | pending 被 release 替换 | 先执行 <code>run upk</code> | 再执行 <code>run upa</code> | 输出 Replacing pending deployment，不返回 EBUSY |
 | REL-04 | 错误 release 再替换 | 已有完整 pending | 更换为新的正确 release 后再次 <code>run upa</code> | 从 confirmed 基线重建目标并提交新 pending |
 | REL-05 | 更低 pending 版本替换 | 错误 pending 版本高于新包，但新包不低于 confirmed | 执行 <code>run upa</code> | 允许替换错误 pending |
 | REL-06 | 低于 confirmed 的替换 | 新 release 低于 confirmed | 执行 <code>run upa</code> | 仍然拒绝降级 |
 | REL-07 | 第一个组件下载失败 | 停止对应 TFTP 文件 | 执行 <code>run upa</code> | 当前 confirmed 保持可启动，不产生可启动的半成品 pending |
-| REL-08 | 中间组件失败 | bootloader 正常、kernel 下载或校验失败 | 执行 <code>run upa</code> | metadata 保持 non-bootable writing/no pending，可直接重试 |
-| REL-09 | 最后组件失败 | bootloader/kernel 正常、rootfs 失败 | 执行 <code>run upa</code> | 不提交 pending，可直接再次执行 upa |
+| REL-08 | 第一个组件校验失败 | kernel 下载成功但 hash 错误 | 执行 <code>run upa</code> | metadata 保持 non-bootable writing/no pending，可直接重试 |
+| REL-09 | 最后组件失败 | kernel 正常、rootfs 失败 | 执行 <code>run upa</code> | 不提交 pending，可直接再次执行 upa |
 | REL-10 | 失败后重试 | REL-08 或 REL-09 后修复文件 | 再次执行 <code>run upa</code> | 无需 mark-good 或人工 init，重新开始成功 |
 | REL-11 | metadata 预提交保护 | 已有 pending | 启动 replacement 后在写入前读取 metadata | 旧 pending 已取消，目标为 WRITING |
 | REL-12 | 成功提交原子性 | 完整 release 成功 | 执行 <code>fw status</code> | 仅最后提交时出现 READY pending，三个组件版本一致 |
 | REL-13 | release 重复执行 | release 已 pending | 不修改文件再次执行 <code>run upa</code> | 正常重新写入并重新提交 pending |
-| REL-14 | manifest 允许 bootloader | 正常 release | 检查 release 属性并执行升级 | bootloader、kernel、rootfs 全部参与事务 |
+| REL-14 | 默认 release 排除 bootloader | 正常默认 release | 检查 fw,components 并执行升级 | 只更新 kernel/rootfs，bootloader region 内容不变 |
+
+## 7.1 Linux fwctl OTA
+
+| 编号 | 测试功能 | 前置条件 | 测试步骤 | 预期结果 |
+|---|---|---|---|---|
+| OTA-01 | 本地 release | Linux 运行于 confirmed A，发布目录完整 | 执行 <code>fwctl update /mnt/ota/release.itb</code> | kernel/rootfs 写入 B，readback 成功，pending=B，tries=3 |
+| OTA-02 | HTTP release | 本地 HTTP 服务提供完整发布目录 | 执行 <code>fwctl update http://server/release.itb</code> | release 和相对组件 URL 均下载成功并提交 pending |
+| OTA-03 | HTTPS release | 服务器证书链受系统 CA 信任 | 执行 HTTPS update | 证书和主机名校验成功后正常升级 |
+| OTA-04 | HTTPS 降级重定向 | HTTPS URL 返回 HTTP Location | 执行 update | libcurl 拒绝重定向，不写组件、不提交 pending |
+| OTA-05 | TLS 证书错误 | 自签名、过期或主机名错误证书 | 执行 update | 下载失败，不绕过 TLS 校验 |
+| OTA-06 | manifest 文件 hash 错误 | 修改 kernel.itb 但不更新 release | 执行 update | 返回校验错误；active/last-good 不变，pending=none，目标 writing |
+| OTA-07 | component FIT hash 错误 | 更新外层文件 hash 但破坏内层 image | 执行 update | FIT image 校验失败，不提交 pending |
+| OTA-08 | release 防降级 | confirmed release version=2，提供 version=1 | 执行 update | 返回 EPERM，metadata 和 region 不变 |
+| OTA-09 | component 防回滚 | component rollback-index 低于 confirmed | 执行 update | 返回 EPERM，不写目标 region |
+| OTA-10 | 更新失败后重试 | 上次事务停留 writing/no pending | 修复发布目录后再次 update | 从 confirmed 基线重新开始并成功提交 pending |
+| OTA-11 | 写后 readback | 本地或 HTTP 升级成功 | 读取目标 RAW region 与源 kernel FIT/rootfs 数据比较 | 全部逐字节一致 |
+| OTA-12 | 手动确认 | 新 deployment 已进入 Linux | 执行 <code>fwctl mark-good</code> | cmdline deployment 变为 active/last-good，pending 清除 |
+| OTA-13 | 配置 region 重叠 | 测试配置含重叠 region | 执行任一 fwctl 命令 | 启动前校验失败，设备内容不变 |
+| OTA-14 | 超大下载 | release 或 component 超过下载上限 | 执行 URL update | 下载中止并删除临时文件，不越界写入 |
+| OTA-15 | 签名强制 | require-signature=true 且密钥已部署 | 分别使用有效签名和无效签名包 | 仅有效签名 release 及组件被接受 |
+| OTA-16 | 并发锁 | 一个 fwctl 已独占设备 | 启动第二个写命令 | 第二个命令返回 busy，不并行写盘 |
 
 ## 8. 启动选择和槽位一致性
 
@@ -208,7 +229,7 @@
 | 编号 | 验收项 | 通过标准 |
 |---|---|---|
 | AC-01 | 正常升级 | kernel、rootfs 和 bootloader 均可独立升级 |
-| AC-02 | 完整升级 | release 三组件全部成功后才提交 pending |
+| AC-02 | 完整升级 | 默认 release 的 kernel/rootfs 全部成功后才提交 pending |
 | AC-03 | 重复升级 | pending 状态可直接替换组件或完整 release |
 | AC-04 | 防降级 | 不能低于 confirmed version/rollback-index |
 | AC-05 | 启动一致性 | R5、A53、U-Boot、kernel 和 rootfs 使用同一 deployment |
