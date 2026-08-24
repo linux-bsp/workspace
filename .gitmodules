@@ -22,3 +22,7 @@
 	path = notes
 	url = git@github.com:wanguo99/notes.git
 	branch = master
+[submodule "systools"]
+	path = systools
+	url = git@github.com:linux-bsp/systools.git
+	branch = master

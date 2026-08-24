@@ -601,8 +601,8 @@ release.itb
 | SPL_FW_RAW_SECTOR_B | B 槽下一阶段 sector |
 | CONFIG_ENV_IS_IN_MMC | 将持久化环境保存到 MMC |
 | CONFIG_FWCTL | 在 PAF 中构建 fwctl app |
-| BR2_PACKAGE_PAF_FWCTL | 选择 fwctl 的 libfdt、libcurl、OpenSSL 和 CA 证书依赖 |
-| BR2_PACKAGE_PAF_FWCTL_FIT_SIGNATURE | 安装 fit_check_sign 签名验证工具 |
+| BR2_PACKAGE_PAF_PDI_FW | 选择 fwctl/PDI FW 的 libfdt、libcurl、OpenSSL 和 CA 证书依赖 |
+| BR2_PACKAGE_PAF_PDI_FW_FIT_SIGNATURE | 安装 fit_check_sign 签名验证工具 |
 
 ## 23. 当前功能清单
 
