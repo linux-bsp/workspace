@@ -1,8 +1,8 @@
 # workspace
 
-嵌入式 Linux BSP 开发工作区聚合仓库。这个仓库使用 Git 子模块统一管理 Buildroot、Buildroot 外部层、Linux、U-Boot、PAF 和板级文档。
+嵌入式 Linux BSP 开发工作区聚合仓库。这个仓库使用 Git 子模块统一管理 Buildroot、Buildroot 外部层、Linux、U-Boot、PAF 和 bmctool，以及板级文档。
 
-`bmctool/` 是从 PAF BMC 代码提取的临时独立副本，生成 `libbmctool.so`；PAF 原有 BMC 模块仍保留。Buildroot 可通过 `br2-external/package/bmctool/` 单独选择该副本。当前源码直接保存在工作区，尚未配置独立远端仓库和 Git 子模块条目。
+`bmctool/` 是从 PAF BMC 代码提取的独立子模块，生成 `libbmctool.so`；PAF 原有 BMC 模块仍保留。Buildroot 可通过 `br2-external/package/bmctool/` 单独选择该模块。
 
 ## 子模块常用命令
 

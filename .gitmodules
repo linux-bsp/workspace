@@ -18,3 +18,7 @@
 	path = uboot/u-boot-2026.04
 	url = git@192.168.10.250:ssdc/bsp/u-boot-2026.04.git
 	branch = master
+[submodule "bmctool"]
+	path = bmctool
+	url = git@192.168.10.250:ssdc/bsp/bmctool.git
+	branch = master
