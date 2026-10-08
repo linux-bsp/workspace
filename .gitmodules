@@ -21,4 +21,4 @@
 [submodule "bmctool"]
 	path = bmctool
 	url = git@192.168.10.250:ssdc/bsp/bmctool.git
-	branch = master
+	branch = main
