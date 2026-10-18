@@ -7,7 +7,7 @@ This repository is a BSP workspace that aggregates the main source trees as Git 
 - `br2-external/` for board-specific Buildroot external configuration
 - `linux/` for Linux kernel source trees, grouped by version such as `linux/linux-7.0/` and `linux/ti-linux-kernel-6.18.13/`
 - `uboot/` for U-Boot source trees, grouped by version such as `uboot/uboot-2024.10/` and `uboot/ti-u-boot-2025.10/`
-- `paf/` for PAF peripheral access framework code
+- `edk/` for EDK embedded device kit code
 - `docs/<board>/` for board-specific reference manuals, datasheets, schematics, and related documents
 
 Do not mix generated build outputs into the repository root. Put new root-level documentation in `README.md`; put board-specific documents under `docs/<board>/` unless a tool requires a specific file at the root.

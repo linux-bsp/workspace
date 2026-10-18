@@ -6,9 +6,9 @@
 	path = br2-external
 	url = git@192.168.10.250:ssdc/bsp/br2-external.git
 	branch = master
-[submodule "paf"]
-	path = paf
-	url = git@192.168.10.250:ssdc/bsp/paf.git
+[submodule "edk"]
+	path = edk
+	url = git@192.168.10.250:ssdc/bsp/EDK.git
 	branch = master
 [submodule "linux-7.0"]
 	path = linux/linux-7.0
@@ -22,3 +22,6 @@
 	path = bmctool
 	url = git@192.168.10.250:ssdc/bsp/bmctool.git
 	branch = main
+[submodule "zd_interface"]
+	path = zd_interface
+	url = ssh://git@47.103.52.163:2222/payload/h200_pl/zd_interface.git

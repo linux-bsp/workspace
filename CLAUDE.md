@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository Overview
 
-This is an embedded Linux BSP (Board Support Package) development workspace that aggregates multiple Git submodules for building complete embedded Linux systems. The workspace uses Buildroot as the primary build system and manages Linux kernel, U-Boot, and custom PAF (Peripheral Access Framework) code.
+This is an embedded Linux BSP (Board Support Package) development workspace that aggregates multiple Git submodules for building complete embedded Linux systems. The workspace uses Buildroot as the primary build system and manages Linux kernel, U-Boot, and custom EDK (Embedded Device Kit) code.
 
 ## Submodule Architecture
 
@@ -16,7 +16,7 @@ The repository uses Git submodules organized by function:
 - `linux/ti-linux-kernel-6.18.13/` - TI-specific Linux kernel for TI platforms
 - `uboot/uboot-2024.10/` - U-Boot 2024.10 for NXP i.MX6ULL
 - `uboot/ti-u-boot-2025.10/` - U-Boot 2025.10 for TI platforms
-- `paf/` - PAF (Peripheral Access Framework) code; includes PDM kernel module and PDI userspace library
+- `edk/` - EDK (Embedded Device Kit) code; includes PDM kernel module and PDI userspace library
 - `docs/` - Board documentation (datasheets, schematics, reference manuals)
 - `dl/` - Buildroot download cache (not tracked in git)
 
@@ -87,23 +87,23 @@ cp defconfig ../br2-external/configs/imx6ullevk_defconfig
 cd buildroot
 make linux-rebuild       # Rebuild Linux kernel
 make uboot-rebuild       # Rebuild U-Boot
-make paf-rebuild         # Rebuild PAF package
+make edk-rebuild         # Rebuild EDK package
 make clean               # Clean everything
 ```
 
-### PAF Development
+### EDK Development
 
-The PAF (Peripheral Access Framework) submodule has its own build system combining Kconfig, CMake, and Linux Kbuild:
+The EDK (Embedded Device Kit) submodule has its own build system combining Kconfig, CMake, and Linux Kbuild:
 
 ```bash
-cd paf
+cd edk
 make list                                    # List available defconfigs
 make ubuntu_x86_modules_defconfig            # Configure for x86 development
 make all                                     # Build userspace libs and kernel modules
 make modules                                 # Build only kernel modules
 ```
 
-PAF currently builds the PDM kernel module as `pdm.ko`; userspace access is provided by PDI.
+EDK currently builds the PDM kernel module as `pdm.ko`; userspace access is provided by PDI.
 
 ## Submodule Operations
 
@@ -162,7 +162,7 @@ The `br2-external` layer follows Buildroot external tree conventions:
 
 - `configs/` - Board defconfigs (e.g., `imx6ullevk_defconfig`)
 - `board/<vendor>/<board>/` - Board-specific files, overlays, post-image scripts
-- `package/paf/` - PAF package integration for Buildroot
+- `package/edk/` - EDK package integration for Buildroot
 - `external.mk` - External tree makefile
 - `external.desc` - External tree metadata
 
@@ -172,7 +172,7 @@ The Buildroot defconfigs use local source overrides pointing to workspace submod
 
 - Linux: `BR2_LINUX_KERNEL_CUSTOM_LOCAL=y` → `../linux/linux-7.0`
 - U-Boot: `BR2_TARGET_UBOOT_CUSTOM_LOCAL=y` → `../uboot/uboot-2024.10`
-- PAF: `PAF_OVERRIDE_SRCDIR=../paf`
+- EDK: `EDK_OVERRIDE_SRCDIR=../edk`
 
 This allows rapid iteration: changes in submodules are picked up on the next `make` without re-downloading.
 
@@ -234,4 +234,4 @@ Flash `sdcard.img` to an SD card or use individual images for network boot or ot
 - Submodule commits must be tracked: after updating a submodule, commit the pointer in the workspace repository
 - The `dl/` directory caches downloads and can grow large - it's excluded from git
 - Buildroot builds are out-of-tree by default; clean by removing `buildroot/output/`
-- PAF uses separate build directories under `paf/_build/` for userspace components and modules
+- EDK uses separate build directories under `edk/_build/` for userspace components and modules

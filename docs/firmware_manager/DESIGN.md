@@ -72,7 +72,7 @@ Buildroot post-image
             |
             +-- TFTP ----------> U-Boot fw command --+
             |                                          |
-            +-- local / HTTP(S) -> PAF fwctl update ---+
+            +-- local / HTTP(S) -> EDK fwctl update ---+
                                                        |
                                                        +-- FIT/manifest verification
                                                        +-- trusted layout validation
@@ -98,7 +98,7 @@ ROM -> R5 SPL -> A53 SPL -> U-Boot -> Linux
 | SPL 平台层 | 在早期启动阶段选择下一 bootloader 槽 | <code>board/ti/am62x/evm.c</code> |
 | 可信布局 | 定义存储、产品、layout-id、region 和策略 | <code>arch/arm/dts/k3-am625-sk-u-boot.dtsi</code> |
 | 默认启动环境 | fw_boot、网络、分区、快捷升级命令 | <code>board/ti/am62x/am62x_raw_ab.env</code> |
-| Linux 工具 | 下载、校验、写入 release 并管理 FWMD metadata | <code>paf/apps/fwctl</code> |
+| Linux 工具 | 下载、校验、写入 release 并管理 FWMD metadata | <code>edk/apps/fwctl</code> |
 | Buildroot 集成 | 生成 FIT、安装 fwctl 和启动服务 | <code>br2-external/board/ti/am62x</code> |
 
 ## 6. AM62x SD RAW 布局
@@ -429,7 +429,7 @@ R5 SPL 配置 <code>SPL_FW_BOOT_SELECTOR_COMMIT</code>，负责唯一一次尝�
 
 ## 16. Linux fwctl
 
-<code>fwctl</code> 是 <code>paf/apps</code> 中的可选用户态 app，不属于 PDM 内核层或 PDI 外设接口层。Buildroot 通过 PAF package 选择依赖并安装：
+<code>fwctl</code> 是 <code>edk/apps</code> 中的可选用户态 app，不属于 PDM 内核层或 PDI 外设接口层。Buildroot 通过 EDK package 选择依赖并安装：
 
 | 文件 | 用途 |
 |---|---|
@@ -600,9 +600,9 @@ release.itb
 | SPL_FW_METADATA1_OFFSET | SPL metadata 副本 1 offset |
 | SPL_FW_RAW_SECTOR_B | B 槽下一阶段 sector |
 | CONFIG_ENV_IS_IN_MMC | 将持久化环境保存到 MMC |
-| CONFIG_FWCTL | 在 PAF 中构建 fwctl app |
-| BR2_PACKAGE_PAF_PDI_FW | 选择 fwctl/PDI FW 的 libfdt、libcurl、OpenSSL 和 CA 证书依赖 |
-| BR2_PACKAGE_PAF_PDI_FW_FIT_SIGNATURE | 安装 fit_check_sign 签名验证工具 |
+| CONFIG_FWCTL | 在 EDK 中构建 fwctl app |
+| BR2_PACKAGE_EDK_PDI_FW | 选择 fwctl/PDI FW 的 libfdt、libcurl、OpenSSL 和 CA 证书依赖 |
+| BR2_PACKAGE_EDK_PDI_FW_FIT_SIGNATURE | 安装 fit_check_sign 签名验证工具 |
 
 ## 23. 当前功能清单
 
@@ -714,7 +714,7 @@ reset
 | AM62x 可信布局 | <code>arch/arm/dts/k3-am625-sk-u-boot.dtsi</code> |
 | U-Boot 使用文档 | <code>doc/usage/cmd/fw.rst</code> |
 | DT binding | <code>doc/device-tree-bindings/firmware/u-boot,firmware-manager.txt</code> |
-| Linux 工具 | <code>paf/apps/fwctl</code> |
+| Linux 工具 | <code>edk/apps/fwctl</code> |
 | Linux 板级配置 | <code>br2-external/board/ti/am62x/rootfs-overlay/etc/fwctl.conf</code> |
 | FIT 模板 | <code>br2-external/board/ti/am62x/layout</code> |
 | 实机测试用例 | <code>docs/firmware_manager/TEST_CASES.md</code> |
