@@ -1,8 +1,8 @@
 # workspace
 
-嵌入式 Linux BSP 开发工作区聚合仓库。这个仓库使用 Git 子模块统一管理 Buildroot、Buildroot 外部层、Linux、U-Boot、EDK 和 bmctool，以及板级文档。
+嵌入式 Linux BSP 开发工作区聚合仓库。这个仓库使用 Git 子模块统一管理 Buildroot、Buildroot 外部层、Linux、U-Boot、EDK 和 libbmc，以及板级文档。
 
-`bmctool/` 是从 EDK BMC 代码提取的独立子模块，生成 `libbmctool.so`；EDK 原有 BMC 模块仍保留。Buildroot 可通过 `br2-external/package/bmctool/` 单独选择该模块。
+`libbmc/` 是从 EDK BMC 代码提取的独立子模块，生成 `libbmc.so`；EDK 原有 BMC 模块仍保留。Buildroot 可通过 `br2-external/package/libbmc/` 单独选择该模块。
 
 ## 子模块常用命令
 
@@ -72,7 +72,7 @@ git submodule update --init -- linux/linux-7.0
 
 ### 跟踪远端分支
 
-本仓库的 `bmctool` 子模块跟踪远端 `main` 分支，其余子模块跟踪各自远端的 `master` 分支。配置命令如下：
+本仓库的 `libbmc` 子模块跟踪远端 `main` 分支，其余子模块跟踪各自远端的 `master` 分支。配置命令如下：
 
 ```bash
 git submodule set-branch --branch master -- buildroot
@@ -82,7 +82,7 @@ git submodule set-branch --branch master -- linux/ti-linux-kernel-6.18.13
 git submodule set-branch --branch master -- uboot/uboot-2024.10
 git submodule set-branch --branch master -- uboot/ti-u-boot-2025.10
 git submodule set-branch --branch master -- edk
-git submodule set-branch --branch main -- bmctool
+git submodule set-branch --branch main -- libbmc
 ```
 
 这些命令会在 `.gitmodules` 中写入对应的 `branch`。注意：主仓库仍然记录每个子模块的具体提交；`branch` 只决定 `git submodule update --remote` 从哪个远端分支取最新提交。
