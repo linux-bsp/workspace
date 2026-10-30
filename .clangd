@@ -1,0 +1,7 @@
+# BEGIN SourceInsight-Reader managed index scope; separator=0
+---
+If:
+  PathMatch: ["buildroot(/.*)?","linux(/.*)?"]
+Index:
+  Background: Skip
+# END SourceInsight-Reader managed index scope
