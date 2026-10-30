@@ -8,7 +8,7 @@
 	branch = master
 [submodule "edk"]
 	path = edk
-	url = git@192.168.10.250:ssdc/bsp/EDK.git
+	url = git@github.com:linux-bsp/EDK.git
 	branch = master
 [submodule "linux-7.0"]
 	path = linux/linux-7.0
