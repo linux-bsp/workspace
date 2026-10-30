@@ -25,3 +25,7 @@
 [submodule "zd_interface"]
 	path = zd_interface
 	url = ssh://git@47.103.52.163:2222/payload/h200_pl/zd_interface.git
+[submodule "sadboard-external"]
+	path = sadboard-external
+	url = git@github.com:linux-bsp/sadboard-external.git
+	branch = main

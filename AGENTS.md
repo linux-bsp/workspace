@@ -1,45 +1,45 @@
 # Repository Guidelines
 
 ## Project Structure & Module Organization
-This repository is a BSP workspace that aggregates the main source trees as Git submodules. Keep the repository root focused on workspace metadata, documentation, and submodule entries.
 
-- `buildroot/` for the Buildroot source tree
-- `bsp-base-external/` for board-specific Buildroot external configuration
-- `linux/` for Linux kernel source trees, grouped by version such as `linux/linux-7.0/` and `linux/ti-linux-kernel-6.18.13/`
-- `uboot/` for U-Boot source trees, grouped by version such as `uboot/uboot-2024.10/` and `uboot/ti-u-boot-2025.10/`
-- `edk/` for EDK embedded device kit code
-- `docs/<board>/` for board-specific reference manuals, datasheets, schematics, and related documents
+SadBoard develops on the `SadBoard` branch of `linux-bsp/workspace`, using existing BSP submodules. Learning scenarios, experiment images, automated checks, and CLI commands are not implemented yet.
 
-Do not mix generated build outputs into the repository root. Put new root-level documentation in `README.md`; put board-specific documents under `docs/<board>/` unless a tool requires a specific file at the root.
+- `README.md`: project scope, status, and documentation index.
+- `docs/bootlin-linux-debugging-guide.md`: Chinese Bootlin study guide.
+- `docs/workspace-guide.md`: inherited workspace operations; check historical platform examples before use.
+- `buildroot/`, `linux/`, `uboot/`: build system and versioned source submodules.
+- `bsp-base-external/`: board support; keep the `LINUX_BSP` external identifier.
+- `sadboard-external/`: minimal `SADBOARD` external skeleton for future experiments.
+- `edk/`, `libbmc/`, `zd_interface/`: existing software submodules.
+
+Put learning guides in `docs/`, board references in `docs/<board>/`, and generated builds in ignored `output/`. Link new guides from `README.md`. Read submodule-specific instructions before changing their contents.
 
 ## Build, Test, and Development Commands
-No build system or test runner is configured yet. Until one is added, use standard Git commands for local workflow:
 
-- `git status` to inspect changes
-- `git diff` to review edits before commit
-- `git add <path>` to stage specific files
-- `git commit -m "type: short summary"` to create a commit
+Initialize the build configuration layers:
 
-When build or test tooling is introduced, document the canonical commands here and keep them reproducible from the repository root.
+```sh
+git submodule update --init -- buildroot bsp-base-external sadboard-external
+make -C buildroot O="$PWD/output/sadboard" \
+  BR2_EXTERNAL="$PWD/bsp-base-external $PWD/sadboard-external" list-defconfigs
+```
+
+This lists configurations; it does not build firmware or enable debugging tools. Full builds require the selected board's source submodules and configuration. No SadBoard test runner exists. Bootlin guide commands are external lab instructions.
+
+Use `git diff --check`, `git diff --cached --check`, and `git status --short`. Review untracked files separately.
 
 ## Coding Style & Naming Conventions
-Use 4-space indentation for new text-based source files unless the chosen language has a stronger community standard. Prefer ASCII-only content unless non-ASCII is required.
 
-Naming guidance:
+Write learning documentation in Chinese; preserve official identifiers and commands. Use descriptive headings, hyphenated lowercase filenames, and language-tagged code fences. Follow existing language conventions in source submodules; otherwise use four-space indentation for new source files. No workspace-wide formatter is configured.
 
-- Directories: lowercase, hyphenated when needed
-- Files: descriptive and consistent with the language ecosystem
-- Classes/types: `PascalCase`
-- Functions/variables: `camelCase` or `snake_case`, matching the language
+## Validation and Scenario Guidelines
 
-Add formatting or lint configuration with the first language/toolchain added to the repo.
-
-## Testing Guidelines
-Place tests under `tests/` and mirror the source layout where practical. Name tests after the unit under test, such as `tests/parser_test.*` or `tests/test_parser.*`, depending on the framework.
-
-Every new feature or bug fix should include automated tests once a test framework exists.
+Check relative links, citations, platform assumptions, and configuration loading. Report the actual environment and distinguish reviewed instructions from executed experiments. Proposed scenarios should specify symptoms, prerequisites, triggers, expected evidence, root cause, repair verification, and reset procedures. Keep planned behavior distinct from implemented functionality. Use each submodule's own testing instructions for code changes.
 
 ## Commit & Pull Request Guidelines
-There is no existing commit history yet, so establish a simple convention now: `type: imperative summary` (for example, `docs: add contributor guide`).
 
-Pull requests should include a short description, the reason for the change, and notes about validation performed. If the change affects user-visible behavior, include example output or screenshots where relevant.
+Use focused `docs:`, `chore:`, `feat:`, or `fix:` commits. PRs should explain the change, affected components, validation, and related issues. Commit and push submodule changes before publishing parent pointers. Preserve unrelated work and reproducible commit pins.
+
+## Sources & Attribution
+
+Preserve Bootlin source links and CC BY-SA 3.0 attribution. Separate project proposals from official course content. SadBoard's code license remains undecided; existing submodule licenses still apply.
