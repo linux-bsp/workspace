@@ -22,6 +22,3 @@
 	path = libbmc
 	url = git@192.168.10.250:ssdc/bsp/bmctool.git
 	branch = main
-[submodule "zd_interface"]
-	path = zd_interface
-	url = ssh://git@47.103.52.163:2222/payload/h200_pl/zd_interface.git

@@ -2,3 +2,8 @@
 /dl_*/
 /buildroot_*/
 .vscode
+
+# Local reference sources and temporary repositories.
+/PowerControlLogic_0.4.15-dev_source/
+/PowerControlLogic_0.4.15-dev_source.zip
+/zd_interface/
