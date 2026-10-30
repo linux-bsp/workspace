@@ -99,7 +99,7 @@ ROM -> R5 SPL -> A53 SPL -> U-Boot -> Linux
 | 可信布局 | 定义存储、产品、layout-id、region 和策略 | <code>arch/arm/dts/k3-am625-sk-u-boot.dtsi</code> |
 | 默认启动环境 | fw_boot、网络、分区、快捷升级命令 | <code>board/ti/am62x/am62x_raw_ab.env</code> |
 | Linux 工具 | 下载、校验、写入 release 并管理 FWMD metadata | <code>edk/apps/fwctl</code> |
-| Buildroot 集成 | 生成 FIT、安装 fwctl 和启动服务 | <code>br2-external/board/ti/am62x</code> |
+| Buildroot 集成 | 生成 FIT、安装 fwctl 和启动服务 | <code>bsp-base-external/board/ti/am62x</code> |
 
 ## 6. AM62x SD RAW 布局
 
@@ -715,6 +715,6 @@ reset
 | U-Boot 使用文档 | <code>doc/usage/cmd/fw.rst</code> |
 | DT binding | <code>doc/device-tree-bindings/firmware/u-boot,firmware-manager.txt</code> |
 | Linux 工具 | <code>edk/apps/fwctl</code> |
-| Linux 板级配置 | <code>br2-external/board/ti/am62x/rootfs-overlay/etc/fwctl.conf</code> |
-| FIT 模板 | <code>br2-external/board/ti/am62x/layout</code> |
+| Linux 板级配置 | <code>bsp-base-external/board/ti/am62x/rootfs-overlay/etc/fwctl.conf</code> |
+| FIT 模板 | <code>bsp-base-external/board/ti/am62x/layout</code> |
 | 实机测试用例 | <code>docs/firmware_manager/TEST_CASES.md</code> |

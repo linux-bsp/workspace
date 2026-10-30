@@ -2,7 +2,7 @@
 
 嵌入式 Linux BSP 开发工作区聚合仓库。这个仓库使用 Git 子模块统一管理 Buildroot、Buildroot 外部层、Linux、U-Boot、EDK 和 libbmc，以及板级文档。
 
-`libbmc/` 是从 EDK BMC 代码提取的独立子模块，生成 `libbmc.so`；EDK 原有 BMC 模块仍保留。Buildroot 可通过 `br2-external/package/libbmc/` 单独选择该模块。
+`libbmc/` 是从 EDK BMC 代码提取的独立子模块，生成 `libbmc.so`；EDK 原有 BMC 模块仍保留。Buildroot 可通过 `bsp-base-external/package/libbmc/` 单独选择该模块。
 
 ## 子模块常用命令
 
@@ -14,7 +14,7 @@
 ./scripts/setup-platform.sh imx6ull
 ```
 
-`imx6ull` 会更新 `buildroot`、`br2-external`、`edk`、`linux/linux-7.0` 和 `uboot/uboot-2024.10`，不会拉取 `linux/ti-linux-kernel-6.18.13` 或 `uboot/ti-u-boot-2025.10`。
+`imx6ull` 会更新 `buildroot`、`bsp-base-external`、`edk`、`linux/linux-7.0` 和 `uboot/uboot-2024.10`，不会拉取 `linux/ti-linux-kernel-6.18.13` 或 `uboot/ti-u-boot-2025.10`。
 
 如需更新到 `.gitmodules` 中配置的远端分支最新提交：
 
@@ -76,7 +76,7 @@ git submodule update --init -- linux/linux-7.0
 
 ```bash
 git submodule set-branch --branch master -- buildroot
-git submodule set-branch --branch master -- br2-external
+git submodule set-branch --branch master -- bsp-base-external
 git submodule set-branch --branch master -- linux/linux-7.0
 git submodule set-branch --branch master -- linux/ti-linux-kernel-6.18.13
 git submodule set-branch --branch master -- uboot/uboot-2024.10
@@ -105,7 +105,7 @@ git submodule update --init --remote -- linux/linux-7.0
 
 ```bash
 git status
-git add .gitmodules buildroot br2-external linux/linux-7.0 linux/ti-linux-kernel-6.18.13 uboot/uboot-2024.10 uboot/ti-u-boot-2025.10 edk
+git add .gitmodules buildroot bsp-base-external linux/linux-7.0 linux/ti-linux-kernel-6.18.13 uboot/uboot-2024.10 uboot/ti-u-boot-2025.10 edk
 git commit -m "chore: update submodules"
 ```
 
@@ -192,7 +192,7 @@ git submodule update --init -- linux/linux-7.0
 ## 目录说明
 
 - `buildroot/` Buildroot 源码树
-- `br2-external/` 面向板级集成的 Buildroot 外部层
+- `bsp-base-external/` 面向板级集成的 Buildroot 外部层
 - `linux/` Linux 内核源码树目录，按版本放置，例如 `linux/linux-7.0/` 和 `linux/ti-linux-kernel-6.18.13/`
 - `uboot/` U-Boot 源码树目录，按版本放置，例如 `uboot/uboot-2024.10/` 和 `uboot/ti-u-boot-2025.10/`
 - `edk/` EDK 外设访问框架代码

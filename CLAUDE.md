@@ -11,7 +11,7 @@ This is an embedded Linux BSP (Board Support Package) development workspace that
 The repository uses Git submodules organized by function:
 
 - `buildroot/` - Buildroot source tree (the build orchestrator)
-- `br2-external/` - Board-specific Buildroot external layer with defconfigs, overlays, and package integration
+- `bsp-base-external/` - Board-specific Buildroot external layer with defconfigs, overlays, and package integration
 - `linux/linux-7.0/` - Linux kernel 7.0 for NXP i.MX6ULL
 - `linux/ti-linux-kernel-6.18.13/` - TI-specific Linux kernel for TI platforms
 - `uboot/uboot-2024.10/` - U-Boot 2024.10 for NXP i.MX6ULL
@@ -49,7 +49,7 @@ Use `scripts/setup-platform.sh` to initialize only the submodules needed for a t
 
 ```bash
 cd buildroot
-make BR2_EXTERNAL=../br2-external imx6ullevk_defconfig
+make BR2_EXTERNAL=../bsp-base-external imx6ullevk_defconfig
 make
 ```
 
@@ -59,7 +59,7 @@ For the debug/study variant with additional tools:
 
 ```bash
 cd buildroot
-make BR2_EXTERNAL=../br2-external imx6ullevk_debug_study_defconfig
+make BR2_EXTERNAL=../bsp-base-external imx6ullevk_debug_study_defconfig
 make
 ```
 
@@ -70,15 +70,15 @@ cd buildroot
 make menuconfig          # Modify full Buildroot configuration
 make linux-menuconfig    # Modify Linux kernel configuration
 make uboot-menuconfig    # Modify U-Boot configuration
-make savedefconfig       # Save minimal defconfig (must manually copy to br2-external/configs/)
+make savedefconfig       # Save minimal defconfig (must manually copy to bsp-base-external/configs/)
 ```
 
-After modifying configurations, save the defconfig back to `br2-external/configs/` manually:
+After modifying configurations, save the defconfig back to `bsp-base-external/configs/` manually:
 
 ```bash
 # From buildroot directory
 make savedefconfig
-cp defconfig ../br2-external/configs/imx6ullevk_defconfig
+cp defconfig ../bsp-base-external/configs/imx6ullevk_defconfig
 ```
 
 ### Rebuilding Specific Components
@@ -156,9 +156,9 @@ git commit -m "chore: update linux-7.0 to include my-feature"
 
 ## Key Integration Points
 
-### br2-external Structure
+### bsp-base-external Structure
 
-The `br2-external` layer follows Buildroot external tree conventions:
+The `bsp-base-external` layer follows Buildroot external tree conventions:
 
 - `configs/` - Board defconfigs (e.g., `imx6ullevk_defconfig`)
 - `board/<vendor>/<board>/` - Board-specific files, overlays, post-image scripts
@@ -185,7 +185,7 @@ git clone git@github.com:linux-bsp/workspace.git
 cd workspace
 ./scripts/setup-platform.sh imx6ull
 cd buildroot
-make BR2_EXTERNAL=../br2-external imx6ullevk_defconfig
+make BR2_EXTERNAL=../bsp-base-external imx6ullevk_defconfig
 make -j$(nproc)
 ```
 
@@ -206,8 +206,8 @@ git push origin fix-gpio-driver
 
 ### Adding support for a new board
 
-1. Add board defconfig to `br2-external/configs/`
-2. Create board directory under `br2-external/board/<vendor>/<board>/`
+1. Add board defconfig to `bsp-base-external/configs/`
+2. Create board directory under `bsp-base-external/board/<vendor>/<board>/`
 3. Add necessary overlays, post-image scripts, kernel fragments
 4. If using different kernel/u-boot versions, add new submodules under `linux/` or `uboot/`
 5. Update `scripts/setup-platform.sh` to recognize the new platform

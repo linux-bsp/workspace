@@ -1,10 +1,10 @@
 [submodule "buildroot"]
 	path = buildroot
-	url = git@192.168.10.250:ssdc/bsp/buildroot.git
+	url = git@github.com:linux-bsp/buildroot.git
 	branch = master
-[submodule "br2-external"]
-	path = br2-external
-	url = git@192.168.10.250:ssdc/bsp/br2-external.git
+[submodule "bsp-base-external"]
+	path = bsp-base-external
+	url = git@github.com:linux-bsp/bsp-base-external.git
 	branch = master
 [submodule "edk"]
 	path = edk
@@ -12,11 +12,11 @@
 	branch = master
 [submodule "linux-7.0"]
 	path = linux/linux-7.0
-	url = git@192.168.10.250:ssdc/bsp/linux-7.0.git
+	url = git@github.com:linux-bsp/linux-7.0.git
 	branch = master
 [submodule "uboot/u-boot-2026.04"]
 	path = uboot/u-boot-2026.04
-	url = git@192.168.10.250:ssdc/bsp/u-boot-2026.04.git
+	url = git@github.com:linux-bsp/u-boot-2026.04.git
 	branch = master
 [submodule "libbmc"]
 	path = libbmc

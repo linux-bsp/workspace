@@ -40,8 +40,8 @@ ATK-DL6Y2C 板级设备树中曾删除了 `ecspi3` 继承自 SoC dtsi 的 DMA �
 
    修改文件：
 
-   - `br2-external/board/freescale/imx6ull-evk/linux_defconfig`
-   - `br2-external/board/freescale/imx6ull-evk/linux_debug_study_defconfig`
+   - `bsp-base-external/board/freescale/imx6ull-evk/linux_defconfig`
+   - `bsp-base-external/board/freescale/imx6ull-evk/linux_debug_study_defconfig`
 
    增加配置：
 
@@ -52,7 +52,7 @@ ATK-DL6Y2C 板级设备树中曾删除了 `ecspi3` 继承自 SoC dtsi 的 DMA �
 ## 相关提交
 
 - `linux/linux-7.0`: `8d397569a arm: dts: enable atk dl6y2c ecspi dma`
-- `br2-external`: `adb1aa2 board: enable imx sdma for spi`
+- `bsp-base-external`: `adb1aa2 board: enable imx sdma for spi`
 - 主仓库指针更新: `47d5d4b bsp: enable spi sdma support`
 
 ## 后续验证
