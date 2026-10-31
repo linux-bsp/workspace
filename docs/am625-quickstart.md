@@ -4,6 +4,19 @@
 
 本文描述现有主机上的使用方式。`output/` 被 Git 忽略，新克隆的工作区不会包含镜像、工具链或下载的实验，需要先按 [环境搭建指南](am625-bootlin-debug-environment.md) 构建并准备实验材料。
 
+## 新克隆工作区的首次构建
+
+已安装 Buildroot 主机依赖、具备各子模块仓库访问权限时，从 workspace 根目录执行：
+
+```bash
+git submodule update --init --recursive
+cd buildroot
+BR2_EXTERNAL="../bsp-base-external ../sadboard-external" \
+  make sadboard_am625_debug_defconfig && make all
+```
+
+默认自动构建交叉工具链，镜像生成在 `buildroot/output/images/`。下面的操作示例使用原主机的 `workspace/output/am625-debug/`，采用上述默认构建方式时需替换对应路径；也可以按 [环境指南](am625-bootlin-debug-environment.md) 使用 `O=` 指定独立输出目录。Bootlin 实验材料仍需按环境指南单独下载和编译。
+
 ## 1. 进入项目并检查已有产物
 
 主机执行：

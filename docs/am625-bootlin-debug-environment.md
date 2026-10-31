@@ -22,19 +22,45 @@
 
 ## 生成与构建
 
-所有命令从 workspace 根目录执行。建议主机至少预留数十 GB 磁盘；默认包内并行度为 8。
+从新克隆的 workspace 根目录初始化源码子模块，进入 Buildroot 后直接使用标准 defconfig：
 
 ```bash
 git submodule update --init --recursive
-python3 sadboard-external/scripts/configure-am625.py
-make -C output/am625-debug 2>&1 | tee output/am625-debug/build.log
+cd buildroot
+BR2_EXTERNAL="../bsp-base-external ../sadboard-external" \
+  make sadboard_am625_debug_defconfig && make all
 ```
 
-如上游下载缓慢，可在 `make` 命令后追加 `BR2_PRIMARY_SITE=https://sources.buildroot.net`，优先使用 Buildroot 镜像，仍由包哈希校验源码。
+主机应先准备 Buildroot 构建依赖。当前 `libbmc` 子模块仍使用内网 remote，需要能访问该仓库。默认包内并行度为 8；首次构建会独立编译交叉工具链，无需另一份工作区。
 
-shell 管道需要检查构建失败时，可先执行 `set -o pipefail`（Bash）。首次使用默认配置会构建独立工具链。已有输出目录不会被配置脚本覆盖；失败后直接重复 `make` 可继续。
+`configs/sadboard_am625_debug_defconfig` 已保存组合配置，使用者不需要先执行 Python。Buildroot 会在输出目录中记录 external 路径，所以第二条 `make all` 可以不再传 `BR2_EXTERNAL`。
 
-这台主机首次验证采用已有工具链与下载缓存，等价命令为：
+**输出路径需要区分：**
+
+- 上述不带 `O=` 的命令使用 `buildroot/.config` 和 `buildroot/output/`，镜像在 `buildroot/output/images/`。
+- 本文后面的历史构建记录与上板示例使用 `workspace/output/am625-debug/`。新建相同布局时，从 workspace 根目录执行：
+
+```bash
+make -C buildroot O="$PWD/output/am625-debug" \
+  BR2_EXTERNAL="$PWD/bsp-base-external $PWD/sadboard-external" \
+  sadboard_am625_debug_defconfig
+make -C output/am625-debug all
+```
+
+这组命令仅适用于新的输出目录。当前主机已有的 `output/am625-debug` 使用外部工具链，测试内部工具链方式请改用新的目录，例如 `output/am625-native-debug`，避免混用构建结果。后续增量构建直接执行相应目录中的 `make all`。
+
+如上游下载缓慢，可在构建命令后追加 `BR2_PRIMARY_SITE=https://sources.buildroot.net`。需要日志时可用 `2>&1 | tee build.log`，并在 Bash 中先执行 `set -o pipefail` 以保留构建失败状态。
+
+维护者修改 BSP 基线或调试片段后，用以下命令重新导出标准配置并审查差异；此步骤不属于普通构建流程：
+
+```bash
+regen_dir=$(mktemp -d)
+python3 sadboard-external/scripts/configure-am625.py \
+  --output "$regen_dir" --export-defconfig
+git -C sadboard-external diff -- configs/sadboard_am625_debug_defconfig
+```
+
+这台主机首次验证采用已有工具链与下载缓存，首次配置时的等价命令为（已有 `.config` 时脚本会拒绝覆盖）：
 
 ```bash
 python3 sadboard-external/scripts/configure-am625.py \
@@ -209,3 +235,9 @@ SquashFS 已接近原 128 MiB 槽位容量，且本环境没有生成产品启�
 构建日志为 `output/am625-debug/build.log`；官方实验编译日志为 `output/bootlin-reference/labs-build.log`。现有工具链、BSP 外部层和内核目录未被本任务修改；下载缓存新增了所需源码包。
 
 **尚未验证**：AM6254 上电启动、SSH/串口连接、NFS 导出、真实 PMU 和网络性能、Valgrind 运行、KGDB、内核故障注入与 kdump。继续上板需要实际板卡连接及网络信息。
+
+### 标准入口验证补充
+
+已实际执行 `cd buildroot` 后通过环境变量传入两个 external，运行 `make sadboard_am625_debug_defconfig`。生成配置与原组合脚本的默认配置一致，仅 `BR2_DEFCONFIG` 的记录路径不同；入口可被 `make list-defconfigs` 列出。
+
+后续不传 `BR2_EXTERNAL` 的 `make printvars` 与 `make show-info` 均成功，确认 external 路径被记住、所需调试工具和本地源码软件包进入构建依赖图。本次验证了标准入口及配置一致性，没有重新执行内部工具链方式的完整 `make all`。

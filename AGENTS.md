@@ -17,15 +17,16 @@ Put learning guides in `docs/`, board references in `docs/<board>/`, and generat
 
 ## Build, Test, and Development Commands
 
-Initialize the build configuration layers:
+Initialize source submodules, then use the standard Buildroot entry:
 
 ```sh
-git submodule update --init -- buildroot bsp-base-external sadboard-external
-make -C buildroot O="$PWD/output/sadboard" \
-  BR2_EXTERNAL="$PWD/bsp-base-external $PWD/sadboard-external" list-defconfigs
+git submodule update --init --recursive
+cd buildroot
+BR2_EXTERNAL="../bsp-base-external ../sadboard-external" \
+  make sadboard_am625_debug_defconfig && make all
 ```
 
-This lists configurations only. Use `python3 sadboard-external/scripts/configure-am625.py` then `make -C output/am625-debug` for the AM6254 debugging profile; see `docs/am625-bootlin-debug-environment.md`. Full builds require the selected board's source submodules and configuration. No SadBoard test runner exists. Bootlin guide commands are external lab instructions.
+Without `O=`, artifacts go to `buildroot/output/`; existing guides also use workspace `output/am625-debug/`. Keep output trees separate when changing toolchains. The Python helper remains optional for local toolchains and diagnostic variants. After changing baseline fragments, regenerate the checked-in defconfig with `--export-defconfig` in a fresh output directory and verify configuration equivalence. See `docs/am625-bootlin-debug-environment.md`. No SadBoard test runner exists; Bootlin commands are external lab instructions.
 
 Use `git diff --check`, `git diff --cached --check`, and `git status --short`. Review untracked files separately.
 

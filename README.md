@@ -24,16 +24,17 @@ SadBoard 在 [linux-bsp/workspace](https://github.com/linux-bsp/workspace) 的 `
 git submodule update --init -- buildroot bsp-base-external sadboard-external
 ```
 
-随后可检查两个 external 的加载情况：
+初始化目标板需要的源码子模块后，可直接使用标准配置：
 
 ```bash
-make -C buildroot \
-  O="$PWD/output/sadboard" \
-  BR2_EXTERNAL="$PWD/bsp-base-external $PWD/sadboard-external" \
-  list-defconfigs
+cd buildroot
+BR2_EXTERNAL="../bsp-base-external ../sadboard-external" \
+  make sadboard_am625_debug_defconfig && make all
 ```
 
-该命令列出配置，不构建固件。完整固件构建还需要初始化目标板使用的 Linux、U-Boot 和软件包源码子模块。两个 external 同时加载不会自动合并 defconfig，也不会自动开启调试工具；AM6254 环境应使用配置生成脚本，详见 [环境指南](docs/am625-bootlin-debug-environment.md)。
+不指定 `O=` 时，产物位于 `buildroot/output/images/`。Buildroot 会记住本输出目录使用的两个 external；后续 `make all` 无需再次指定。默认独立构建工具链，配置输入保存在 Git 中，输出目录由构建生成。
+
+在新克隆的工作区中，先运行 `git submodule update --init --recursive`。当前 `libbmc` 仍使用内网 remote，需要相应访问权限。`make list-defconfigs` 可以查看本实验入口。可选工具链、独立输出目录和详细构建步骤见 [环境指南](docs/am625-bootlin-debug-environment.md)。
 
 `sadboard-external` 包含 AM6254 配置生成脚本、Buildroot/内核配置片段和目标端环境检查脚本，跟踪远端 `main` 分支。workspace 固定所有子模块的具体提交；复现实验时使用固定提交。`git submodule update --remote` 会尝试更新到跟踪分支的新提交。
 
@@ -151,6 +152,8 @@ QEMU 计划用于验证分析流程、逻辑故障和场景复现。依赖真实
 这些项目是参考资料或候选组件，当前仓库尚未集成。
 
 ## 文档
+
+- [Workspace 目录与 AM62x SDK](docs/workspace-toolchain.md)：独立 SDK 配置、原生 `make sdk`、手动解压重定位和共享工具链。
 
 - [AM6254 快速上手](docs/am625-quickstart.md)：使用已有镜像、NFS/TFTP 启动、环境检查和第一个 GDB 实验。
 
