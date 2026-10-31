@@ -8,7 +8,7 @@ SadBoard 是一个面向嵌入式 Linux 的故障定位与分析练习项目。�
 
 ## 当前状态
 
-项目处于规划阶段，当前仓库包含项目说明、学习资料，以及 `sadboard-external` 子模块的最小 Buildroot external 骨架。故障场景、实验镜像、自动检查和命令行工具均尚未实现。下文的场景与运行流程属于规划。
+项目处于规划阶段，当前仓库包含项目说明、学习资料，以及 `sadboard-external` 中的 AM6254 调试环境配置与检查脚本。已完成 AM6254 调试内核和根文件系统的主机构建，上板验证尚未进行；详情见环境指南。SadBoard 故障题库、自动验收和场景管理命令行尚未实现。下文的场景与运行流程属于规划。
 
 ## Workspace 分支与 Buildroot 扩展层
 
@@ -33,9 +33,9 @@ make -C buildroot \
   list-defconfigs
 ```
 
-该命令列出配置，不构建固件。完整固件构建还需要初始化目标板使用的 Linux、U-Boot 和软件包源码子模块。两个 external 同时加载不会自动合并 defconfig，也不会自动开启调试工具；实验配置尚待实现。
+该命令列出配置，不构建固件。完整固件构建还需要初始化目标板使用的 Linux、U-Boot 和软件包源码子模块。两个 external 同时加载不会自动合并 defconfig，也不会自动开启调试工具；AM6254 环境应使用配置生成脚本，详见 [环境指南](docs/am625-bootlin-debug-environment.md)。
 
-`sadboard-external` 当前仅包含 `external.desc`、`Config.in`、`external.mk` 和说明文档，跟踪远端 `main` 分支。workspace 固定所有子模块的具体提交；复现实验时使用固定提交。`git submodule update --remote` 会尝试更新到跟踪分支的新提交。
+`sadboard-external` 包含 AM6254 配置生成脚本、Buildroot/内核配置片段和目标端环境检查脚本，跟踪远端 `main` 分支。workspace 固定所有子模块的具体提交；复现实验时使用固定提交。`git submodule update --remote` 会尝试更新到跟踪分支的新提交。
 
 开发时应先提交并推送子模块改动，再在 workspace 提交更新后的子模块指针。构建输出统一放在 `output/`，不提交生成文件。
 
@@ -151,6 +151,10 @@ QEMU 计划用于验证分析流程、逻辑故障和场景复现。依赖真实
 这些项目是参考资料或候选组件，当前仓库尚未集成。
 
 ## 文档
+
+- [AM6254 快速上手](docs/am625-quickstart.md)：使用已有镜像、NFS/TFTP 启动、环境检查和第一个 GDB 实验。
+
+- [AM6254 Bootlin 调试环境](docs/am625-bootlin-debug-environment.md)：配置生成、构建、NFS 启动与实验验证。
 
 - [Bootlin Linux 调试课程详解与实验学习指南](docs/bootlin-linux-debugging-guide.md)：课程主题、官方实验、资料链接，以及与 SadBoard 目标的对应关系。
 

@@ -2,15 +2,16 @@
 
 ## Project Structure & Module Organization
 
-SadBoard develops on the `SadBoard` branch of `linux-bsp/workspace`, using existing BSP submodules. Learning scenarios, experiment images, automated checks, and CLI commands are not implemented yet.
+SadBoard develops on the `SadBoard` branch of `linux-bsp/workspace`, using existing BSP submodules. AM6254 debugging configuration and a capability-check script exist; scenario orchestration and automatic grading are not implemented. Record image build and board validation status separately.
 
 - `README.md`: project scope, status, and documentation index.
+- `docs/am625-quickstart.md`: board startup and first experiment walkthrough.
 - `docs/bootlin-linux-debugging-guide.md`: Chinese Bootlin study guide.
 - `docs/workspace-guide.md`: inherited workspace operations; check historical platform examples before use.
 - `buildroot/`, `linux/`, `uboot/`: build system and versioned source submodules.
 - `bsp-base-external/`: board support; keep the `LINUX_BSP` external identifier.
-- `sadboard-external/`: minimal `SADBOARD` external skeleton for future experiments.
-- `edk/`, `libbmc/`, `zd_interface/`: existing software submodules.
+- `sadboard-external/`: `SADBOARD` external with AM6254 debugging fragments, setup script, and target overlay.
+- `edk/`, `libbmc/`: existing software submodules.
 
 Put learning guides in `docs/`, board references in `docs/<board>/`, and generated builds in ignored `output/`. Link new guides from `README.md`. Read submodule-specific instructions before changing their contents.
 
@@ -24,7 +25,7 @@ make -C buildroot O="$PWD/output/sadboard" \
   BR2_EXTERNAL="$PWD/bsp-base-external $PWD/sadboard-external" list-defconfigs
 ```
 
-This lists configurations; it does not build firmware or enable debugging tools. Full builds require the selected board's source submodules and configuration. No SadBoard test runner exists. Bootlin guide commands are external lab instructions.
+This lists configurations only. Use `python3 sadboard-external/scripts/configure-am625.py` then `make -C output/am625-debug` for the AM6254 debugging profile; see `docs/am625-bootlin-debug-environment.md`. Full builds require the selected board's source submodules and configuration. No SadBoard test runner exists. Bootlin guide commands are external lab instructions.
 
 Use `git diff --check`, `git diff --cached --check`, and `git status --short`. Review untracked files separately.
 
