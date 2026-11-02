@@ -1,237 +1,59 @@
-# CLAUDE.md
+# Repository Guidelines
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+## Project Structure & Module Organization
+This repository is a BSP workspace that aggregates the main source trees as Git submodules. Keep the repository root focused on workspace metadata, documentation, and submodule entries.
 
-## Repository Overview
+- `buildroot/` for the Buildroot source tree
+- `bsp-base-external/` for board-specific Buildroot external configuration
+- `linux/` for Linux kernel source trees, grouped by version such as `linux/linux-7.0/` and `linux/ti-linux-kernel-6.18.13/`
+- `uboot/` for U-Boot source trees, grouped by version such as `uboot/uboot-2024.10/` and `uboot/ti-u-boot-2025.10/`
+- `edk/` for peripheral management
+- `device-manager/` for the management server, firmware tools and device logging
+- `docs/<board>/` for board-specific reference manuals, datasheets, schematics, and related documents
 
-This is an embedded Linux BSP (Board Support Package) development workspace that aggregates multiple Git submodules for building complete embedded Linux systems. The workspace uses Buildroot as the primary build system and manages Linux kernel, U-Boot, and custom EDK (Embedded Device Kit) code.
+Do not mix generated build outputs into the repository root. Put new root-level documentation in `README.md`; put board-specific documents under `docs/<board>/` unless a tool requires a specific file at the root.
 
-## Submodule Architecture
+## Build, Test, and Development Commands
+Use the workspace Buildroot configuration and keep generated files under `output/`:
 
-The repository uses Git submodules organized by function:
+- `make -C buildroot O="$PWD/output/am625" all` builds the configured AM625 image.
+- `make -C buildroot O="$PWD/output/am625" host-device-server` builds host management tools.
+- `make -C device-manager/logging test` checks logging lifecycle and rotation.
+- `python3 device-manager/tests/test_firmware.py` checks the firmware engine; supply dependency paths through `CPPFLAGS` and `LDFLAGS` when needed.
+- `git submodule update --init --recursive` initializes the source repositories.
 
-- `buildroot/` - Buildroot source tree (the build orchestrator)
-- `bsp-base-external/` - Board-specific Buildroot external layer with defconfigs, overlays, and package integration
-- `linux/linux-7.0/` - Linux kernel 7.0 for NXP i.MX6ULL
-- `linux/ti-linux-kernel-6.18.13/` - TI-specific Linux kernel for TI platforms
-- `uboot/uboot-2024.10/` - U-Boot 2024.10 for NXP i.MX6ULL
-- `uboot/ti-u-boot-2025.10/` - U-Boot 2025.10 for TI platforms
-- `edk/` - EDK (Embedded Device Kit) code; includes PDM kernel module and PDI userspace library
-- `docs/` - Board documentation (datasheets, schematics, reference manuals)
-- `dl/` - Buildroot download cache (not tracked in git)
+For a fresh build, select `bsp-base-external` with `BR2_EXTERNAL` and apply `alientek_am62x_defconfig` first; preserve an existing build's toolchain configuration when rebuilding packages.
 
-Each submodule is configured to track its remote `master` branch. The workspace records specific commits, but can update to latest remote commits using `--remote` flags.
+## Coding Style & Naming Conventions
+Use 4-space indentation for new text-based source files unless the chosen language has a stronger community standard. Prefer ASCII-only content unless non-ASCII is required.
 
-## Platform-Specific Setup
+Naming guidance:
 
-Use `scripts/setup-platform.sh` to initialize only the submodules needed for a target platform:
+- Directories: lowercase, hyphenated when needed
+- Files: descriptive and consistent with the language ecosystem
+- Classes/types: `PascalCase`
+- Functions/variables: `camelCase` or `snake_case`, matching the language
 
-```bash
-# Initialize i.MX6ULL workspace (common + linux-7.0 + uboot-2024.10)
-./scripts/setup-platform.sh imx6ull
+Add formatting or lint configuration with the first language/toolchain added to the repo.
 
-# Initialize TI platform workspace (common + ti-linux-kernel + ti-u-boot)
-./scripts/setup-platform.sh ti
+## Testing Guidelines
+Place tests under `tests/` and mirror the source layout where practical. Name tests after the unit under test, such as `tests/parser_test.*` or `tests/test_parser.*`, depending on the framework.
 
-# Update to latest remote commits instead of recorded commits
-./scripts/setup-platform.sh --remote imx6ull
+Every new feature or bug fix should include automated tests once a test framework exists.
 
-# Use shallow clone for large submodules to reduce download size
-./scripts/setup-platform.sh --depth 1 imx6ull
+## Commit & Pull Request Guidelines
+Use the existing concise commit convention: `type: imperative summary` (for example, `docs: add contributor guide`).
 
-# List supported platforms
-./scripts/setup-platform.sh --list
-```
+Pull requests should include a short description, the reason for the change, and notes about validation performed. If the change affects user-visible behavior, include example output or screenshots where relevant.
 
-## Build Commands
+## Firmware Release Workflow
 
-### Building for NXP i.MX6ULL EVK
+For firmware changes, complete the applicable tests and AM625 image validation, then publish the new OTA release automatically. The user has authorized this workflow; a separate publication confirmation is unnecessary.
 
-```bash
-cd buildroot
-make BR2_EXTERNAL=../bsp-base-external imx6ullevk_defconfig
-make
-```
+Commit the exact corresponding source changes only after the intended device reports `success` for that publication and running version following reboot and health confirmation. Download, installation, reboot, and boot-testing are not success. Preserve the release identity, device transaction, test results, and source snapshot for audit. If the release fails, rolls back, or is quarantined, retain the changes and investigate; do not commit it as a successful release or bypass quarantine.
 
-The output images (kernel, u-boot, rootfs) will be in `buildroot/output/images/`.
+Commit affected submodules before updating their workspace gitlinks. Do not include generated firmware or unrelated concurrent edits. Hardware confirmation of a kernel/rootfs OTA does not validate an uninstalled bootloader. Publishing firmware does not imply pushing Git commits; push only when requested.
 
-For the debug/study variant with additional tools:
+Keep the firmware tag fixed at `v0.0.1` (packed version 1). Change it only when the user explicitly requests a version change. Content changes produce a new full SHA256 identity; publication numbers remain distinct audit identifiers. Store each build in a unique output directory so repeated tags never overwrite earlier artifacts.
 
-```bash
-cd buildroot
-make BR2_EXTERNAL=../bsp-base-external imx6ullevk_debug_study_defconfig
-make
-```
-
-### Buildroot Configuration
-
-```bash
-cd buildroot
-make menuconfig          # Modify full Buildroot configuration
-make linux-menuconfig    # Modify Linux kernel configuration
-make uboot-menuconfig    # Modify U-Boot configuration
-make savedefconfig       # Save minimal defconfig (must manually copy to bsp-base-external/configs/)
-```
-
-After modifying configurations, save the defconfig back to `bsp-base-external/configs/` manually:
-
-```bash
-# From buildroot directory
-make savedefconfig
-cp defconfig ../bsp-base-external/configs/imx6ullevk_defconfig
-```
-
-### Rebuilding Specific Components
-
-```bash
-cd buildroot
-make linux-rebuild       # Rebuild Linux kernel
-make uboot-rebuild       # Rebuild U-Boot
-make edk-rebuild         # Rebuild EDK package
-make clean               # Clean everything
-```
-
-### EDK Development
-
-The EDK (Embedded Device Kit) submodule has its own build system combining Kconfig, CMake, and Linux Kbuild:
-
-```bash
-cd edk
-make list                                    # List available defconfigs
-make ubuntu_x86_modules_defconfig            # Configure for x86 development
-make all                                     # Build userspace libs and kernel modules
-make modules                                 # Build only kernel modules
-```
-
-EDK currently builds the PDM kernel module as `pdm.ko`; userspace access is provided by PDI.
-
-## Submodule Operations
-
-### Update submodules to recorded commits
-
-```bash
-git submodule update --init --recursive                    # All submodules
-git submodule update --init -- linux/linux-7.0             # Specific submodule
-```
-
-### Update submodules to latest remote commits
-
-```bash
-git submodule update --init --remote --recursive           # All submodules
-git submodule update --init --remote -- linux/linux-7.0    # Specific submodule
-
-# After updating, commit the new submodule pointers
-git add linux/linux-7.0
-git commit -m "chore: update linux-7.0 submodule"
-```
-
-### Check submodule status
-
-```bash
-git submodule status        # Check all submodule states
-git status --short          # Check workspace dirty state
-```
-
-In `git submodule status` output:
-- `-` prefix: submodule not initialized
-- `+` prefix: submodule commit differs from recorded commit
-- `U` prefix: submodule has conflicts
-
-### Working inside submodules
-
-Submodules are full Git repositories. Enter them and use normal Git commands:
-
-```bash
-cd linux/linux-7.0
-git status
-git log --oneline -10
-git checkout -b my-feature
-# Make changes, commit, push
-cd ../..
-
-# Update workspace to track the new commit
-git add linux/linux-7.0
-git commit -m "chore: update linux-7.0 to include my-feature"
-```
-
-## Key Integration Points
-
-### bsp-base-external Structure
-
-The `bsp-base-external` layer follows Buildroot external tree conventions:
-
-- `configs/` - Board defconfigs (e.g., `imx6ullevk_defconfig`)
-- `board/<vendor>/<board>/` - Board-specific files, overlays, post-image scripts
-- `package/edk/` - EDK package integration for Buildroot
-- `external.mk` - External tree makefile
-- `external.desc` - External tree metadata
-
-### Local Source Overrides
-
-The Buildroot defconfigs use local source overrides pointing to workspace submodules instead of downloading tarballs:
-
-- Linux: `BR2_LINUX_KERNEL_CUSTOM_LOCAL=y` → `../linux/linux-7.0`
-- U-Boot: `BR2_TARGET_UBOOT_CUSTOM_LOCAL=y` → `../uboot/uboot-2024.10`
-- EDK: `EDK_OVERRIDE_SRCDIR=../edk`
-
-This allows rapid iteration: changes in submodules are picked up on the next `make` without re-downloading.
-
-## Common Workflows
-
-### Starting fresh on a new platform
-
-```bash
-git clone git@github.com:linux-bsp/workspace.git
-cd workspace
-./scripts/setup-platform.sh imx6ull
-cd buildroot
-make BR2_EXTERNAL=../bsp-base-external imx6ullevk_defconfig
-make -j$(nproc)
-```
-
-### Developing a Linux kernel change
-
-```bash
-cd linux/linux-7.0
-git checkout -b fix-gpio-driver
-# Edit kernel code
-cd ../../buildroot
-make linux-rebuild        # Test the change
-# If successful, commit in the submodule
-cd ../linux/linux-7.0
-git add .
-git commit -m "fix: correct GPIO initialization"
-git push origin fix-gpio-driver
-```
-
-### Adding support for a new board
-
-1. Add board defconfig to `bsp-base-external/configs/`
-2. Create board directory under `bsp-base-external/board/<vendor>/<board>/`
-3. Add necessary overlays, post-image scripts, kernel fragments
-4. If using different kernel/u-boot versions, add new submodules under `linux/` or `uboot/`
-5. Update `scripts/setup-platform.sh` to recognize the new platform
-6. Document board-specific build and boot steps in the board directory
-
-## Build Output
-
-After a successful Buildroot build, find images in:
-
-```
-buildroot/output/images/
-├── imx6ull-evk.dtb        # Device tree blob
-├── rootfs.tar             # Root filesystem archive
-├── sdcard.img             # Complete SD card image
-├── u-boot.imx             # U-Boot with i.MX header
-└── zImage                 # Linux kernel image
-```
-
-Flash `sdcard.img` to an SD card or use individual images for network boot or other deployment methods.
-
-## Important Notes
-
-- Never commit changes directly inside `buildroot/output/` - these are build artifacts
-- Submodule commits must be tracked: after updating a submodule, commit the pointer in the workspace repository
-- The `dl/` directory caches downloads and can grow large - it's excluded from git
-- Buildroot builds are out-of-tree by default; clean by removing `buildroot/output/`
-- EDK uses separate build directories under `edk/_build/` for userspace components and modules
+Use concise `[module] [INFO|WARN|ERROR] message` firmware logs; avoid separator banners and duplicate prefixes. Persist firmware identity and download metadata in the OTA server SQLite catalog; UI refresh must not rehash unchanged payloads. Keep one active publication and retain historical publication/audit records.

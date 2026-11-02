@@ -22,3 +22,8 @@
 	path = libbmc
 	url = git@github.com:wanguo99/libbmc.git
 	branch = master
+
+[submodule "device-manager"]
+	path = device-manager
+	url = git@github.com:linux-bsp/device-manager.git
+	branch = master

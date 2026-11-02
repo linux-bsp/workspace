@@ -7,20 +7,22 @@ This repository is a BSP workspace that aggregates the main source trees as Git 
 - `bsp-base-external/` for board-specific Buildroot external configuration
 - `linux/` for Linux kernel source trees, grouped by version such as `linux/linux-7.0/` and `linux/ti-linux-kernel-6.18.13/`
 - `uboot/` for U-Boot source trees, grouped by version such as `uboot/uboot-2024.10/` and `uboot/ti-u-boot-2025.10/`
-- `edk/` for EDK embedded device kit code
+- `edk/` for peripheral management
+- `device-manager/` for the management server, firmware tools and device logging
 - `docs/<board>/` for board-specific reference manuals, datasheets, schematics, and related documents
 
 Do not mix generated build outputs into the repository root. Put new root-level documentation in `README.md`; put board-specific documents under `docs/<board>/` unless a tool requires a specific file at the root.
 
 ## Build, Test, and Development Commands
-No build system or test runner is configured yet. Until one is added, use standard Git commands for local workflow:
+Use the workspace Buildroot configuration and keep generated files under `output/`:
 
-- `git status` to inspect changes
-- `git diff` to review edits before commit
-- `git add <path>` to stage specific files
-- `git commit -m "type: short summary"` to create a commit
+- `make -C buildroot O="$PWD/output/am625" all` builds the configured AM625 image.
+- `make -C buildroot O="$PWD/output/am625" host-device-server` builds host management tools.
+- `make -C device-manager/logging test` checks logging lifecycle and rotation.
+- `python3 device-manager/tests/test_firmware.py` checks the firmware engine; supply dependency paths through `CPPFLAGS` and `LDFLAGS` when needed.
+- `git submodule update --init --recursive` initializes the source repositories.
 
-When build or test tooling is introduced, document the canonical commands here and keep them reproducible from the repository root.
+For a fresh build, select `bsp-base-external` with `BR2_EXTERNAL` and apply `alientek_am62x_defconfig` first; preserve an existing build's toolchain configuration when rebuilding packages.
 
 ## Coding Style & Naming Conventions
 Use 4-space indentation for new text-based source files unless the chosen language has a stronger community standard. Prefer ASCII-only content unless non-ASCII is required.
@@ -40,7 +42,7 @@ Place tests under `tests/` and mirror the source layout where practical. Name te
 Every new feature or bug fix should include automated tests once a test framework exists.
 
 ## Commit & Pull Request Guidelines
-There is no existing commit history yet, so establish a simple convention now: `type: imperative summary` (for example, `docs: add contributor guide`).
+Use the existing concise commit convention: `type: imperative summary` (for example, `docs: add contributor guide`).
 
 Pull requests should include a short description, the reason for the change, and notes about validation performed. If the change affects user-visible behavior, include example output or screenshots where relevant.
 

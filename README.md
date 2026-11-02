@@ -1,199 +1,54 @@
-# workspace
+# BSP workspace
 
-嵌入式 Linux BSP 开发工作区聚合仓库。这个仓库使用 Git 子模块统一管理 Buildroot、Buildroot 外部层、Linux、U-Boot、EDK 和 libbmc，以及板级文档。
+嵌入式 Linux BSP 开发工作区，通过 Git 子模块固定一组可配套构建的源码版本。当前主线板卡为 ALIENTEK AM625。
 
-`libbmc/` 是从 EDK BMC 代码提取的独立子模块，生成 `libbmc.so`；EDK 原有 BMC 模块仍保留。Buildroot 可通过 `bsp-base-external/package/libbmc/` 单独选择该模块。
+## 组成
 
-## 子模块常用命令
+| 目录 | 职责 |
+| --- | --- |
+| `buildroot/` | 构建系统 |
+| `bsp-base-external/` | 板卡配置、Buildroot 包、启动脚本、镜像布局 |
+| `linux/linux-7.0/` | Linux 内核及板级驱动 |
+| `uboot/u-boot-2026.04/` | R5/A53 SPL 和 U-Boot |
+| `edk/` | PDM/PDI 外设管理及业务服务 |
+| `device-manager/` | 管理 Web、OTA、fwctl/fwctld、logctl/logctld |
+| `libbmc/` | 独立 BMC SDK |
+| `docs/` | 硬件资料与设计文档 |
+| `output/` | 本地构建、测试与发布产物，Git 忽略 |
 
-### 按平台初始化工作区
+## 拉取与构建
 
-使用 `scripts/setup-platform.sh` 只初始化或更新目标平台需要的子模块：
-
-```bash
-./scripts/setup-platform.sh imx6ull
+```sh
+git clone --recurse-submodules git@github.com:linux-bsp/workspace.git am62x
+cd am62x
+make -C buildroot O="$PWD/output/am625" \
+  BR2_EXTERNAL="$PWD/bsp-base-external" alientek_am62x_defconfig
+make -C buildroot O="$PWD/output/am625" all
 ```
 
-`imx6ull` 会更新 `buildroot`、`bsp-base-external`、`edk`、`linux/linux-7.0` 和 `uboot/uboot-2024.10`，不会拉取 `linux/ti-linux-kernel-6.18.13` 或 `uboot/ti-u-boot-2025.10`。
+首次构建的 defconfig 使用内部工具链，不依赖预装 SDK。已有输出目录直接执行 `all`；不要重新应用 defconfig 覆盖定制的外部工具链设置。下载缓存可通过 `BR2_DL_DIR="$HOME/workspaces/dl"` 共享。镜像生成在 `output/am625/images/`。
 
-如需更新到 `.gitmodules` 中配置的远端分支最新提交：
+SDK 使用独立输出目录，按 [BSP 外部层说明](bsp-base-external/README.md) 执行 `make sdk` 后手动解压并运行 `relocate-sdk.sh`。共享工具链可放在 `~/workspaces/toolchain/`。
 
-```bash
-./scripts/setup-platform.sh --remote imx6ull
+## 设备管理与日志
+
+```sh
+make -C buildroot O="$PWD/output/am625" host-device-server
+output/am625/host/bin/device-server --root "$PWD/output/device-feed" --bind 0.0.0.0 --port 8090
 ```
 
-查看支持的平台和子模块映射：
+使用 [Device Manager](device-manager/README.md) 管理固件上传、发布、设备升级结果及审计。OTA/SOL 位于侧栏；SOL 当前只有入口，网络传输尚未实现。端口 8090 避开本机 GitLab 的 8080。
 
-```bash
-./scripts/setup-platform.sh --list
-```
+设备串口执行 `logctl status`、`logctl boots`、`logctl show --boot previous` 查看日志。持久化要求已有可写的 `/data` 文件系统；没有时退回 RAM 并告警。系统不会自动格式化分区，也不依赖 SSH。SPL/U-Boot 日志接力需要安装对应新引导程序，kernel/rootfs OTA 不会自动完成这一步。
 
-### 克隆与初始化
+## 子模块与版本管理
 
-```bash
-git clone git@github.com:linux-bsp/workspace.git
-cd workspace
+```sh
 git submodule update --init --recursive
-```
-
-如果网络较慢，可以单独初始化较大的子模块，并使用浅克隆和部分克隆减少下载量：
-
-```bash
-git submodule update --init --depth 1 --filter=blob:none -- linux/linux-7.0
-git submodule update --init --depth 1 --filter=blob:none -- linux/ti-linux-kernel-6.18.13
-git submodule update --init --depth 1 --filter=blob:none -- uboot/uboot-2024.10
-git submodule update --init --depth 1 --filter=blob:none -- uboot/ti-u-boot-2025.10
-```
-
-### 查看状态
-
-```bash
 git submodule status
 git status --short
 ```
 
-`git submodule status` 输出中，路径前面的符号含义：
+默认使用本仓库记录的准确提交。`.gitmodules` 中的 `branch = master` 只影响显式执行 `git submodule update --remote`；它不会改变固定提交，也不代表每个本地开发分支都叫 master。EDK、Linux 的 OTA 开发提交可能来自 `ota/v1.0.16` 分支。
 
-- `-` 子模块还没有初始化
-- `+` 子模块工作区提交和主仓库记录的提交不一致
-- `U` 子模块存在冲突
-
-### 更新到主仓库记录的提交
-
-```bash
-git submodule update --init --recursive
-```
-
-只更新某一个子模块：
-
-```bash
-git submodule update --init -- linux/linux-7.0
-```
-
-### 跟踪远端分支
-
-本仓库的 `libbmc` 子模块跟踪远端 `main` 分支，其余子模块跟踪各自远端的 `master` 分支。配置命令如下：
-
-```bash
-git submodule set-branch --branch master -- buildroot
-git submodule set-branch --branch master -- bsp-base-external
-git submodule set-branch --branch master -- linux/linux-7.0
-git submodule set-branch --branch master -- linux/ti-linux-kernel-6.18.13
-git submodule set-branch --branch master -- uboot/uboot-2024.10
-git submodule set-branch --branch master -- uboot/ti-u-boot-2025.10
-git submodule set-branch --branch master -- edk
-git submodule set-branch --branch main -- libbmc
-```
-
-这些命令会在 `.gitmodules` 中写入对应的 `branch`。注意：主仓库仍然记录每个子模块的具体提交；`branch` 只决定 `git submodule update --remote` 从哪个远端分支取最新提交。
-
-### 拉取子模块远端最新提交
-
-将所有子模块更新到 `.gitmodules` 配置的远端分支最新提交：
-
-```bash
-git submodule update --init --remote --recursive
-```
-
-只更新某一个子模块到配置的远端分支最新提交：
-
-```bash
-git submodule update --init --remote -- linux/linux-7.0
-```
-
-更新后需要在主仓库提交新的子模块指针：
-
-```bash
-git status
-git add .gitmodules buildroot bsp-base-external linux/linux-7.0 linux/ti-linux-kernel-6.18.13 uboot/uboot-2024.10 uboot/ti-u-boot-2025.10 edk
-git commit -m "chore: update submodules"
-```
-
-### 同步 URL 配置
-
-如果修改了 `.gitmodules` 或远端地址，先同步本地 Git 配置：
-
-```bash
-git submodule sync --recursive
-git submodule update --init --recursive
-```
-
-只同步某一个子模块：
-
-```bash
-git submodule sync -- linux/linux-7.0
-git submodule update --init -- linux/linux-7.0
-```
-
-### 添加子模块
-
-```bash
-git submodule add git@github.com:linux-bsp/example.git example
-git add .gitmodules example
-git commit -m "chore: add example submodule"
-```
-
-添加较大的仓库时可以使用浅克隆：
-
-```bash
-git submodule add --depth 1 git@github.com:linux-bsp/example.git example
-```
-
-### 删除子模块
-
-```bash
-git submodule deinit -f -- example
-git rm -f -- example
-rm -rf .git/modules/example
-git commit -m "chore: remove example submodule"
-```
-
-### 进入子模块操作
-
-子模块本身也是 Git 仓库，可以进入目录后正常执行 Git 命令：
-
-```bash
-cd linux/linux-7.0
-git status
-git branch
-git log --oneline -5
-cd ..
-```
-
-也可以在主仓库批量执行命令：
-
-```bash
-git submodule foreach 'git status --short'
-git submodule foreach 'git log --oneline -1'
-```
-
-### 中断或下载失败后重试
-
-如果中断导致子模块留下半截目录，先清理对应路径后重试：
-
-```bash
-rm -rf linux/linux-7.0 .git/modules/linux-7.0
-git submodule update --init --depth 1 --filter=blob:none -- linux/linux-7.0
-```
-
-如果子模块名称和路径都带有目录层级，例如 `linux/ti-linux-kernel-6.18.13`，`.git/modules` 下的清理路径也需要保留同样的层级：
-
-```bash
-rm -rf linux/ti-linux-kernel-6.18.13 .git/modules/linux/ti-linux-kernel-6.18.13
-git submodule update --init --depth 1 --filter=blob:none -- linux/ti-linux-kernel-6.18.13
-```
-
-如果只是工作区缺失，但 `.gitmodules` 和索引中已经有记录，直接重新初始化：
-
-```bash
-git submodule update --init -- linux/linux-7.0
-```
-
-## 目录说明
-
-- `buildroot/` Buildroot 源码树
-- `bsp-base-external/` 面向板级集成的 Buildroot 外部层
-- `linux/` Linux 内核源码树目录，按版本放置，例如 `linux/linux-7.0/` 和 `linux/ti-linux-kernel-6.18.13/`
-- `uboot/` U-Boot 源码树目录，按版本放置，例如 `uboot/uboot-2024.10/` 和 `uboot/ti-u-boot-2025.10/`
-- `edk/` EDK 外设访问框架代码
-- `docs/<board>/` 按板卡归档参考手册、数据手册、原理图和相关 PDF，例如 `docs/imx6ull/`
+修改后先提交子仓库，再更新工作区 gitlink。推送工作区前确保引用的子仓库提交已上传。固件 tag 固定 `v0.0.1`，内容变化更新 SHA256；设备重启并通过健康检查、上报成功之后才提交对应代码。验证记录见 [AM625 发布记录](bsp-base-external/board/ti/am625/releases/)。
