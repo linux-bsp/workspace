@@ -53,3 +53,5 @@ Commit the exact corresponding source changes only after the intended device rep
 Commit affected submodules before updating their workspace gitlinks. Do not include generated firmware or unrelated concurrent edits. Hardware confirmation of a kernel/rootfs OTA does not validate an uninstalled bootloader. Publishing firmware does not imply pushing Git commits; push only when requested.
 
 Keep the firmware tag fixed at `v0.0.1` (packed version 1). Change it only when the user explicitly requests a version change. Content changes produce a new full SHA256 identity; publication numbers remain distinct audit identifiers. Store each build in a unique output directory so repeated tags never overwrite earlier artifacts.
+
+Use concise `[module] [INFO|WARN|ERROR] message` firmware logs; avoid separator banners and duplicate prefixes. Persist firmware identity and download metadata in the OTA server SQLite catalog; UI refresh must not rehash unchanged payloads. Keep one active publication and retain historical publication/audit records.
