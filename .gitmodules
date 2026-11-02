@@ -20,5 +20,5 @@
 	branch = master
 [submodule "libbmc"]
 	path = libbmc
-	url = git@192.168.10.250:ssdc/bsp/bmctool.git
-	branch = main
+	url = git@github.com:wanguo99/libbmc.git
+	branch = master
