@@ -43,3 +43,11 @@ Every new feature or bug fix should include automated tests once a test framewor
 There is no existing commit history yet, so establish a simple convention now: `type: imperative summary` (for example, `docs: add contributor guide`).
 
 Pull requests should include a short description, the reason for the change, and notes about validation performed. If the change affects user-visible behavior, include example output or screenshots where relevant.
+
+## Firmware Release Workflow
+
+For firmware changes, complete the applicable tests and AM625 image validation, then publish the new OTA release automatically. The user has authorized this workflow; a separate publication confirmation is unnecessary.
+
+Commit the exact corresponding source changes only after the intended device reports `success` for that publication and running version following reboot and health confirmation. Download, installation, reboot, and boot-testing are not success. Preserve the release identity, device transaction, test results, and source snapshot for audit. If the release fails, rolls back, or is quarantined, retain the changes and investigate; do not commit it as a successful release or bypass quarantine.
+
+Commit affected submodules before updating their workspace gitlinks. Do not include generated firmware or unrelated concurrent edits. Hardware confirmation of a kernel/rootfs OTA does not validate an uninstalled bootloader. Publishing firmware does not imply pushing Git commits; push only when requested.
