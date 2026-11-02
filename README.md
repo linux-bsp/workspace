@@ -37,7 +37,7 @@ make -C buildroot O="$PWD/output/am625" host-device-server
 output/am625/host/bin/device-server --root "$PWD/output/device-feed" --bind 0.0.0.0 --port 8090
 ```
 
-使用 [Device Manager](device-manager/README.md) 管理固件上传、发布、设备升级结果及审计。OTA/SOL 位于侧栏；SOL 支持带凭据校验的只读网络日志查看和回放，配置见 [SOL 指南](device-manager/docs/sol.md)。端口 8090 避开本机 GitLab 的 8080。
+使用 [Device Manager](device-manager/README.md) 管理固件上传、发布、设备升级结果及审计。OTA/SOL 位于侧栏；SOL 支持只读网络日志查看和回放，当前调试环境免凭据自动连接，配置见 [SOL 指南](device-manager/docs/sol.md)。端口 8090 避开本机 GitLab 的 8080。
 
 设备串口执行 `logctl status`、`logctl boots`、`logctl show --boot previous` 查看日志。持久化要求已有可写的 `/data` 文件系统；没有时退回 RAM 并告警。系统不会自动格式化分区，也不依赖 SSH。SPL/U-Boot 日志接力需要安装对应新引导程序，kernel/rootfs OTA 不会自动完成这一步。
 
