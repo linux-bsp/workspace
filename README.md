@@ -33,7 +33,7 @@ SDK 使用独立输出目录，按 [BSP 外部层说明](bsp-base-external/READM
 ## 设备管理与日志
 
 ```sh
-make -C buildroot O="$PWD/output/am625" host-device-server
+make -C buildroot O="$PWD/output/am625" host-device-manager
 output/am625/host/bin/device-server --root "$PWD/output/device-feed" --bind 0.0.0.0 --port 8090
 ```
 
