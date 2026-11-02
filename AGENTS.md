@@ -52,7 +52,7 @@ For firmware changes, complete the applicable tests and AM625 image validation, 
 
 Commit the exact corresponding source changes only after the intended device reports `success` for that publication and running version following reboot and health confirmation. Download, installation, reboot, and boot-testing are not success. Preserve the release identity, device transaction, test results, and source snapshot for audit. If the release fails, rolls back, or is quarantined, retain the changes and investigate; do not commit it as a successful release or bypass quarantine.
 
-Commit affected submodules before updating their workspace gitlinks. Do not include generated firmware or unrelated concurrent edits. Hardware confirmation of a kernel/rootfs OTA does not validate an uninstalled bootloader. Publishing firmware does not imply pushing Git commits; push only when requested.
+Commit affected submodules before updating their workspace gitlinks. Push each affected repository to its configured remote after committing; push submodules before the workspace gitlink commit. Do not include generated firmware or unrelated concurrent edits. Hardware confirmation of a kernel/rootfs OTA does not validate an uninstalled bootloader.
 
 Keep the firmware tag fixed at `v0.0.1` (packed version 1). Change it only when the user explicitly requests a version change. Content changes produce a new full SHA256 identity; publication numbers remain distinct audit identifiers. Store each build in a unique output directory so repeated tags never overwrite earlier artifacts.
 
