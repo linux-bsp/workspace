@@ -41,6 +41,8 @@ output/am625/host/bin/device-server --root "$PWD/output/device-feed" --bind 0.0.
 
 设备串口执行 `logctl status`、`logctl boots`、`logctl show --boot previous` 查看日志。持久化要求已有可写的 `/data` 文件系统；没有时退回 RAM 并告警。系统不会自动格式化分区，也不依赖 SSH。SPL/U-Boot 日志接力需要安装对应新引导程序，kernel/rootfs OTA 不会自动完成这一步。
 
+AM625 的现状核查、重启原因记录、日志持久化上报和分阶段验收计划见 [固件恢复与启动日志软件架构及开发计划](docs/am62x/firmware-logging-architecture-plan.md)。
+
 ## 子模块与版本管理
 
 ```sh
