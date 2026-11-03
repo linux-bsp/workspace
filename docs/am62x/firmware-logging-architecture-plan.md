@@ -32,7 +32,7 @@
 | kernel 恢复 | U-Boot 已实现按已记录版本/ID请求对应 kernel FIT并检查包内容 | 不能当作 bootloader 自恢复；补齐离线和中断恢复证据 |
 | rootfs 恢复 | `fwctl init` 在 RAM 中校验完整 payload，建立 dm-verity；有备用 deployment 回退和精确 rootfs 网络恢复 | 保留现有机制；统一结果事件和失败分类 |
 | 固件续传 | fwctld 使用 HTTP Range、持久化暂存目录和完整 SHA256 校验 | 完善内容绑定、同步边界和真断电验收；不是重新从零开发续传 |
-| bootloader 日志接力 | 三段保留 DDR 缓冲区，Linux 验证长度、阶段、CRC；两次正常重启有实机记录 | 三阶段已调通；补冷启动、溢出、异常重启和缺失标记 |
+| bootloader 日志接力 | 已扩为两组 SPL/U-Boot/kernel 启动缓存，服务器归档确认后清理；#43 实机 panic 恢复通过 | 详见双缓冲验收；冷启动、更多复位类型仍待验证 |
 | 本地日志 | logctld 收集 kmsg、启动/服务输出、早期缓存，支持轮转、pstore 归档和日志导出 | 增加上传确认感知、尾记录修复、错误上报和附件管理 |
 | SOL 上传 | 独立上传子进程；服务器保存字节偏移，支持重试与去重；SQLite WAL/FULL | 增加持久归档语义；修复裁剪与确认游标的关系 |
 | 数据分区 | 新工厂镜像包含 256 MiB ext4；最新服务器记录已收到 persistent 和 synced 标记 | 已有持久化上报证据；不能继续描述为“data 尚未可写” |
@@ -168,9 +168,9 @@ SD/eMMC 采用板级 profile 固定实际介质和区域。不能只依赖可能
 
 | 来源 | 采集方法 | 限制 |
 | --- | --- | --- |
-| R5 SPL | SRAM 早期缓存迁移到预留 DDR | 现有早期缓存 2048 B，阶段 DDR 记录 16 KiB；满时需报告 dropped |
-| A53 SPL、U-Boot | 预留 DDR 记录，由 Linux 验证导入 | 当前每次新启动会清理/重建接力区；不是跨重启历史区 |
-| Linux | kmsg 原始序号/时间戳，pstore/ramoops 崩溃记录 | kmsg 可能环形溢出；ramoops 是否跨某种复位保存需实机验证 |
+| R5 SPL | SRAM 早期缓存迁移到预留 DDR | 现有早期缓存 2048 B，每组 R5 DDR 32 KiB；双组轮换，满时报告 dropped |
+| A53 SPL、U-Boot | 预留 DDR 记录，由 Linux 验证导入 | 两组 DDR 记录；warm reset 可保留上次启动，断电不保证 |
+| Linux | kmsg 原始序号/时间戳，pstore/ramoops 崩溃记录 | 另有每组 320 KiB printk 启动缓存，#43 panic 恢复通过；kmsg 可能环形溢出，其他复位仍需验证 |
 | initramfs | RAM 暂存，通过 `/run` 交接；必要事件写 pmsg/早期事件通道 | rootfs 未启动时无法依赖正式系统日志 daemon |
 | rcS/rcK、已接入服务 | 现有 logctl run 与文件采集 | 同一输出从 console 和文件采集时需定义去重策略 |
 | ROM、TIFS、ATF、任意交互 shell | 当前没有完整采集链路 | 标记未覆盖；若后续要求物理 UART 全量，需可修改的阶段接入或独立硬件采集 |
@@ -284,6 +284,8 @@ SOL 默认保留现有串口外观。原始日志下载与当前视图导出分�
 仅 host 修改先做服务端回归与旧设备协议验证；若按阶段发布配套固件，仍记录真实源码和内容变化，不伪造 hash。纯分析文档不生成新 OTA。涉及 SPL/U-Boot 的 M3/M6 独立验证部署过的启动器，不把普通 OTA success 视为 bootloader 验收。
 
 按新增需求，优先交付 OTA 失败诊断这一 M2/M4 子集：关联可确认启动的已接收日志、独立保留失败片段、在 OTA 原因详情中查看和下载；Linux/data 异常仅上报已观察原因，不附具体日志。原计划中的崩溃附件上传不属于当前交付项。发布 #42 的范围与证据见 [失败日志验收](ota-failure-evidence-validation.md)；CRC 分段、离线保护、自动缓存配额和全量故障验收仍待完成。
+
+按后续新增双缓冲需求，优先完成 DDR 启动缓存扩容、当前/上次启动保留、独立服务端归档与确认后清空这一 M2/M4/M6 子集。发布 #43 已在实机验证 pre-rootfs panic 恢复及从第一组重新开始，见 [双缓冲启动日志验收](bootlog-double-buffer-validation.md)。不等同于完成分区级掉电日志 journal、全部复位类型、长期离线配额或 M6 全量验收。
 
 ## 10 验证矩阵与完成标准
 
