@@ -131,11 +131,35 @@ SHA256 校验；不把该过程计为旧 A 槽自动恢复兼容性验收。新�
 证据：`output/ota-validation/0.0.1-upgrade-07-layout-validation/`。配置一致不能替代
 已部署布局的兼容约束；同 HWID 布局仍须保持固定，不能据此直接在线调整分区。
 
+## 第八阶段：工厂命令边界与引导程序实机验证
+
+- 发布 63、v0.0.1，内容 ID：
+  `4121c06e23ebafd3dea627d72b09fe7fbcc15b42bcec92e5832e179edd3e8955`。
+- Linux/U-Boot 共用 `fwctl help`、`capabilities`、`factory-init a|b --force`。
+  help/capabilities 不打开固件介质；缺少 force 的工厂操作提前拒绝。
+  移除旧 init a/b 写法，Linux 无参数 init 仍专用于 initramfs PID 1。
+  U-Boot 人工状态和校验结果中的组件版本改为 vMAJOR.MINOR.PATCH。
+- 8 组 native 引擎/CLI、36 项自动升级、8 项健康、11 项 U-Boot 元数据、
+  sandbox 工厂强制/拒绝和逐字节不变校验、FIT、ARM64 loader、身份互操作通过。
+- 普通 OTA 实机 success 后，Linux 实测拒绝缺少 force 和旧初始化命令，元数据序列
+  不变。另行受控切到已有 A 引导维护，使用同一已验证 FIT 运行 Linux，确认后将
+  新 A53 SPL/U-Boot 与 R5 负载安装至 B。新 A53/U-Boot B 实际执行能力查询、
+  状态版本显示和无 force/旧命令拒绝，序列不变，再启动 Linux 通过健康确认。
+- B 槽三项负载由 O_DIRECT 读取计算的完整 SHA256 与工件一致；A 槽三项完整
+  引导分区在维护前、维护中和维护后均与备份一致。ROM 仍执行原 R5 A，不能把
+  新 R5 B 的构建与读回当作 ROM 实机执行验收。
+- 最终 deployment 0：bootloader B、kernel/rootfs A，confirmed=1。旧 A53/U-Boot A
+  对 HWID-only 包仍需受控维护启动，本阶段不宣称修复了旧 A 的自动兼容性。
+
+证据：`output/ota-validation/0.0.1-upgrade-08-command-contract/`。强制工厂初始化
+只在可丢弃 sandbox 介质上执行，实机仅验证拒绝路径。当前操作入口与槽位含义见
+[操作指南](firmware-upgrade-guide.md)。
+
 ## 后续顺序
 
-1. 工厂初始化边界、状态输出及恢复接口说明。
-2. bootloader 独立内容身份与签名投产流程。
-3. 服务端并发与真实断电、其他存储介质的专项验收。
+1. 在不重写 ROM 固定首级的前提下维护旧 A53/U-Boot A 的兼容性。
+2. bootloader 独立内容身份、部署布局兼容契约与签名投产流程。
+3. 服务端有界并发与真实断电、其他存储介质的专项验收。
 
 原 data 低空间问题已由第五阶段的受控缓存保留修复；仍需保留空间监控，
 不能把有限存储视作无限归档。未格式化、扩分区或删除设备日志。

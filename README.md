@@ -41,6 +41,8 @@ output/am625/host/bin/device-server --root "$PWD/output/device-feed" --bind 0.0.
 
 OTA 自动按固件包声明的全部 HWID 发布，页面产品信息从 HWID 解析。身份字段与配置见 [HWID 说明](device-manager/docs/hwid.md)，操作与验证见 [固件 HWID 自动发布](docs/am62x/firmware-hwid-publication.md)。
 
+跨 U-Boot/Linux 的命令、槽位含义、手动维护及恢复边界见 [固件升级操作指南](docs/am62x/firmware-upgrade-guide.md)；逐阶段实机结果见 [优化验收记录](docs/am62x/firmware-upgrade-optimization-validation.md)。
+
 设备串口执行 `logctl status`、`logctl boots`、`logctl show --boot previous` 查看日志。持久化要求已有可写的 `/data` 文件系统；没有时退回 RAM 并告警。系统不会自动格式化分区，也不依赖 SSH。SPL/U-Boot 日志接力需要安装对应新引导程序，kernel/rootfs OTA 不会自动完成这一步。
 
 AM625 的现状核查、重启原因记录、日志持久化上报和分阶段验收计划见 [固件恢复与启动日志软件架构及开发计划](docs/am62x/firmware-logging-architecture-plan.md)。

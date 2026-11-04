@@ -1,8 +1,12 @@
-# Firmware Manager 设计方案与功能概述
+# Firmware Manager 早期设计方案与功能概述
+
+本文保留早期实现的设计脉络，部分命令、路径和字段已演进。当前操作以
+[升级与恢复指南](../am62x/firmware-upgrade-guide.md) 和
+[逐阶段实机验收](../am62x/firmware-upgrade-optimization-validation.md) 为准。
 
 ## 1. 文档范围
 
-本文档描述当前 Firmware Manager 的实际实现，包括：
+本文档描述早期 Firmware Manager 的实现，包括：
 
 - U-Boot <code>fw</code> 固件管理命令。
 - SPL 阶段的 A/B deployment 选择。
