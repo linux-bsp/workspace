@@ -95,11 +95,31 @@ SHA256 校验；不把该过程计为旧 A 槽自动恢复兼容性验收。新�
 
 证据：`output/ota-validation/0.0.1-upgrade-05-cache-retention/`。
 
+## 第六阶段：手动升级参数、组件事务与分区拒写
+
+- 发布 61、v0.0.1，内容 ID：
+  `ca3573b64fd974b7d71fde0efdffaefc43ea142809a1d424c3ee6386bda7b53b`。
+- `fwctl update kernel /path/release.itb` 等两参数形式可用，参数错误在打开介质前
+  拒绝。缺失组件和禁止的 bootloader 请求不再先改 metadata。
+- 单组件事务保留 READY 中已暂存组件，重复更新也始终写已确认源的相反物理槽。
+  写入前持久化不可启动状态，读回后才提交；WRITING 不允许 mark-good。
+- 实际块设备/MTD 的更新入口要求当前启动源等于已确认 active；块负载写入持有
+  目标分区的独占 claim，阻止挂载或 dm holder 使用中的分区被覆盖。
+- 实机在新系统尚未确认时更新被 EBUSY 拒绝。确认后暂停 poller，连续 kernel、
+  kernel、rootfs 暂存到 B；运行 A 的直接 SHA256 校验始终 match。挂载 B rootfs
+  后更新被 EBUSY 拒绝，WRITING 候选确认被拒绝。最后完整包重建身份并启动 B，
+  health-check=0、两项负载直接校验 match，fwctld 随启动恢复。
+- 7 组 C 引擎/CLI 测试、36 项自动升级、8 项健康观察、FIT、ARM64 loader 和
+  Linux/U-Boot 元数据互操作通过。MTD 入口保护只做源码/构建验证，没有 NOR 实物验收。
+
+证据：`output/ota-validation/0.0.1-upgrade-06-manual-transactions/`。CLI 与 poller
+共用非阻塞存储锁；手动维护宜先停止 poller，锁冲突返回 EAGAIN 时不发生写入。
+
 ## 后续顺序
 
-1. 完善 Linux 命令参数、手动组件事务和运行分区写入保护。
+1. 保留独立配置，增加构建时分区一致性检查。
 2. 工厂初始化边界、状态输出及恢复接口说明。
-3. 分区配置一致性检查、组件身份、服务端并发与剩余故障验收逐项推进。
+3. 组件身份、服务端并发与剩余故障验收逐项推进。
 
 原 data 低空间问题已由第五阶段的受控缓存保留修复；仍需保留空间监控，
 不能把有限存储视作无限归档。未格式化、扩分区或删除设备日志。
