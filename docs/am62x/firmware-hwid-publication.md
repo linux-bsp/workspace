@@ -10,7 +10,19 @@
 fw,hwids = "1010001000110000";
 ```
 
-支持多种硬件时，构建者可以声明多个完整 HWID。release、kernel、rootfs 必须共同支持 release 声明的全部值，否则拒绝上传。AM625 模板位于 `bsp-base-external/board/ti/am625/layout/`。
+支持多种硬件时，构建者可以声明多个完整 HWID。release、kernel、rootfs 必须共同支持 release 声明的全部值，否则拒绝上传。
+
+AM625 统一修改 [firmware.json](../../bsp-base-external/board/ti/am625/firmware.json)：
+
+```json
+{
+    "hwids": ["1010001000110000"]
+}
+```
+
+四份 FIT 模板只保留 `@FW_HWIDS@` 占位符。镜像构建时读取一次公共配置，统一填入 release、bootloader、kernel、rootfs；配置或模板不完整时直接失败。修改列表后运行原输出目录的 `make all` 重新打包。`images/firmware.json` 留存本次构建实际使用的配置。
+
+公共配置阶段已发布 `v0.0.1 / 64373f72` 并通过 AM625 实机健康确认，见 [验证记录](../../bsp-base-external/board/ti/am625/releases/v0.0.1-64373f72.md)。
 
 设备自身的 HWID 仍来自 U-Boot 环境；服务器不能通过发布改变设备身份。设备下载后、写入前及启动时继续进行精确匹配。
 
