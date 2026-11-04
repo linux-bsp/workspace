@@ -6,7 +6,7 @@
 
 采集与上传链路通过：最后一次失败启动和恢复启动的 SPL、U-Boot、kernel 已进入服务器独立归档，八段 CRC 正确、dropped=0，网页可查看和导出。
 
-OTA 详情附件链路存在缺口：异常事务记录了 `linux-panic-observed` 和 `rolled-back`，但按现有 Linux 异常“只上报原因”策略，事故接口是 `mode=reason-only, bytes=0`。启动缓存归档未与 OTA 事故附件建立关联。当前可在 SOL 查到真实失败日志，不能宣称 OTA 详情已有日志附件。
+原始验收时 OTA 详情附件链路存在缺口（同日已修复，见 [附件关联验收](ota-incident-attachments-validation.md)）：异常事务记录了 `linux-panic-observed` 和 `rolled-back`，但按现有 Linux 异常“只上报原因”策略，事故接口是 `mode=reason-only, bytes=0`。启动缓存归档未与 OTA 事故附件建立关联。该时点可在 SOL 查到真实失败日志，OTA 详情尚无日志附件；下文保留当时观察结果。
 
 ## 故障与恢复过程
 
@@ -70,4 +70,4 @@ OTA 详情附件链路存在缺口：异常事务记录了 `linux-panic-observed
 
 本次没有模拟掉电、DDR 丢失、Linux console 注册前异常或 data 损坏；未接入的 ROM/TIFS/ATF 直接输出也不能由此机制保证保存。capture ID 与实际 Linux boot ID 不等同。
 
-下一步应把有可靠身份、清单及回退关系的早期启动归档关联到 OTA 事故，并在异常详情提供查看/下载入口。现有 pstore 原因只是 observed，不应把恢复启动 UUID 当作发生 panic 的启动 UUID；关联失败时仍应保留可查询的 SOL 归档。
+后续已把有可验证恢复上下文的早期启动归档复制关联到 OTA 事故，并增加查看、下载与 SOL 跳转；详见上述附件关联验收。现有 pstore 原因只是 observed，不应把恢复启动 UUID 当作发生 panic 的启动 UUID；关联失败时仍应保留可查询的 SOL 归档。
