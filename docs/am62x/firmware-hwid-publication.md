@@ -12,7 +12,7 @@ fw,hwids = "1010001000110000";
 
 支持多种硬件时，构建者可以声明多个完整 HWID。release、kernel、rootfs 必须共同支持 release 声明的全部值，否则拒绝上传。
 
-AM625 统一修改 [firmware.json](../../bsp-base-external/board/ti/am625/firmware.json)：
+AM625 统一修改 [firmware.json](../../bsp-base-external/board/ti/am625/firmware.json) 的 `hwids` 字段，例如以下片段：
 
 ```json
 {
@@ -20,9 +20,14 @@ AM625 统一修改 [firmware.json](../../bsp-base-external/board/ti/am625/firmwa
 }
 ```
 
-四份 FIT 模板只保留 `@FW_HWIDS@` 占位符。镜像构建时读取一次公共配置，统一填入 release、bootloader、kernel、rootfs；配置或模板不完整时直接失败。修改列表后运行原输出目录的 `make all` 重新打包。`images/firmware.json` 留存本次构建实际使用的配置。
+该文件同时描述软件版本、架构、组件输入、加载地址、initramfs、verity 和默认升级组件。
+构建器直接生成四份 ITS 并调用 mkimage 生成 ITB，板级不再维护 ITS 模板或组件 genimage 配置。
+修改配置后执行原输出目录的 `make all` 重新打包；`images/firmware.json` 留存实际使用的配置。
+字段和升级已有输出目录的方法见 [统一固件生成器](../../bsp-base-external/support/firmware/README.md)。
 
 公共配置阶段已发布 `v0.0.1 / 64373f72` 并通过 AM625 实机健康确认，见 [验证记录](../../bsp-base-external/board/ti/am625/releases/v0.0.1-64373f72.md)。
+
+完整 JSON 生成阶段已发布 `v0.0.1 / 07071f2d` 并通过 AM625 实机健康确认，见 [生成器及升级验证](../../bsp-base-external/board/ti/am625/releases/v0.0.1-07071f2d.md)。
 
 设备自身的 HWID 仍来自 U-Boot 环境；服务器不能通过发布改变设备身份。设备下载后、写入前及启动时继续进行精确匹配。
 
