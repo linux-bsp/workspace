@@ -39,6 +39,8 @@ output/am625/host/bin/device-server --root "$PWD/output/device-feed" --bind 0.0.
 
 使用 [Device Manager](device-manager/README.md) 管理固件上传、发布、设备升级结果及审计。OTA/SOL 位于侧栏；SOL 支持只读网络日志查看和回放，当前调试环境免凭据自动连接，配置见 [SOL 指南](device-manager/docs/sol.md)。端口 8090 避开本机 GitLab 的 8080。
 
+OTA 按完整 HWID 发布，页面产品信息从 HWID 解析。身份字段与配置见 [HWID 说明](device-manager/docs/hwid.md)，本次升级结果见 [AM625 HWID 发布验证](docs/am62x/hwid-only-ota-validation.md)。
+
 设备串口执行 `logctl status`、`logctl boots`、`logctl show --boot previous` 查看日志。持久化要求已有可写的 `/data` 文件系统；没有时退回 RAM 并告警。系统不会自动格式化分区，也不依赖 SSH。SPL/U-Boot 日志接力需要安装对应新引导程序，kernel/rootfs OTA 不会自动完成这一步。
 
 AM625 的现状核查、重启原因记录、日志持久化上报和分阶段验收计划见 [固件恢复与启动日志软件架构及开发计划](docs/am62x/firmware-logging-architecture-plan.md)。
