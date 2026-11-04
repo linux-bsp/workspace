@@ -115,11 +115,27 @@ SHA256 校验；不把该过程计为旧 A 槽自动恢复兼容性验收。新�
 证据：`output/ota-validation/0.0.1-upgrade-06-manual-transactions/`。CLI 与 poller
 共用非阻塞存储锁；手动维护宜先停止 poller，锁冲突返回 EAGAIN 时不发生写入。
 
+## 第七阶段：独立布局的一致性门禁
+
+- 发布 62、v0.0.1，内容 ID：
+  `5fa96eb8b40a406835cbfb5698f239ecbfdb3c72fab1f540832aa3ba08799f16`。
+- 保留 JSON 打包配置与设备启动配置，不生成或迁移分区。打包前比较板级/已安装
+  Linux 区域、A53/R5 DTB 的 12 个区域、U-Boot 构建 .config 的环境偏移、
+  blkdevparts、工厂 genimage、Linux 环境访问配置、HWID 与 JSON 容量上限。
+- 缺少构建依赖或任何差异时拒绝生成；成功输出 layout-validation.json，保存区域表
+  与九份输入的完整 SHA256，随唯一发布目录归档。
+- 11 项真实 DTB/配置差异注入、10 项生成器、4 项 FIT 和 ARM64 loader 通过。
+  实机 success 后核对 deployment 1、kernel/rootfs A、confirmed=1、data=persistent，
+  备用 rootfs 校验正常。此阶段没有更新 bootloader，也未宣称 R5 新代码实机执行。
+
+证据：`output/ota-validation/0.0.1-upgrade-07-layout-validation/`。配置一致不能替代
+已部署布局的兼容约束；同 HWID 布局仍须保持固定，不能据此直接在线调整分区。
+
 ## 后续顺序
 
-1. 保留独立配置，增加构建时分区一致性检查。
-2. 工厂初始化边界、状态输出及恢复接口说明。
-3. 组件身份、服务端并发与剩余故障验收逐项推进。
+1. 工厂初始化边界、状态输出及恢复接口说明。
+2. bootloader 独立内容身份与签名投产流程。
+3. 服务端并发与真实断电、其他存储介质的专项验收。
 
 原 data 低空间问题已由第五阶段的受控缓存保留修复；仍需保留空间监控，
 不能把有限存储视作无限归档。未格式化、扩分区或删除设备日志。
