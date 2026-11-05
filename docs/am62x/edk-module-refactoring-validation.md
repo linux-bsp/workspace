@@ -18,3 +18,20 @@
 
 原始证据、发布包、源码快照和提交检查：
 `output/ota-validation/0.0.1-edk-refactor-s1/`。
+
+## 阶段 2：共享传输与 HWID
+
+- 模块迁入 `edk/user/transfer/`、`edk/user/hwid/`，使用 Kconfig/CMake 选择。
+- HWID 值解析不依赖 libubootenv；设备环境访问单独启用。
+- 本机和 ARM64 静态库构建通过，ELF 架构分别为 x86-64、AArch64。
+- CTest 运行 CMake 生成的传输驱动，17 项实际 HTTP/续传/落盘故障测试通过。
+- 管理模块 40 组、362 项 unittest 与 SDK 构建回归通过。
+- BSP 身份互读、FIT、存储身份和恢复回归通过；补齐三个板级验证脚本的旧路径。
+  这些仅验证脚本的补充单独归档，运行代码与构建源码快照一致。
+- 发布 ID：`1c04ca1851bdcb448f080b0f94a79a6e79d8c83da1080c870c5990aff2696832`。
+- 发布审计编号 90，设备 192.168.10.211 上报 success。
+- 启动 ID：`4b37a7fd-f26f-4852-967e-fa0ddc9cda02`。
+- systemd、六个管理/健康服务、两个 rootfs 槽及当前镜像内容检查通过。
+- 日志持久化、SOL 与 UTC+8 时间同步正常。本阶段未更新 SPL/U-Boot。
+
+证据：`output/ota-validation/0.0.1-edk-refactor-s2/`。
