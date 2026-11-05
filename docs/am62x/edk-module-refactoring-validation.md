@@ -35,3 +35,20 @@
 - 日志持久化、SOL 与 UTC+8 时间同步正常。本阶段未更新 SPL/U-Boot。
 
 证据：`output/ota-validation/0.0.1-edk-refactor-s2/`。
+
+## 阶段 3：固件模块与统一构建
+
+- fwctl 的 CLI、事务、存储、恢复和健康检查整体迁到 `edk/user/fwctl/`；
+  fwctld 源码位于该模块的 `agent/`，保留独立服务生命周期。
+- Kconfig 自动选择传输/HWID 依赖；Buildroot 生成组件配置后通过 EDK CMake
+  构建设备固件工具。本机与 ARM64 构建通过，补全静态环境库的 zlib 依赖。
+- 44 个生产 C/头文件逐字节保持一致。SDK 回归、管理模块完整回归、传输
+  CTest、实际包 CLI、BSP FIT/身份/恢复回归通过。
+- 实际 initramfs ARM64 动态加载器执行、fwctl/BusyBox 依赖与缺库反例通过。
+- 发布 ID：`74397335485e81ffd3e2eaf96bac945a1bed9d0bab07ce56def94894362a6328`。
+- 发布审计编号 91，设备 192.168.10.211 上报 success。
+- 启动 ID：`37da09de-810f-4576-b5ed-30a67c7afcd0`。
+- systemd、管理/健康服务、rootfs 双槽及当前镜像 SHA256 校验通过。
+- 日志持久化、SOL、UTC+8 同步正常；本阶段未更新 SPL/U-Boot。
+
+证据：`output/ota-validation/0.0.1-edk-refactor-s3/`。
