@@ -69,3 +69,20 @@
 - 本阶段未更新 SPL/U-Boot。
 
 证据：`output/ota-validation/0.0.1-edk-refactor-s4/`。
+
+## 阶段 5：主机服务与协议边界
+
+- 主机工具迁到 `host/device-manager/`，HTTP、OTA、SOL、时间、设备与审计
+  分别组织为私有对象目标，仍生成一个 device-server。
+- Web 资源在构建目录生成，HWID 映射归属 `configs/`，服务模板迁到 `integration/`。
+- 报告编解码、值校验进入纯协议目标；文件清单/进程适配进入 fwctl 私有层。
+  fwctld 不再引用服务器头文件，server 二进制无 libcurl/libubootenv 依赖。
+- 本机与 ARM64 构建、SDK 回归、40 组 362 项管理测试通过；服务端回归直接
+  运行 CMake 产物。实际固件包 CLI 和 initramfs ARM64 加载验证通过。
+- 发布 ID：`cc53966b96817f753128235a5b40257ebff3c1224f1337497b211726d35b56a1`。
+- 发布审计编号 93，设备 192.168.10.211 上报 success。
+- 启动 ID：`9004ec40-799b-47ac-82ae-23a707987dad`。
+- 实机服务、健康确认、双 rootfs 与当前镜像校验、持久日志、SOL、UTC+8 通过。
+- 本阶段未更新 SPL/U-Boot。
+
+证据：`output/ota-validation/0.0.1-edk-refactor-s5/`。
