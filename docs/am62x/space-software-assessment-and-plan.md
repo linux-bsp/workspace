@@ -190,3 +190,12 @@ EDK 9 组、固件 8 组、启动确认 8 例、启动关键性 3 组、FIT 4 �
 证据：`output/ota-validation/0.0.1-reliability-s3a/`。
 S3 尚未全部完成：S3b 将增加整次闭合日志归档确认和按确认状态的保留优先级。
 实机新发现 BusyBox tar 不支持 -z，压缩导出也在 S3b 修复；不能仅凭主机 GNU tar 测试认定板上导出可用。
+
+### S3b1（2026-11-05）
+
+`v0.0.1 / 8be2b2b6`，发布记录 70，AM625 部署 1 confirmed、OTA success。
+修复实际 BusyBox 压缩导出配置，增加临时文件/同步/原子替换以及压缩进程截止时间。
+15 组日志测试、4 组 FIT 和实际 ARM64 loader 检查通过。板上导出上一轮真实启动目录，
+服务器校验 gzip 尾部、包内文件及 SHA256，板上 tar 可列出归档，health-check=0。
+证据：`output/ota-validation/0.0.1-reliability-s3b1/`。
+下一步继续 S3b2 的整次闭合日志包上传、服务器完整性确认和本地保留优先级。
