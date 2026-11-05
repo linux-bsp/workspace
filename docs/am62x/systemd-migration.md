@@ -79,4 +79,39 @@ logctl status
 管理端同时验证了固件删除、SOL 首次连接时间标题与启动状态，以及各页面优先用设备 IP
 显示的行为。历史事务仍保留当时的 IP，稳定内部设备标识继续用于关联，不因地址变化拆分历史。
 
+### 后续 OTA 暴露的锁竞争修复
+
+基线 `a33d0aa6` 能正常启动，但进行下一次 OTA 时，更新进程占用固件元数据锁，
+旧健康监督将 `Resource temporarily unavailable` 误判为本地故障并重启。
+因此仅验证一次迁移启动还不够，必须验证迁移后的系统能继续安装下一固件。
+
+`50147beb` 修复健康结果约定：0 为全部通过，75 为本地服务未就绪，76 为固件事务占锁，
+其他错误为失败。76 不产生 READY，也不增加启动确认成功次数；运行监督最多容忍连续
+180 秒忙状态，使用 `/proc/uptime` 单调时间。其他服务异常不能被占锁状态掩盖。
+`fw-confirm` 同样允许暂时忙，仍要求六次连续成功，并保留总观察期限。
+
+正式镜像实机持锁 22 秒期间监督保持 active，释放后健康恢复；部署已确认，失败 unit 为零。
+首轮 OTA 的取消记录、临时修复过程及正式镜像验证均归档，未手动确认候选、关闭健康检查
+或停止硬件看门狗。详见 [S5f 验收记录](space-software-assessment-and-plan.md)。
+
+再次从该正式镜像自动 OTA 至 `v0.0.1 / c06cfb5d`（完整 ID
+`c06cfb5dcd09d8e7d54fd5902ac662db40a8535eebc6175b073e5c4727ab0b4a`，发布 85），
+设备安装、重启、健康确认及服务端 success 均通过；没有使用临时健康脚本。
+最终部署 1、kernel/rootfs B 槽，备用 rootfs 校验通过，失败 unit=0。
+串口和设备最终状态见 `output/ota-validation/0.0.1-reliability-s5f-04/`。
+
+### 串口输出与尚存提示
+
+PID 1、服务默认环境和调试控制台均使用 `TERM=dumb`，禁用颜色和 URL 转义；控制台固定
+行列，避免串口和 SOL 捕获 OSC 会话标记、ANSI 颜色及光标位置查询。保持原有服务状态和
+错误信息，不以降低全局日志级别隐藏问题。
+
+- `watchdog already running` / `nowayout prevents watchdog being stopped`：U-Boot、
+  initramfs 到 PID 1 接力时硬件仍在计时。实机确认 systemd 接管并持续服务，未关闭 nowayout。
+- `Modifying watchdog hardware timeout is not supported`：RTI 驱动不支持重新设置已启动的
+  watchdog，systemd 复用实际 60 秒期限；不能把配置请求值当成硬件已改变的依据。
+- `pdm: loading out-of-tree module taints kernel`：PDM 为外置模块，属于内核调试状态标记。
+- RTC 在本次暖重启早期显示 1970 年，随后 Device Manager 完成校时并写 RTC；设备显示
+  UTC+8，RTC 保持 UTC。跨复位/断电保持能力仍待硬件及驱动验证，早期日志时间不视为可信。
+
 配置语义参考 systemd 官方的 [服务就绪通知与服务 watchdog](https://www.freedesktop.org/software/systemd/man/255/systemd.service.html) 和 [管理器硬件 watchdog](https://www.freedesktop.org/software/systemd/man/258/user.conf.d.html)。服务 watchdog 监督应用通知；RuntimeWatchdog 由 PID 1 喂硬件，两者失效边界不同。
