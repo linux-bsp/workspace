@@ -52,3 +52,20 @@
 - 日志持久化、SOL、UTC+8 同步正常；本阶段未更新 SPL/U-Boot。
 
 证据：`output/ota-validation/0.0.1-edk-refactor-s3/`。
+
+## 阶段 4：日志与时间模块
+
+- logctl/logctld、timectl/timectld 分别迁到 `user/logctl/`、`user/timectl/`，
+  使用 EDK Kconfig/CMake，daemon 命令通过别名运行相同程序。
+- 时间源契约迁到 `protocol/management/`，解除时间工具对 OTA 目录的依赖。
+- 管理完整回归、SDK 构建回归、实际 initramfs 动态加载验证通过。
+- CMake 原生产物的日志、启动记录、时间同步/源配置/服务共 46 项测试通过。
+- 独立日志 ARM64 配置无 fwctl/HWID 环境库依赖；别名删除重建不重新链接，
+  按组件安装保留别名链接；host 管理服务重新构建并重载。
+- 发布 ID：`870e576bbfd5c94789df9d8d0d4085965816817d36a69c3d465266f1341f6a49`。
+- 发布审计编号 92，设备 192.168.10.211 上报 success。
+- 启动 ID：`c691cb2b-dcee-40d0-8a92-8073f5c9b8bb`。
+- 实机服务、健康、双 rootfs 和当前镜像校验、持久日志、SOL、UTC+8 均通过。
+- 本阶段未更新 SPL/U-Boot。
+
+证据：`output/ota-validation/0.0.1-edk-refactor-s4/`。
