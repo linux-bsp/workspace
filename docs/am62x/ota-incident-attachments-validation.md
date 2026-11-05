@@ -29,4 +29,4 @@ SOL 链接携带设备、capture、publication 和 source boot，直接选择对
 
 自动关联只在恢复上下文唯一、相邻缓存对存在且归档可验证时进行；不按短哈希、接近的时间戳或同一版本号推断。四阶段的 complete 状态不等于整个物理 UART 无遗漏。没有充分关系的数据继续保留在 SOL，并明确显示未关联。
 
-服务升级前 SQLite 备份、回填结果、字节核验及源码快照在 `output/incident-link-validation/`。生成物不提交 Git。实现与 API 说明见 [SOL 文档](../../device-manager/docs/sol.md)。
+服务升级前 SQLite 备份、回填结果、字节核验及源码快照在 `output/incident-link-validation/`。生成物不提交 Git。实现与 API 说明见 [SOL 文档](../../edk/device-manager/docs/sol.md)。

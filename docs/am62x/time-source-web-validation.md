@@ -39,4 +39,4 @@
 - 既有 time endpoint 3 项、logging 9 项、SOL 10 项、启动双缓冲 8 项、控制台与归档命名 15 项通过；真实三 ITB 发布/下载字节对比通过。
 - 浏览器验证桌面/移动布局、两种源设置、期望/生效源区分、失败提示、刷新路由、未保存编辑、陈旧上报；在生产页面实操并记录设备确认。
 
-构建目录 `output/am625-time-ui/`。源快照、构建源对比、完整身份和镜像 SHA256、上传/发布回执、设备状态、重启前后记录及测试日志保存在 `output/ota-validation/0.0.1-time-ui/`；截图与浏览器检查在 `output/time-ui-browser/`。生成物不提交 Git。使用细节见 [设备校时文档](../../device-manager/docs/time-sync.md)。
+构建目录 `output/am625-time-ui/`。源快照、构建源对比、完整身份和镜像 SHA256、上传/发布回执、设备状态、重启前后记录及测试日志保存在 `output/ota-validation/0.0.1-time-ui/`；截图与浏览器检查在 `output/time-ui-browser/`。生成物不提交 Git。使用细节见 [设备校时文档](../../edk/device-manager/docs/time-sync.md)。

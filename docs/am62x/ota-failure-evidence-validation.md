@@ -21,6 +21,6 @@
 
 ## 证据与边界
 
-工件、串口、数据库查询快照、测试及构建日志、浏览器截图、源码与编译包快照位于 `output/ota-validation/0.0.1-failure-evidence-v2/`，生成物不提交 Git。接口与原因定义见 [组件说明](../../device-manager/docs/incident-evidence.md)。
+工件、串口、数据库查询快照、测试及构建日志、浏览器截图、源码与编译包快照位于 `output/ota-validation/0.0.1-failure-evidence-v2/`，生成物不提交 Git。接口与原因定义见 [组件说明](../../edk/device-manager/docs/incident-evidence.md)。
 
 本轮实机只验证正常 OTA、自然低空间观察及持久采集恢复；Linux panic、回滚与数据异常失败分支由主机和隔离服务验证，没有宣称实机全部故障通过。Linux 无法运行时由恢复后代理补报；已收到片段始终标记 complete=false。离线日志保护、自动缓存配额和完整分段归档尚待实现。M1.2/M2/M4 的其余工作并未全部完成。

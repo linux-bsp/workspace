@@ -2,7 +2,7 @@
 
 ## 方案与当前身份
 
-HWID 直接保存为 U-Boot 的 `hwid` 环境变量，复用现有环境的 CRC、冗余副本和存储驱动。编码规则见 [HWID 编码规范](hwid-specification.md)，工具说明见 [Device Manager HWID 文档](../../device-manager/docs/hwid.md)。
+HWID 直接保存为 U-Boot 的 `hwid` 环境变量，复用现有环境的 CRC、冗余副本和存储驱动。编码规则见 [HWID 编码规范](hwid-specification.md)，工具说明见 [Device Manager HWID 文档](../../edk/device-manager/docs/hwid.md)。
 
 当前板卡：`1-01-0001-0001-10-000`，规范文本 `1010001000110000`，PCB V1.0。
 
@@ -42,7 +42,7 @@ Linux 修改仅更新该变量，并读回检查；同值设置不重复写盘�
 - SPL 在存储控制器可用后，通过原生环境后端加载身份。
 - 完整 U-Boot 打印身份，并写入传给 Linux 的 `/chosen/dm,hwid`。
 - initramfs 与 fwctl 使用 libubootenv 读取相同环境；两份 CRC 都无效时不自动重建环境。
-- AM625 的 release、bootloader、kernel 和 rootfs FIT 声明完整 `fw,hwids` 列表。U-Boot 与 Linux 更新、恢复校验要求精确匹配，该阶段保留了原有兼容性字段；后续已在 HWID 独立发布阶段移除，当前接口以 [Device Manager HWID 文档](../../device-manager/docs/hwid.md) 为准。
+- AM625 的 release、bootloader、kernel 和 rootfs FIT 声明完整 `fw,hwids` 列表。U-Boot 与 Linux 更新、恢复校验要求精确匹配，该阶段保留了原有兼容性字段；后续已在 HWID 独立发布阶段移除，当前接口以 [Device Manager HWID 文档](../../edk/device-manager/docs/hwid.md) 为准。
 
 固件内容 ID、软件 tag、设备 HWID 和实物序列号分别管理；HWID 不随软件升级改变。
 

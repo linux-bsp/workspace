@@ -156,7 +156,7 @@ S4/S6 的硬件前置条件不是“软件已完成”，也不能用模拟器�
 - [ECSS-E-ST-40C Rev.1](https://ecss.nl/standard/ecss-e-st-40c-rev-1-software-30-april-2025/)：按项目裁剪需求、设计、验证、运行和维护过程。
 - [现有固件/日志计划](firmware-logging-architecture-plan.md)：与本文合并追踪，已有实现不重复列为缺失。
 - [启动链实机边界](firmware-upgrade-optimization-validation.md)。
-- [统一传输已验证版本](../../device-manager/docs/releases/v0.0.1-fd821f46.md)。
+- [统一传输已验证版本](../../edk/device-manager/docs/releases/v0.0.1-fd821f46.md)。
 
 ## 7. 阶段验收记录
 

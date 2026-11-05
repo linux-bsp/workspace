@@ -14,4 +14,4 @@
 - 生产环境只读验证真实 OTA panic/恢复归档的查看与导出，仍可取得之前保存的全部原始字节。未用生产历史做删除测试。
 - 管理服务已重载；设备 OTA 结果仍为 success，原故障包仍被隔离。
 
-工件：`output/sol-delete-browser/` 的浏览器脚本、结果和桌面/移动截图，以及 `output/sol-delete-*-regression.log`、`output/sol-delete-tests.log`。操作说明见 [SOL 文档](../../device-manager/docs/sol.md)。本次实际故障日志见 [OTA 启动失败验收](ota-boot-failure-log-validation.md)。
+工件：`output/sol-delete-browser/` 的浏览器脚本、结果和桌面/移动截图，以及 `output/sol-delete-*-regression.log`、`output/sol-delete-tests.log`。操作说明见 [SOL 文档](../../edk/device-manager/docs/sol.md)。本次实际故障日志见 [OTA 启动失败验收](ota-boot-failure-log-validation.md)。

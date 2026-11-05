@@ -10,7 +10,7 @@
 
 OTA API、设备上报、运行配置和新生成的 FIT 已移除独立的 `product`、`layout` 身份字段。页面产品列、固件详情和设备详情只从 HWID 解析产品信息；不维护第二套产品身份。物理分区偏移和容量仍由 BSP 指定。
 
-规范见 [HWID 使用说明](../../device-manager/docs/hwid.md)。普通 OTA 不修改环境变量中的 HWID。
+规范见 [HWID 使用说明](../../edk/device-manager/docs/hwid.md)。普通 OTA 不修改环境变量中的 HWID。
 
 ## 发布与校验
 

@@ -22,7 +22,7 @@ Web 归档列表显示北京时间和记录类型，导出文件示例为 `2026-
 
 `GET /api/time/<nonce>` 返回管理服务器的 Unix 秒和纳秒。logctld 上传进程在 eth0 link UP 且有 IP 后独立校时，采样三次选择最低 RTT，检查 nonce、范围和返回格式，估算半程延迟。失败不阻塞采集和健康检查，30 秒后重试；正常每小时重校，发现系统时间相对 CLOCK_BOOTTIME 跳变超过两秒则提前重校。
 
-新设备配置默认 `time-sync=1`。`logctl sync-time` 支持手工校时，`logctl status` 提供时间来源、最近成功时间、偏差、延迟估计和 RTC 写入状态。具体接口和配置见 [组件文档](../../device-manager/docs/time-sync.md)。
+新设备配置默认 `time-sync=1`。`logctl sync-time` 支持手工校时，`logctl status` 提供时间来源、最近成功时间、偏差、延迟估计和 RTC 写入状态。具体接口和配置见 [组件文档](../../edk/device-manager/docs/time-sync.md)。
 
 首次实机启动，内核读取片内 RTC 为 `1970-01-01T00:00:08 UTC`；网络就绪后自动校准至 `2026-11-04T00:56:20Z`，RTC 写入成功，设备系统时间和读取出的 RTC 时间相差不超过约一秒。OTA 启动健康确认成功，服务器报告 success，data/persistent、日志 sync-state=ok，启动缓存归档确认后正常清空。
 

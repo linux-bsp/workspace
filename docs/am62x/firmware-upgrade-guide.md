@@ -106,5 +106,5 @@ JSON 打包配置和设备启动配置独立维护；最终打包的布局门禁
 
 具体测试、发布身份和实机证据见
 [优化验收记录](firmware-upgrade-optimization-validation.md)，Linux 接口细节见
-[fwctl 文档](../../device-manager/docs/fwctl.md)，U-Boot 细节见
+[fwctl 文档](../../edk/device-manager/docs/fwctl.md)，U-Boot 细节见
 [命令文档](../../uboot/u-boot-2026.04/doc/usage/cmd/fw.rst)。
