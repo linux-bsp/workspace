@@ -86,3 +86,39 @@
 - 本阶段未更新 SPL/U-Boot。
 
 证据：`output/ota-validation/0.0.1-edk-refactor-s5/`。
+
+## 阶段 6：统一配置、安装和回归入口
+
+- Buildroot 收敛为 edk、host-edk，删除旧 device-manager 包定义和组件递归 Makefile。
+  板级组件选项生成单一 Kconfig 输入，内核依赖仅由 PDM 引入。
+- 同一源码树分别输出 host/target；staging 只安装公共库和可选 SDK 头文件。
+  根 Make 支持单独工具目标，libs 仅构建库；源码目录不再产生工具和 Web 头。
+- 统一原生回归注册 41 个 CTest 项：38 项首次通过，3 项旧源码程序路径修正后
+  重跑通过，无剩余失败。测试支持完整 Python 和显式构建产物，失败可单独重跑。
+- SDK 配置/增量/安装消费、配置映射稳定性、新克隆 defconfig、库单独构建、
+  日志与服务器依赖隔离、BSP FIT/身份/恢复、实际 initramfs ARM64 加载均通过。
+- 发布 ID：`2868a46343897abc3606cbfdb174eee3dc40181f369398ff730beadfd416b2f0`。
+- 发布审计编号 94，设备 192.168.10.211 上报 success。
+- 启动 ID：`a752f496-aa44-45a5-9c45-b7cf98aec2db`。
+- 实机 systemd 无失败服务，固件/日志/时间/健康服务 active，PDM active；两个
+  rootfs 槽和当前 kernel/rootfs 完整 SHA256 验证通过。
+- 日志持久化、SOL、UTC+8 同步和命令别名正常；HWID 为 1010001000110000。
+- 本阶段未更新 SPL/U-Boot。libbmc 保持独立，提交 abcd362 未改变。
+
+证据：`output/ota-validation/0.0.1-edk-refactor-s6/`，包含源码快照、验证脚本、
+固件包、服务器结果、串口日志和提交检查。服务重载辅助脚本的进程退出竞态已
+修复；首次未重启成功时尚未发布固件，相关重载/串口记录保留用于追溯。
+
+## 完成状态
+
+| 阶段 | 固件 tag | 内容 ID 前缀 | 实机结果 |
+| --- | --- | --- | --- |
+| 1 配置依赖图 | v0.0.1 | e50db961 | success |
+| 2 传输与 HWID | v0.0.1 | 1c04ca18 | success |
+| 3 固件模块 | v0.0.1 | 74397335 | success |
+| 4 日志与时间 | v0.0.1 | 870e576b | success |
+| 5 服务端与协议 | v0.0.1 | cc53966b | success |
+| 6 构建配置统一 | v0.0.1 | 2868a463 | success |
+
+每阶段均先构建、发布并完成实机健康确认，再提交与推送子仓库，最后更新
+workspace gitlink。最新使用方法见 [EDK README](../../edk/README.md)。

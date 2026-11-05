@@ -8,7 +8,7 @@ This repository is a BSP workspace that aggregates the main source trees as Git 
 - `linux/` for Linux kernel source trees, grouped by version such as `linux/linux-7.0/` and `linux/ti-linux-kernel-6.18.13/`
 - `uboot/` for U-Boot source trees, grouped by version such as `uboot/uboot-2024.10/` and `uboot/ti-u-boot-2025.10/`
 - `edk/` for peripheral management and the integrated device-manager module
-- `edk/device-manager/` for the management server, firmware tools and device logging
+- `edk/host/device-manager/` and `edk/user/{fwctl,logctl,timectl,hwid,transfer}/` for device management
 - `docs/<board>/` for board-specific reference manuals, datasheets, schematics, and related documents
 
 Do not mix generated build outputs into the repository root. Put new root-level documentation in `README.md`; put board-specific documents under `docs/<board>/` unless a tool requires a specific file at the root.
@@ -17,9 +17,9 @@ Do not mix generated build outputs into the repository root. Put new root-level 
 Use the workspace Buildroot configuration and keep generated files under `output/`:
 
 - `make -C buildroot O="$PWD/output/am625" all` builds the configured AM625 image.
-- `make -C buildroot O="$PWD/output/am625" host-device-manager` builds host management tools.
-- `make -C edk/device-manager/logging test` checks logging lifecycle and rotation.
-- `make -C edk/device-manager/fwctl test` checks the firmware engine; supply dependency paths through `CPPFLAGS` and `LDFLAGS` when needed.
+- `make -C buildroot O="$PWD/output/am625" host-edk` builds host management tools.
+- `ctest --test-dir edk/.build/management-tests --output-on-failure -R management_logging` checks logging.
+- `ctest --test-dir edk/.build/management-tests --output-on-failure -R management_firmware` checks firmware transactions.
 - `git submodule update --init --recursive` initializes the source repositories.
 
 For a fresh build, select `bsp-base-external` with `BR2_EXTERNAL` and apply `alientek_am62x_defconfig` first; preserve an existing build's toolchain configuration when rebuilding packages.
