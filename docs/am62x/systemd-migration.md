@@ -13,6 +13,7 @@ AM625 主 rootfs 使用 systemd 管理服务；独立 initramfs 仍由 `/init` �
 | `pdebug-web.service` | 前台运行 lighttpd；`ptelemetryd.service` 默认禁用 |
 | `fwctld.service` | 前台 OTA 轮询；网络未就绪时延迟请求，传输失败不使本地健康检查失败 |
 | `logctld.service` / `logctl-journal.service` | 保留 SPL/U-Boot/kernel 原有采集，journal 的 MESSAGE 文本接入 services 流，不附加 unit/时间等展示前缀 |
+| `timectld.service` | 独立 NTP/HTTP 校时、RTC 和配置回报；与日志服务无生命周期依赖，不以网络校时成功作为启动门槛 |
 | `fw-health.service` | 评估本地健康策略；systemctl 子进程查询使用单调时钟、输出上限和 1 秒总期限 |
 | `fw-confirm.service` | 连续六次健康检查通过后确认部署、记录启动事件，仍由 fwctld 向服务器报告 OTA 结果 |
 | `fw-health-failure.service` | 记录关键健康失败，拒绝尚未确认的候选部署，并请求受控重启 |
@@ -26,7 +27,7 @@ PID 1 独占 `/dev/watchdog0`，运行及重启 watchdog 期限均为 60 秒。A
 - `10-board-ethernet.link` 保留内核分配的 `eth0` 等网口名称，避免 udev 改名为 `end0` 后与恢复环境、OTA 和健康策略不一致。
 - Device Manager 原生服务及前台启动脚本：`device-manager/integration/systemd/`。
 - 必须健康的本地 unit/网卡：`/etc/device-manager/health.conf`。当前要求 networkd 和 lo/eth0 已配置 UP，不要求以太网载波或远端响应。
-- `/etc/default/fwctld` 与 `/data/fwctld.conf` 保留 OTA 配置来源；禁用内置 timesyncd，继续使用 Device Manager 的可配置校时，显示 UTC+8。
+- `/etc/default/fwctld` 与 `/data/fwctld.conf` 保留 OTA 配置来源；禁用内置 timesyncd，由独立 timectld 使用 `/etc/device-manager/time.conf` 和 `/data/timectl/source.conf` 管理校时，显示 UTC+8。
 - journal 使用有上限的 RAM 存储；logctld 负责 data 归档与 SOL 上报。禁用 systemd-pstore 自动搬移，避免抢先处理已有启动证据。
 
 切换 init 系统应使用新的 Buildroot 输出目录。不要在旧 SysV target 目录上直接增量覆盖后发布。旧 SDK、dl 缓存可以复用。
@@ -42,6 +43,8 @@ make -C buildroot O="$PWD/output/am625-systemd" all
 cat /proc/1/comm
 systemctl --failed
 systemctl status fw-health fw-confirm fwctld logctld psatellited
+systemctl status timectld
+timectl status
 journalctl -b -u fwctld -o cat
 fwctl health-check
 fwctl version
@@ -115,3 +118,25 @@ PID 1、服务默认环境和调试控制台均使用 `TERM=dumb`，禁用颜色
   UTC+8，RTC 保持 UTC。跨复位/断电保持能力仍待硬件及驱动验证，早期日志时间不视为可信。
 
 配置语义参考 systemd 官方的 [服务就绪通知与服务 watchdog](https://www.freedesktop.org/software/systemd/man/255/systemd.service.html) 和 [管理器硬件 watchdog](https://www.freedesktop.org/software/systemd/man/258/user.conf.d.html)。服务 watchdog 监督应用通知；RuntimeWatchdog 由 PID 1 喂硬件，两者失效边界不同。
+
+### 时间服务拆分验收（2026-11-05）
+
+固件 `v0.0.1 / b3397bb3`，完整 ID
+`b3397bb3c3b9b1a4de52f8306519890d4f3b35175c1672c9c0e05d245e086e02`，发布 86，
+AM625 自动 OTA 至部署 0/A 槽，重启后健康确认并向服务器上报 success。
+
+`timectld` 与 `timectl` 共用一个二进制，通过独立 systemd unit 和有界 Unix socket 管理。
+日志程序移除设时实现与 `sync-time` 命令；校时配置不再依赖 sol.conf 或日志运行目录。
+旧 `/data/log/time-source.conf` 成功导入新位置，原副本保留供固件回退。
+
+- 停止 logctld：timectld 保持 active，`timectl sync` 成功，服务器持续收到时间状态。
+- 停止 timectld：CLI 明确报服务不可用，logctld 仍采集并通过 SOL 上传测试消息；健康检查通过。
+- 网页 API 下发临时 LAN NTP 源：设备完成 9 次 UDP 采样，手工同步及时间服务重启后配置恢复通过。
+  这是使用主机真实 UTC 时间的临时协议夹具，不代表长期精度或外部授时系统验收。
+- 测试结束恢复原来的 Device Manager HTTP 时间源，所有相关服务 active，失败 unit=0，
+  health-check=0、data=persistent、archive-pending=0、sync-state=ok，UTC+8 显示正常。
+
+20 项时间模块测试、26 项日志/启动记录测试、9 项时间 API 测试及实际 ARM64 加载检查通过。
+服务启用链接在最终 SquashFS 中检查；Buildroot 在生成文件系统时执行 preset，原始 target
+目录不能代替最终镜像的启用状态。证据在 `output/ota-validation/0.0.1-time-service/`。
+本阶段保留原 SNTP/HTTP 算法，不引入 chronyd，不宣称解决 RTC 跨复位保时。
