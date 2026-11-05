@@ -19,7 +19,7 @@ Use the workspace Buildroot configuration and keep generated files under `output
 - `make -C buildroot O="$PWD/output/am625" all` builds the configured AM625 image.
 - `make -C buildroot O="$PWD/output/am625" host-device-manager` builds host management tools.
 - `make -C device-manager/logging test` checks logging lifecycle and rotation.
-- `python3 device-manager/tests/test_firmware.py` checks the firmware engine; supply dependency paths through `CPPFLAGS` and `LDFLAGS` when needed.
+- `make -C device-manager/fwctl test` checks the firmware engine; supply dependency paths through `CPPFLAGS` and `LDFLAGS` when needed.
 - `git submodule update --init --recursive` initializes the source repositories.
 
 For a fresh build, select `bsp-base-external` with `BR2_EXTERNAL` and apply `alientek_am62x_defconfig` first; preserve an existing build's toolchain configuration when rebuilding packages.

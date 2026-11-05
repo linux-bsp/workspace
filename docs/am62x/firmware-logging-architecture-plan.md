@@ -43,7 +43,7 @@
 
 源码入口：
 
-- [固件事务与存储](../../device-manager/firmware/src/)、[initramfs](../../device-manager/recovery/fw-init.c)、[OTA 代理](../../device-manager/ota/agent/fwctld.c)。
+- [固件事务与存储](../../device-manager/fwctl/core/)、[initramfs](../../device-manager/fwctl/recovery/fw-init.c)、[OTA 代理](../../device-manager/ota/agent/fwctld.c)。
 - [本地日志](../../device-manager/logging/logging.c)、[上传器](../../device-manager/logging/sol-forward.c)、[SOL 数据库与接口](../../device-manager/ota/server/sol.c)。
 - [SPL/U-Boot 接力](../../uboot/u-boot-2026.04/common/bsp_bootlog.c)、[AM625 复位原因](../../uboot/u-boot-2026.04/arch/arm/mach-k3/am62x/boot.c)、[Linux 导入](../../linux/linux-7.0/drivers/firmware/bsp_bootlog.c)。
 - [SOL 实机说明](../../device-manager/docs/sol.md)、[分阶段固件验证](boot-stage-firmware-validation.md)、[续传版本验证范围](../../device-manager/docs/releases/v0.0.1-27953f8b.md)。
