@@ -184,6 +184,29 @@
 证据：`output/ota-validation/0.0.1-osa-ipc/`，包含源码快照、测试、固件包、
 OTA 成功记录、串口验收及提交记录。
 
+## OSA 整合阶段 2：公共日志与 OTA 输出适配（2026-11-06）
+
+- OSA 提供公共 va_list 日志入口及可替换输出回调。fwctld 共用日志对象实现，
+  删除私有格式化逻辑；libosa 仍向 PDI 等使用者提供同一实现。
+- 普通日志统一为 `[模块] [级别] 内容`，DEBUG 才附带源码位置。INFO/DEBUG
+  使用单调时钟限流，WARN/ERROR/FATAL 不占该预算；日志保留调用者 errno。
+  格式化与输出移出策略锁，输出回调可以安全查询日志统计。
+- 保留 fwctld 非阻塞串口镜像及子进程 stdout/stderr 实时转发；已带 fwctl
+  前缀的记录原样输出。SOL 原始字节与机器可读命令输出不经过日志格式化。
+- 新增日志限流、错误保留、回调重入查询、长消息边界、errno 与串口阻塞回归；
+  SDK 18 项、管理端 50 项 CTest 全部通过。扩展 OSA 动态库公共符号/依赖检查。
+  最终 FIT 4 项、实际 ARM64 initramfs 加载及真实固件包上传发布检查通过。
+- 发布 ID：94ef26aa21f0b924881aeee5db858a5376a5c302ec5bc6ecd811a949d0e39016，
+  tag 为 v0.0.1；发布审计编号 103，设备 192.168.10.211 上报 success。
+- 启动 ID：3a9fc411-9000-4863-a3b1-199964033bcf。实机无失败服务，双 rootfs
+  槽及当前 kernel/rootfs 全量校验通过，日志持久化、SOL 归档、UTC+8 校时正常。
+  新 fwctld 启动与缓存回收日志格式正确；未更新 SPL/U-Boot。
+
+证据：`output/ota-validation/0.0.1-osa-logging/`。fwctl/fwctld 未新增 libosa.so
+或 libpdi.so 运行时依赖。此次统一公共日志能力和 OTA 适配；日志/时间工具的
+其他输出入口与服务端公共依赖仍需按职责分别梳理，不表示所有 POSIX 调用都
+应封装进 OSA。
+
 ## 完成状态
 
 | 阶段 | 固件 tag | 内容 ID 前缀 | 实机结果 |
@@ -197,6 +220,7 @@ OTA 成功记录、串口验收及提交记录。
 | 协议归位与模拟器移除 | v0.0.1 | 0ba0e3a8 | success |
 | 内核/用户态目录收敛与确认锁重试 | v0.0.1 | 655ecded | success |
 | OSA 公共 IPC 与截止时间 | v0.0.1 | 989e81ba | success |
+| OSA 公共日志与 OTA 输出适配 | v0.0.1 | 94ef26aa | success |
 
 每阶段均先构建、发布并完成实机健康确认，再提交与推送子仓库，最后更新
 workspace gitlink。最新使用方法见 [EDK README](../../edk/README.md)。
