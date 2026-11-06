@@ -207,6 +207,33 @@ OTA 成功记录、串口验收及提交记录。
 其他输出入口与服务端公共依赖仍需按职责分别梳理，不表示所有 POSIX 调用都
 应封装进 OSA。
 
+## OSA 整合阶段 3：用户态日志入口统一（2026-11-06）
+
+- fwctl/fwctld、logctl/logctld、timectl/timectld、Device Manager/ota-cli 及
+  外设应用的运行诊断统一调用 OSA。日志格式、等级、限流和输出回调由 OSA
+  管理；新增显式 FILE 输出入口，保留人类可读 CLI 结果原有的 stdout 通道。
+- logctld 负责采集、持久化、归档和转发，其自身诊断输出到 stderr，避免
+  回灌采集入口。timectld 保留时间源、校时和 RTC 职责，使用 OSA 记录日志。
+  OSA 不依赖这两个守护进程，也不依赖可用网络或管理服务器。
+- initramfs 使用 OSA 回调接入原有控制台和启动日志保存路径。SOL 原始串口
+  字节、遥测数据、CLI 机器协议及 HTTP 响应不经过日志格式化；内核 PDM
+  继续使用内核日志接口。fwctl/fwctld/logctl/timectl 未新增 libosa.so 或
+  libpdi.so 运行时依赖。
+- SDK 18 项、管理端 50 项 CTest 全部通过；完整 AM625 镜像、FIT 4 项、
+  恢复 6 项、真实固件包上传发布和实际 ARM64 initramfs 加载验证通过。
+  首轮发现的独立测试链接遗漏和服务启动消息解析假设均已修复并重新验证，
+  初次失败记录保留。Device Manager 服务已使用新产物重载。
+- 发布 ID：`4a31f6d8a75c5764a106af46008a07f2121e264b6ba07d149da4b788c93babd2`，
+  tag 保持 `v0.0.1`；发布审计编号 104，设备 `192.168.10.211` 上报 `success`。
+- 启动 ID：`cc716efb-348c-46e6-bca7-6c09ae53b2f2`。运行 deployment 0，
+  kernel/rootfs 使用 A 槽；实机无失败服务，六个管理/健康服务正常，健康检查、
+  双 rootfs 槽和当前 kernel/rootfs 完整 SHA256 校验通过。
+- 日志持久化、上一启动记录读取、SOL 连接、启动缓冲归档确认及 UTC+8 校时
+  均通过；串口确认 OSA 日志格式正常。本阶段未更新 SPL/U-Boot。
+
+证据：`output/ota-validation/0.0.1-osa-all-logs/`，包含源码快照、构建和测试
+记录、固件包、OTA 成功记录、串口验收与提交记录。
+
 ## 完成状态
 
 | 阶段 | 固件 tag | 内容 ID 前缀 | 实机结果 |
@@ -221,6 +248,7 @@ OTA 成功记录、串口验收及提交记录。
 | 内核/用户态目录收敛与确认锁重试 | v0.0.1 | 655ecded | success |
 | OSA 公共 IPC 与截止时间 | v0.0.1 | 989e81ba | success |
 | OSA 公共日志与 OTA 输出适配 | v0.0.1 | 94ef26aa | success |
+| OSA 用户态日志入口统一 | v0.0.1 | 4a31f6d8 | success |
 
 每阶段均先构建、发布并完成实机健康确认，再提交与推送子仓库，最后更新
 workspace gitlink。最新使用方法见 [EDK README](../../edk/README.md)。
