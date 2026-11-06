@@ -164,6 +164,26 @@
 最终源码快照、发布、实机验收和锁竞争验证：
 `output/ota-validation/0.0.1-userspace-layout-confirmation/`。
 
+## OSA 整合阶段 1：公共 IPC 与截止时间（2026-11-06）
+
+- 删除 fwctl 内复制的 peripheral_ipc 实现，改用 OSA 公共头文件与同一组
+  IPC 对象文件。libosa 和 fwctl 共用源码；initramfs 不新增 libosa.so 依赖。
+- 提取 osa_wait_fd，有限超时采用 CLOCK_MONOTONIC 截止时间，信号打断后
+  只等待剩余时间。保留已排队数据优先于对端关闭的语义。
+- 新增连续信号干扰回归：旧实现把 100 ms 等待延长到收到 400 ms 后的数据，
+  新实现按时返回 ETIMEDOUT。原有 systemd 与 SysV 健康协议行为保持不变。
+- SDK 17 项、管理端 49 项 CTest 和真实固件包上传发布回归通过；FIT 4 项、
+  恢复 6 项、ARM64 存储身份 7 项及实际 initramfs 加载检查通过。
+  同步修正三个 BSP 验证脚本遗留的用户态目录引用。
+- 发布 ID：989e81ba34af9f60a788fb6db55dd94bb86035f7ed382e8866dd14295f2692b9，
+  tag 为 v0.0.1；发布审计编号 102，设备 192.168.10.211 上报 success。
+- 启动 ID：6fa58fde-b9d1-4a14-8d61-5c21f4fdde80。实机无失败服务；双 rootfs
+  槽、当前 kernel/rootfs 全量校验、日志持久化与归档、UTC+8 校时通过。
+  未更新 SPL/U-Boot；SysV IPC 路径由本机协议回归验证，实机运行 systemd。
+
+证据：`output/ota-validation/0.0.1-osa-ipc/`，包含源码快照、测试、固件包、
+OTA 成功记录、串口验收及提交记录。
+
 ## 完成状态
 
 | 阶段 | 固件 tag | 内容 ID 前缀 | 实机结果 |
@@ -176,6 +196,7 @@
 | 6 构建配置统一 | v0.0.1 | 2868a463 | success |
 | 协议归位与模拟器移除 | v0.0.1 | 0ba0e3a8 | success |
 | 内核/用户态目录收敛与确认锁重试 | v0.0.1 | 655ecded | success |
+| OSA 公共 IPC 与截止时间 | v0.0.1 | 989e81ba | success |
 
 每阶段均先构建、发布并完成实机健康确认，再提交与推送子仓库，最后更新
 workspace gitlink。最新使用方法见 [EDK README](../../edk/README.md)。
