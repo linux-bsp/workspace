@@ -63,4 +63,4 @@ PCB 版本严格对应实物丝印。主版本和修订版本各取值 0～15；
 - 存储后端可以是 SD、eMMC 或 SPI NOR；HWID 字符串格式保持一致，存储位置及冗余由对应 U-Boot 环境后端管理。NAND 暂不纳入实现范围。
 - 固件内容继续通过软件版本与完整 SHA256 标识，与 HWID 分别管理。
 
-各存储后端、使用方法与启动阶段验证结果见 [AM625 HWID 环境存储与验证](hwid-environment-validation.md)。
+各存储后端、使用方法与启动阶段验证结果见 [AM625 HWID 环境存储与验证](validation-history.md#hwid-environment-validation)。

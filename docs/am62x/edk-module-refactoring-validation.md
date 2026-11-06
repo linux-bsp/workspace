@@ -1,6 +1,6 @@
 # EDK 管理模块分阶段重构验收
 
-设计与实施顺序见 [EDK 重构计划](../../edk/docs/management-modules-refactoring.md)。
+当前设计见 [EDK 架构](../../edk/docs/architecture.md)。本文记录已经完成的分阶段验收。
 固件版本固定 v0.0.1；每阶段完成构建、发布和 AM625 健康确认后提交推送。
 
 ## 阶段 1：Kconfig 完整依赖图

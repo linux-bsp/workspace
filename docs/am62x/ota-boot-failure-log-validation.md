@@ -6,7 +6,7 @@
 
 采集与上传链路通过：最后一次失败启动和恢复启动的 SPL、U-Boot、kernel 已进入服务器独立归档，八段 CRC 正确、dropped=0，网页可查看和导出。
 
-原始验收时 OTA 详情附件链路存在缺口（同日已修复，见 [附件关联验收](ota-incident-attachments-validation.md)）：异常事务记录了 `linux-panic-observed` 和 `rolled-back`，但按现有 Linux 异常“只上报原因”策略，事故接口是 `mode=reason-only, bytes=0`。启动缓存归档未与 OTA 事故附件建立关联。该时点可在 SOL 查到真实失败日志，OTA 详情尚无日志附件；下文保留当时观察结果。
+原始验收时 OTA 详情附件链路存在缺口（同日已修复，见 [附件关联验收](validation-history.md#ota-incident-attachments-validation)）：异常事务记录了 `linux-panic-observed` 和 `rolled-back`，但按现有 Linux 异常“只上报原因”策略，事故接口是 `mode=reason-only, bytes=0`。启动缓存归档未与 OTA 事故附件建立关联。该时点可在 SOL 查到真实失败日志，OTA 详情尚无日志附件；下文保留当时观察结果。
 
 ## 故障与恢复过程
 

@@ -25,9 +25,9 @@ AM625 统一修改 [firmware.json](../../bsp-base-external/board/ti/am625/firmwa
 修改配置后执行原输出目录的 `make all` 重新打包；`images/firmware.json` 留存实际使用的配置。
 字段和升级已有输出目录的方法见 [统一固件生成器](../../bsp-base-external/support/firmware/README.md)。
 
-公共配置阶段已发布 `v0.0.1 / 64373f72` 并通过 AM625 实机健康确认，见 [验证记录](../../bsp-base-external/board/ti/am625/releases/v0.0.1-64373f72.md)。
+公共配置阶段已发布 `v0.0.1 / 64373f72` 并通过 AM625 实机健康确认，见 [验证记录](../../bsp-base-external/board/ti/am625/releases/README.md#v0.0.1-64373f72)。
 
-完整 JSON 生成阶段已发布 `v0.0.1 / 07071f2d` 并通过 AM625 实机健康确认，见 [生成器及升级验证](../../bsp-base-external/board/ti/am625/releases/v0.0.1-07071f2d.md)。
+完整 JSON 生成阶段已发布 `v0.0.1 / 07071f2d` 并通过 AM625 实机健康确认，见 [生成器及升级验证](../../bsp-base-external/board/ti/am625/releases/README.md#v0.0.1-07071f2d)。
 
 设备自身的 HWID 仍来自 U-Boot 环境；服务器不能通过发布改变设备身份。设备下载后、写入前及启动时继续进行精确匹配。
 
@@ -49,9 +49,9 @@ ota-cli --server http://127.0.0.1:8090 publish draft-XXXXXX
 
 ## 产品名称
 
-页面从 HWID 解析产品线、项目、产品型号和 PCB 版本，通过 [名称字典](../../edk/device-manager/config/hwid-registry.json) 显示和查询中文名称。
+页面从 HWID 解析产品线、项目、产品型号和 PCB 版本，通过 [名称字典](../../edk/configs/hwid-registry.json) 显示和查询中文名称。
 项目使用 `PP/JJJJ`、型号使用 `PP/JJJJ/MMMM` 查找，未登记时保留原始编码；维护方法见
-[HWID 名称字典说明](../../edk/device-manager/docs/hwid.md#名称字典)。字典不决定固件适配范围，也不能替代包内 HWID 校验。
+[HWID 名称字典说明](../../edk/docs/device-manager/hwid.md#名称字典)。字典不决定固件适配范围，也不能替代包内 HWID 校验。
 
 ## 2026-11-04 验证
 
