@@ -60,6 +60,8 @@ git submodule status
 git status --short
 ```
 
-默认使用本仓库记录的准确提交。`.gitmodules` 中的 `branch = master` 只影响显式执行 `git submodule update --remote`；它不会改变固定提交，也不代表每个本地开发分支都叫 master。EDK、Linux 的 OTA 开发提交可能来自 `ota/v1.0.16` 分支。
+默认使用本仓库记录的准确提交。当前开发统一使用 `master`，EDK、Linux 原 OTA 开发线已经合入主分支。`.gitmodules` 中的 `branch = master` 只影响显式执行 `git submodule update --remote`；普通子模块初始化仍检出固定提交，可能显示 detached HEAD。
 
-修改后先提交子仓库，再更新工作区 gitlink。推送工作区前确保引用的子仓库提交已上传。固件 tag 固定 `v0.0.1`，内容变化更新 SHA256；设备重启并通过健康检查、上报成功之后才提交对应代码。验证记录见 [AM625 发布记录](bsp-base-external/board/ti/am625/releases/README.md)。
+EDK 和设备固件共用 [edk/VERSION](edk/VERSION)，当前为 `0.0.1`。Buildroot 的 target/host EDK 包和板级 `firmware.json` 都读取此文件；同版本的不同内容通过 SHA256 hash ID 区分。
+
+修改后先提交子仓库，再更新工作区 gitlink。推送工作区前确保引用的子仓库提交已上传。版本仅在明确要求时调整；设备重启并通过健康检查、上报成功之后才提交对应代码。验证记录见 [AM625 发布记录](bsp-base-external/board/ti/am625/releases/README.md)。

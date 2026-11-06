@@ -342,6 +342,27 @@ OTA 成功记录、串口验收及提交记录。
 证据：`output/ota-validation/0.0.1-layering-s5/`。本轮五阶段均已完成，以上
 结果说明所列回归与 AM625 场景通过，不代表所有介质、外设及空间环境认证。
 
+## master 收拢与统一版本源（2026-11-06）
+
+- EDK 和 Linux 的 ota/v1.0.16 开发提交快进合入 master；Buildroot 检出
+  master，当前 workspace 及六个子仓库统一在 master。旧 main 与相关功能
+  分支的提交均已包含在对应主线，未重写提交历史。
+- EDK/VERSION 改为 0.0.1，作为 SDK、Buildroot target/host EDK 包及设备
+  固件的共同版本源。板级 JSON 通过文件引用读取版本，生成配置保存解析值，
+  构建清单记录 VERSION 的 SHA256。保留完整内容 hash ID 区分同版本固件。
+- 版本源无效或已构建 EDK 的版本不匹配时拒绝发布包生成，并保留上一套产物。
+  CMake SDK 消费、文档和构建测试同步调整。动态库 ABI 号仍为 2，实际库文件
+  版本为 0.0.1；手动清理本机构建输出遗留的 2.0.0 文件，未加入设备清理脚本。
+- SDK 20 项、管理与构建 52 项、生成器 14 项、FIT 4 项、实际 ARM64
+  initramfs 加载和真实包上传发布下载全部通过；检查最终 squashfs 不含旧库。
+- 发布 ID `c889c4c410b79f432f805bb0c35bae465c6e43c8c1d0913d7477562ca421a554`，tag v0.0.1，
+  审计编号 110，设备上报 success。启动 ID `75b62875-8bb6-4806-948f-c119f15b8258`。
+  实机 PDM 显示 edk_version=0.0.1，fwctl 显示同一版本及上述内容 ID；零失败
+  服务、双 rootfs 槽、当前 kernel/rootfs 全量校验、持久日志和 UTC+8 校时通过。
+
+证据：`output/ota-validation/0.0.1-master-version/`。本次 OTA 更新 kernel/rootfs，
+主分支合入的 Linux 提交内容与此前已验证的开发分支相同。
+
 ## 完成状态
 
 | 阶段 | 固件 tag | 内容 ID 前缀 | 实机结果 |
@@ -362,6 +383,7 @@ OTA 成功记录、串口验收及提交记录。
 | 分层 3：固件与日志证据接口 | v0.0.1 | 83649a99 | success |
 | 分层 4：访问策略与 OTA 编排 | v0.0.1 | 667ba933 | success |
 | 分层 5：日志与时间运行上下文 | v0.0.1 | fa43a1f2 | success |
+| master 与统一版本源 | v0.0.1 | c889c4c4 | success |
 
 每阶段均先构建、发布并完成实机健康确认，再提交与推送子仓库，最后更新
 workspace gitlink。最新使用方法见 [EDK README](../../edk/README.md)。
