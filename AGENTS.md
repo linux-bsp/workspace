@@ -8,7 +8,7 @@ This repository is a BSP workspace that aggregates the main source trees as Git 
 - `linux/` for Linux kernel source trees, grouped by version such as `linux/linux-7.0/` and `linux/ti-linux-kernel-6.18.13/`
 - `uboot/` for U-Boot source trees, grouped by version such as `uboot/uboot-2024.10/` and `uboot/ti-u-boot-2025.10/`
 - `edk/` for peripheral management and the integrated device-manager module
-- `edk/host/device-manager/` and `edk/user/{fwctl,logctl,timectl,hwid,transfer}/` for device management
+- `edk/user/apps/device-manager/` and `edk/user/apps/{fwctl,logctl,timectl}/` and `edk/user/lib/` for device management
 - `docs/<board>/` for board-specific reference manuals, datasheets, schematics, and related documents
 
 Do not mix generated build outputs into the repository root. Put new root-level documentation in `README.md`; put board-specific documents under `docs/<board>/` unless a tool requires a specific file at the root.

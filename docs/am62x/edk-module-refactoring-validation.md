@@ -133,6 +133,37 @@
 证据：`output/ota-validation/0.0.1-kernel-protocol-cleanup/`，包含测试结果、
 镜像文件清单、完整源码快照、构建来源、发布记录和串口验收日志。
 
+## 后续整理：内核与用户态目录收敛（2026-11-06）
+
+- 用户态公共库统一进入 `user/lib/`，命令、守护进程和 Device Manager 进入
+  `user/apps/`，systemd 服务及部署脚本进入 `user/integration/`。
+  顶层不再保留 `apps/`、`host/`、`integration/`；UAPI 迁入
+  `kernel/include/uapi/`，六个头文件内容逐字节不变。
+- fwctld 与服务端共用的 OTA 文件适配代码迁入 `user/lib/ota/`，消除服务端
+  对 fwctl 应用目录的依赖。根 CMake/Kconfig 统一经 `user/` 组织子模块，
+  同步更新 Buildroot 验证脚本、测试和现行文档。清理未使用的 HTTP 导出文件。
+- SDK 17 项、管理端 47 项 CTest 通过；时间持久化测试的数据迁到构建目录，
+  避免临时文件污染源码记录，也避免本机 tmpfs 被误当作持久存储。
+  公共库依赖检查区分生产库与集成测试驱动。
+- 初版 `012476dd` 首次启动遇到 metadata 共享读锁与 `mark-good` 的竞争，
+  确认失败触发一次重启，第二次启动成功。该版本未作为最终验收提交。
+  已为健康确认补充有上限的重试，并在重试前复查健康；永久错误、持续占锁
+  以及健康恶化仍拒绝确认。四个新增服务回归及 CLI 错误分类测试通过。
+- 最终实机主动持有存储只读锁：uptime 36 秒加锁，41 秒确认进入重试，
+  48 秒释放，49 秒确认成功。此次 OTA 只有一次启动，没有额外重启。
+- 完整 AM625 镜像、实际 ARM64 initramfs 加载及源码来源一致性检查通过。
+  发布 ID：`655ecded0519e336918b787eadbec80cbdd3c831ccebaba4f3fb89dc2633885c`，
+  tag 保持 `v0.0.1`；发布审计编号 101，设备 192.168.10.211 上报 success。
+- 启动 ID：`3dbc3731-18ff-4ea0-9d43-e82cac41c550`。运行 deployment 1，
+  kernel/rootfs 使用 B 槽，confirmed=1；systemd 无失败单元，六个管理/健康
+  服务 active。双 rootfs 槽、当前 kernel/rootfs 完整 SHA256、日志持久化、
+  SOL 归档确认及 UTC+8 校时通过。本次未更新 SPL/U-Boot。
+- 验收后提交：EDK `1b4057aa`，BSP 引用调整 `5166b3b`；均已推送远程。
+
+初次构建与问题证据：`output/ota-validation/0.0.1-userspace-layout/`；
+最终源码快照、发布、实机验收和锁竞争验证：
+`output/ota-validation/0.0.1-userspace-layout-confirmation/`。
+
 ## 完成状态
 
 | 阶段 | 固件 tag | 内容 ID 前缀 | 实机结果 |
@@ -144,6 +175,7 @@
 | 5 服务端与协议 | v0.0.1 | cc53966b | success |
 | 6 构建配置统一 | v0.0.1 | 2868a463 | success |
 | 协议归位与模拟器移除 | v0.0.1 | 0ba0e3a8 | success |
+| 内核/用户态目录收敛与确认锁重试 | v0.0.1 | 655ecded | success |
 
 每阶段均先构建、发布并完成实机健康确认，再提交与推送子仓库，最后更新
 workspace gitlink。最新使用方法见 [EDK README](../../edk/README.md)。

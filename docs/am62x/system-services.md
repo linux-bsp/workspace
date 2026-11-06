@@ -25,7 +25,7 @@ AM625 不启动可选的旧 system_manager。硬件 watchdog、服务心跳和�
 ## 配置位置
 
 - 板级 unit、preset、网络、journal 和 watchdog：BSP board/ti/am625/rootfs-overlay。
-- 管理服务模板和前台脚本：EDK integration/systemd。
+- 管理服务模板和前台脚本：EDK user/integration/systemd。
 - /etc/device-manager/health.conf：当前要求 networkd、lo、eth0 本地配置正常；
   不要求 carrier、BMC 或 OTA server 可达。
 - /etc/default/fwctld、/data/fwctld.conf：OTA 默认值与持久覆盖。

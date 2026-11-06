@@ -11,7 +11,7 @@
 | `linux/linux-7.0/` | Linux 内核及板级驱动 |
 | `uboot/u-boot-2026.04/` | R5/A53 SPL 和 U-Boot |
 | `edk/` | PDM/PDI 外设管理及业务服务 |
-| `edk/user/`、`edk/host/device-manager/` | 管理 Web、OTA、fwctl/fwctld、logctl/logctld |
+| `edk/user/`、`edk/user/apps/device-manager/` | 管理 Web、OTA、fwctl/fwctld、logctl/logctld |
 | `libbmc/` | 独立 BMC SDK |
 | `docs/` | 硬件资料与设计文档 |
 | `output/` | 本地构建、测试与发布产物，Git 忽略 |
@@ -42,7 +42,7 @@ device-server --root "$PWD/output/device-feed" \
   --bind 0.0.0.0 --port 8090 --sol-debug-no-auth
 ```
 
-使用 [Device Manager](edk/host/device-manager/README.md) 管理固件上传、发布、设备升级结果及审计。OTA/SOL 位于侧栏；SOL 支持只读网络日志查看和回放，当前调试环境免凭据自动连接，配置见 [SOL 指南](edk/docs/device-manager/sol.md)。端口 8090 避开本机 GitLab 的 8080。
+使用 [Device Manager](edk/user/apps/device-manager/README.md) 管理固件上传、发布、设备升级结果及审计。OTA/SOL 位于侧栏；SOL 支持只读网络日志查看和回放，当前调试环境免凭据自动连接，配置见 [SOL 指南](edk/docs/device-manager/sol.md)。端口 8090 避开本机 GitLab 的 8080。
 
 OTA 自动按固件包声明的全部 HWID 发布，页面产品信息从 HWID 解析。身份字段与配置见 [HWID 说明](edk/docs/device-manager/hwid.md)，操作与验证见 [固件 HWID 自动发布](docs/am62x/firmware-hwid-publication.md)。
 

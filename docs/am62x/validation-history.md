@@ -663,7 +663,7 @@ kernel/rootfs OTA 不代表重新验证或更新了 SPL/U-Boot。
 
 审计目录：`output/ota-validation/0.0.1-fwctl-module/`，保存不可变固件包、源码快照、
 测试结果、发布事务和串口日志。模块职责见
-[fwctl 模块说明](../../edk/user/fwctl/README.md)。
+[fwctl 模块说明](../../edk/user/apps/fwctl/README.md)。
 
 
 <a id="edk-device-manager-merge"></a>
