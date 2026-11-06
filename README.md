@@ -38,7 +38,7 @@ SDK 使用独立输出目录，按 [BSP 外部层说明](bsp-base-external/READM
 ```sh
 make -C buildroot O="$PWD/output/am625" host-edk
 export PATH="$PWD/output/am625/host/bin:$PATH"
-device-server --root "$PWD/output/device-feed" \
+dmserver --root "$PWD/output/device-feed" \
   --bind 0.0.0.0 --port 8090 --sol-debug-no-auth
 ```
 

@@ -2,7 +2,7 @@
 
 ## 唯一来源
 
-适用设备在构建时写入 FIT 的 `fw,hwids` 字符串列表，属于固件包的一部分。上传后 Device Manager 校验并解析声明，将其保存在数据库中；页面只读展示，发布接口和 ota-cli 不接受人工指定 HWID。
+适用设备在构建时写入 FIT 的 `fw,hwids` 字符串列表，属于固件包的一部分。上传后 Device Manager 校验并解析声明，将其保存在数据库中；页面只读展示，发布接口和 dmcli ota 不接受人工指定 HWID。
 
 例如本板固件声明：
 
@@ -39,8 +39,8 @@ AM625 统一修改 [firmware.json](../../bsp-base-external/board/ti/am625/firmwa
 4. 每个 HWID 同时只有一个当前发布版本；包外的其他硬件通道不变。
 
 ```sh
-ota-cli --server http://127.0.0.1:8090 upload firmware.tar.gz
-ota-cli --server http://127.0.0.1:8090 publish draft-XXXXXX
+dmcli ota --server http://127.0.0.1:8090 upload firmware.tar.gz
+dmcli ota --server http://127.0.0.1:8090 publish draft-XXXXXX
 ```
 
 `POST /api/publish/draft-XXXXXX` 不接受 HWID 参数。旧的手选目标路径和 CLI 参数会被拒绝；请求头也不能覆盖固件声明。重复发布全部通道已使用的同一内容会返回已有记录。
@@ -57,7 +57,7 @@ ota-cli --server http://127.0.0.1:8090 publish draft-XXXXXX
 
 - 17 项 HWID 通道及继承测试通过，覆盖自动多硬件发布、手选目标拒绝、整包幂等、失败不改变当前版本、隔离及各通道回退。
 - OTA 全套测试通过，包括真实固件 CLI 上传、发布、下载及恢复路径验证；Chromium 实际上传/发布通过，页面没有 HWID 选择框。
-- 实机验证固件保持 `v0.0.1`，内容 ID 为 `592352ec216af15908a342f8617e86ab8b4ce1cbbba96077a79aaf7fcd293a0a`。使用无 HWID 参数的 ota-cli 发布，AM625 完成自动下载、安装、重启和健康确认，服务端收到成功上报。
+- 实机验证固件保持 `v0.0.1`，内容 ID 为 `592352ec216af15908a342f8617e86ab8b4ce1cbbba96077a79aaf7fcd293a0a`。使用无 HWID 参数的 dmcli ota 发布，AM625 完成自动下载、安装、重启和健康确认，服务端收到成功上报。
 - 本次未更改设备端 OTA 协议和环境身份。原健康 B 槽保留；新的 kernel/rootfs 写入 A 槽。未重新烧写引导程序。
 
 构建、测试、成功上报、完整串口日志及源码审计产物保存在 `output/ota-validation/0.0.1-package-hwids/`。

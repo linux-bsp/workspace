@@ -363,6 +363,25 @@ OTA 成功记录、串口验收及提交记录。
 证据：`output/ota-validation/0.0.1-master-version/`。本次 OTA 更新 kernel/rootfs，
 主分支合入的 Linux 提交内容与此前已验证的开发分支相同。
 
+## 统一管理工具命名与子命令（2026-11-06）
+
+- 主机入口统一为 dmserver 与 dmcli，OTA 使用 dmcli ota list/upload/publish。
+  入口统一解析 --server/--json/帮助/版本；公共 HTTP/JSON 输出和 OTA 动作拆成
+  私有模块。服务器地址环境变量改为 DM_SERVER，保留现有 HTTP 契约与包格式。
+- 同步 Kconfig、Buildroot host 选择、Make/CMake 目标、预设、测试和现行文档。
+  当前构建输出移除旧命名可执行文件；仓库未增加兼容别名或设备清理脚本。
+  历史发布记录保留当时名称用于追溯。
+- SDK 20 项、管理/构建 52 项、FIT 4 项、实际 ARM64 initramfs 加载与真实包
+  上传/发布/下载回归通过。命令测试覆盖分发、离线帮助、全局选项位置、JSON
+  原样输出、横线开头文件名、异常输入和发布幂等。
+- 已重载 dmserver，使用 dmcli ota 上传并发布内容 ID
+  `378dea5ac2916841729254f67e888ce6038a9056cecffefff450689b3d0166bd`，tag v0.0.1，审计编号 111；
+  设备上报 success。启动 ID `bde97f59-201d-4c0b-8971-02a8008a0591`，零失败服务、
+  双 rootfs 槽、当前 kernel/rootfs 全量校验、持久日志、SOL 归档与 UTC+8 校时通过。
+
+证据：`output/ota-validation/0.0.1-dm-cli/`。发布前仅修正本地辅助脚本中的串口
+记录目录名；未更改生产源码、固件或重复发布。此轮未更新 SPL/U-Boot。
+
 ## 完成状态
 
 | 阶段 | 固件 tag | 内容 ID 前缀 | 实机结果 |
@@ -384,6 +403,7 @@ OTA 成功记录、串口验收及提交记录。
 | 分层 4：访问策略与 OTA 编排 | v0.0.1 | 667ba933 | success |
 | 分层 5：日志与时间运行上下文 | v0.0.1 | fa43a1f2 | success |
 | master 与统一版本源 | v0.0.1 | c889c4c4 | success |
+| dmcli / dmserver 与 OTA 子命令 | v0.0.1 | 378dea5a | success |
 
 每阶段均先构建、发布并完成实机健康确认，再提交与推送子仓库，最后更新
 workspace gitlink。最新使用方法见 [EDK README](../../edk/README.md)。
