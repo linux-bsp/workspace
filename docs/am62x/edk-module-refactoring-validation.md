@@ -283,6 +283,23 @@ OTA 成功记录、串口验收及提交记录。
 
 证据：`output/ota-validation/0.0.1-layering-s2/`。
 
+## 分层优化阶段 3：固件客户端与日志证据边界
+
+- fwctl 内部拆成事务/存储 engine、健康 health、早期启动 init 构建目标。
+  OTA 通过 client 类型化适配器读取状态、比较镜像；整数溢出、未知状态、
+  非法 hash、额外字段均被拒绝，解析失败不留下半份状态。保留子进程隔离、
+  截止时间与停止信号取消。
+- 日志/崩溃文件扫描归 logctl，通过 diagnostic-reason 输出 DMEVIDENCE1；
+  OTA 只接受已知原因，查询缺失、超时或错误不会伪造原因或修改原失败记录。
+- SDK 20 项、管理 51 项最终通过；首轮对象链接依赖和日志命令测试桩问题
+  已修正，失败记录保留，受影响回归重新通过。FIT 4 项、恢复 6 项、ARM64
+  initramfs 加载、真实固件包上传发布下载均通过。
+- 发布 ID `83649a99e8f0330cf045e338374e30cb42a53253789a331fff2acb953cd5130f`，tag v0.0.1，审计编号 107，设备上报 success。
+  启动 ID `37dbb228-e779-4e62-8411-afcce2f8a5f2`。零失败服务、双 rootfs 槽、当前镜像全量校验、
+  持久日志与校时通过；实机新证据接口正常返回，无异常原因。未更新 SPL/U-Boot。
+
+证据：`output/ota-validation/0.0.1-layering-s3/`。
+
 ## 完成状态
 
 | 阶段 | 固件 tag | 内容 ID 前缀 | 实机结果 |
@@ -300,6 +317,7 @@ OTA 成功记录、串口验收及提交记录。
 | OSA 用户态日志入口统一 | v0.0.1 | 4a31f6d8 | success |
 | 分层 1：OSA IPC 与进程执行 | v0.0.1 | daa25df8 | success |
 | 分层 2：小文件持久化 | v0.0.1 | dd3049bf | success |
+| 分层 3：固件与日志证据接口 | v0.0.1 | 83649a99 | success |
 
 每阶段均先构建、发布并完成实机健康确认，再提交与推送子仓库，最后更新
 workspace gitlink。最新使用方法见 [EDK README](../../edk/README.md)。
