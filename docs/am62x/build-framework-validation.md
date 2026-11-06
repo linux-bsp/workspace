@@ -17,3 +17,17 @@
   持久日志、SOL 和 UTC+8 时间同步通过。未更新或验证引导程序。
 
 证据与精确源码快照：`output/ota-validation/0.0.1-build-refactor-s1/`。
+
+## 阶段 2：有效构建类型
+
+- 显式 CMAKE_BUILD_TYPE 在 Kconfig 默认值计算前应用；类型切换通过最小配置
+  重新推导默认值，保留非默认功能选择。
+- effective-config.json 与 build-info.json 保存实际构建类型和归一化配置。
+- Debug/Release 来回切换、FORTIFY、PDI 功能保留、SDK 消费与配置映射回归通过。
+- 原生安装/固件/时间回归、Host/Target 包、完整板卡镜像和 ARM64 加载器通过。
+- 发布审计编号 96；固件 ID `850c9bf97e9941b82e31d9a324a83856acd57ac50733b0130e636db07b1ddc88`。
+- 设备 192.168.10.211 上报 success；启动 ID `d147ccc2-3ad4-43ca-8616-3f010444efe8`。
+- systemd、双 rootfs、实际负载 SHA256、持久日志、SOL 和 UTC+8 校时通过。
+  本阶段未更新引导程序。
+
+证据：`output/ota-validation/0.0.1-build-refactor-s2/`。
