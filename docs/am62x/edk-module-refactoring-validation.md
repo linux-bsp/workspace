@@ -109,6 +109,30 @@
 固件包、服务器结果、串口日志和提交检查。服务重载辅助脚本的进程退出竞态已
 修复；首次未重启成功时尚未发布固件，相关重载/串口记录保留用于追溯。
 
+## 后续整理：外设协议归位与模拟器移除（2026-11-06）
+
+- MCU、电源报文定义迁入 `kernel/pdm/drivers/mcu/`、`kernel/pdm/drivers/power/`，
+  作为对应驱动的私有头文件；Satellite 协议原本就在内核驱动内。
+- OTA 报告和时间源等用户态共享协议迁到 `user/protocol/`；移除顶层 `protocol/`。
+  UAPI 保持独立，报文字段、CRC 和用户态管理协议内容没有改变。
+- 删除独立 CAN 模拟器源码、Kconfig/CMake 入口、三个预设中的选项，以及
+  pdebug 帮助和现行文档中的模拟器操作步骤。保留协议固定向量和事务回归测试。
+- SDK CI 16 项、管理端 CI 47 项全部通过，实际 ARM64 initramfs 加载检查通过。
+  从干净 EDK/host-edk 包目录重新构建，并完成 AM625 镜像打包。
+- 清除本机构建输出中此前安装的模拟器；最终 squashfs 和实机均确认没有
+  `/usr/bin/simulator`，pdebug、PDM 和管理工具正常保留。无运行时兼容或清理脚本。
+- 发布 ID：`0ba0e3a81eee82e2c82b3456e8a811c28e5229cce5f07afa6ec831ccdd29196c`。
+- 固件 tag：`v0.0.1`；发布审计编号 99，设备 `192.168.10.211` 上报 `success`。
+- 启动 ID：`c5d069b0-111e-41f9-a6bb-af66375890ec`。
+- 实机无失败服务，固件健康确认成功；双 rootfs 与当前 kernel/rootfs 完整哈希
+  校验、日志持久化、SOL、UTC+8 同步通过。PDM 三个外设节点正常绑定，pdebug
+  可查询，帮助信息没有已移除的模拟器命令。
+- 本次验证不包含真实 MCU/卫星平台对端的 CAN 互操作；未更新 SPL/U-Boot。
+- EDK 提交：`ee31b637`，在实机确认和源码快照检查通过后提交并推送。
+
+证据：`output/ota-validation/0.0.1-kernel-protocol-cleanup/`，包含测试结果、
+镜像文件清单、完整源码快照、构建来源、发布记录和串口验收日志。
+
 ## 完成状态
 
 | 阶段 | 固件 tag | 内容 ID 前缀 | 实机结果 |
@@ -119,6 +143,7 @@
 | 4 日志与时间 | v0.0.1 | 870e576b | success |
 | 5 服务端与协议 | v0.0.1 | cc53966b | success |
 | 6 构建配置统一 | v0.0.1 | 2868a463 | success |
+| 协议归位与模拟器移除 | v0.0.1 | 0ba0e3a8 | success |
 
 每阶段均先构建、发布并完成实机健康确认，再提交与推送子仓库，最后更新
 workspace gitlink。最新使用方法见 [EDK README](../../edk/README.md)。
