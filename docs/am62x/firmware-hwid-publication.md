@@ -49,7 +49,7 @@ ota-cli --server http://127.0.0.1:8090 publish draft-XXXXXX
 
 ## 产品名称
 
-页面从 HWID 解析产品线、项目、产品型号和 PCB 版本，通过 [名称字典](../../edk/configs/hwid-registry.json) 显示和查询中文名称。
+页面从 HWID 解析产品线、项目、产品型号和 PCB 版本，通过 [名称字典](../../edk/user/apps/device-manager/data/hwid-registry.json) 显示和查询中文名称。
 项目使用 `PP/JJJJ`、型号使用 `PP/JJJJ/MMMM` 查找，未登记时保留原始编码；维护方法见
 [HWID 名称字典说明](../../edk/docs/device-manager/hwid.md#名称字典)。字典不决定固件适配范围，也不能替代包内 HWID 校验。
 
