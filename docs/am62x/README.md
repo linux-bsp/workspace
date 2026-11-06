@@ -17,6 +17,8 @@
 
 ## 验证与溯源
 
+- [构建框架优化验收](build-framework-validation.md)
+
 - [当前 EDK 模块重构验收基线](edk-module-refactoring-validation.md)
 - [固件下载、事务与恢复优化验证](firmware-upgrade-optimization-validation.md)
 - [OTA 启动失败日志实机验证](ota-boot-failure-log-validation.md)
