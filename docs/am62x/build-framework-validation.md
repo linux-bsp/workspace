@@ -31,3 +31,19 @@
   本阶段未更新引导程序。
 
 证据：`output/ota-validation/0.0.1-build-refactor-s2/`。
+
+## 阶段 3：可复现发布与完整来源
+
+- AM625 启用可复现文件系统时间；FIT 构建时间统一使用 SOURCE_DATE_EPOCH。
+- 完整发布包在私有目录生成验证后原子交换；失败保留上次有效 OTA 包。
+- build-manifest.json 记录全部仓库、未提交改动、配置、工具与 Host/Target 编译来源；
+  编译来源与打包时 EDK 源码摘要一致。Host 来源不再为 unknown。
+- 固定输入/时间的真实 FIT 回归、失败保留反例、SDK 与源码摘要回归通过。
+- 两次完整镜像生成的四个 ITB 及完整内容 ID 逐字节一致，保留 first/repeat-hashes.json。
+  此结果不代表工厂 ext4/SD UUID 或跨机器全量工具链重建已可复现。
+- 发布审计编号 97；固件 ID `22e1f15e87e15c53ab0485d2ed444583c0f0dae1262b0724005dbf4a69fd81f2`。
+- 设备 192.168.10.211 上报 success，启动 ID `462b6fc6-08e0-4981-b7cd-9deef09f6f67`。
+- systemd、双 rootfs、实际负载 SHA256、持久日志、SOL、UTC+8 与 ARM64 加载器通过。
+  本阶段未更新引导程序。
+
+证据：`output/ota-validation/0.0.1-build-refactor-s3/`。
