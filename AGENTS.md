@@ -7,13 +7,15 @@ SadBoard develops on the `SadBoard` branch of `linux-bsp/workspace`, using exist
 - `README.md`: project scope, status, and documentation index.
 - `docs/sadboard-debugging-handbook.md`: consolidated Chinese textbook, organized by case; includes preparation, tools, kernel reading, graded exercises, report template and Bootlin references. Extend the corresponding chapter rather than creating separate learning manuals. Distinguish source-derived paths from captured stacks.
 - `docs/am625-debug-validation.md`: dated build and board evidence, separate from learning instructions.
-- `docs/workspace-guide.md`: inherited workspace operations; check historical platform examples before use.
+- `docs/workspace-toolchain.md`: current shared directory layout and standalone SDK workflow.
+- `docs/am62x/`, `docs/imx6ull/`, `docs/h200/`: board and hardware references; i.MX6ULL examples do not imply a supported SadBoard profile.
 - `buildroot/`, `linux/`, `uboot/`: build system and versioned source submodules.
 - `bsp-base-external/`: board support; keep the `LINUX_BSP` external identifier.
 - `sadboard-external/`: `SADBOARD` external with AM6254 debugging fragments, setup script, and target overlay.
 - `edk/`, `libbmc/`: existing software submodules.
 
 Put learning guides in `docs/`, board references in `docs/<board>/`, and generated builds in ignored `output/`. Link new guides from `README.md`. Read submodule-specific instructions before changing their contents.
+Keep firmware and device-management architecture in `edk/docs/`; link to it instead of maintaining another copy in this workspace. Completed phase results belong in the validation archive.
 
 ## Build, Test, and Development Commands
 

@@ -27,22 +27,25 @@ permissions does not fix that service namespace restriction.
 ## Publish a new build
 
 The server publishes a copy, so refresh it after rebuilding firmware. From
-the BSP workspace root, copy component images first and the manifest last:
+the SadBoard workspace root, copy component images first and the manifest last:
 
 ```sh
-install -m 0644 buildroot/output/images/release/kernel.itb \
-    buildroot/output/images/release/rootfs.itb \
-    buildroot/output/images/release/bootloader.itb /srv/tftp/am625/
-install -m 0644 buildroot/output/images/release/release.itb /srv/tftp/am625/
+firmware_dir="$PWD/output/am625-debug-systemd/images/release"
+install -m 0644 "$firmware_dir/kernel.itb" \
+    "$firmware_dir/rootfs.itb" /srv/tftp/am625/
+install -m 0644 "$firmware_dir/release.itb" /srv/tftp/am625/
 ```
 
 No service restart is needed after publishing. Complete publication before
 starting an update so the manifest and component files are from the same build.
+If using the default in-tree Buildroot output, set `firmware_dir` to
+`$PWD/buildroot/output/images/release` instead. The current release manifest
+contains kernel and rootfs; copying a bootloader package is not part of this flow.
 
 ## Board update
 
 Use the explicit URL to override any different update-server setting already
-present in `/etc/edk/firmware.conf`:
+present in `/etc/device-manager/firmware.conf`:
 
 ```sh
 fwctl update all tftp://192.168.10.246/release.itb

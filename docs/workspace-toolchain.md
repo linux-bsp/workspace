@@ -1,11 +1,11 @@
 # Workspace 目录与 AM62x SDK
 
-## 建议目录
+## 当前目录
 
-以下为计划采用的目录布局；现有工作区尚未迁移。
+当前主机使用以下布局，公共根目录是 `~/workspaces/`：
 
 ```text
-~/workspace/                         # 普通容器目录
+~/workspaces/                        # 普通容器目录
 ├── am62x/                           # workspace 仓库的 BSP 开发副本
 ├── SadBoard/                        # workspace 仓库的 SadBoard 分支副本
 ├── dl/                              # 共享源码下载缓存
@@ -15,8 +15,8 @@
 
 两个仓库分别保留构建输出及其 `host/`。公共 `toolchain/` 存放由 `make sdk`
 导出的工具链；不把两个构建的 `BR2_HOST_DIR` 指向这里。
-迁移前保存未提交修改，在新位置重新生成构建配置；旧构建输出含绝对路径，
-不能仅移动目录就假定可以继续增量编译。
+今后调整路径时，在新位置重新生成构建配置；旧构建输出含绝对路径，不能仅移动
+目录就假定可以继续增量编译。当前 SadBoard 的板卡构建目录为 `output/am625-debug-systemd/`。
 
 ## 生成独立 SDK
 
@@ -32,16 +32,15 @@ SDK 使用 AArch64、GCC 15、glibc、Linux 7.0 系列头文件，支持 C++，
 在新布局的 SadBoard 仓库根目录运行（也可以在包含此配置的 am62x 副本运行）：
 
 ```sh
-cd ~/workspace/SadBoard
+cd ~/workspaces/SadBoard
 git submodule update --init buildroot bsp-base-external
-export BR2_DL_DIR="$HOME/workspace/dl"
+export BR2_DL_DIR="$HOME/workspaces/dl"
 
 make -C buildroot O="$PWD/output/am62x-sdk" \
   BR2_EXTERNAL=../bsp-base-external am62x_sdk_defconfig
 make -C output/am62x-sdk sdk
 ```
 
-尚未迁移时，先进入当前实际仓库根目录，再运行相同的配置和构建命令。
 `O=` 指定专用 SDK 输出目录，避免覆盖 AM625 调试镜像的配置。
 第二条 `make` 会使用输出目录记录的 external 配置，不必再传 `BR2_EXTERNAL`。
 `BR2_DL_DIR` 是当前 shell 的环境变量，新终端需要重新导出或设置在本机 shell 配置中。
@@ -58,13 +57,13 @@ output/am62x-sdk/images/aarch64-buildroot-linux-gnu_sdk-buildroot.tar.gz
 仍在生成 SDK 的仓库根目录，且目标 SDK 目录尚不存在时执行：
 
 ```sh
-mkdir -p "$HOME/workspace/toolchain"
+mkdir -p "$HOME/workspaces/toolchain"
 tar -xzf output/am62x-sdk/images/aarch64-buildroot-linux-gnu_sdk-buildroot.tar.gz \
-  -C "$HOME/workspace/toolchain"
-"$HOME/workspace/toolchain/aarch64-buildroot-linux-gnu_sdk-buildroot/relocate-sdk.sh"
+  -C "$HOME/workspaces/toolchain"
+"$HOME/workspaces/toolchain/aarch64-buildroot-linux-gnu_sdk-buildroot/relocate-sdk.sh"
 
-"$HOME/workspace/toolchain/aarch64-buildroot-linux-gnu_sdk-buildroot/bin/aarch64-buildroot-linux-gnu-gcc" -dumpmachine
-"$HOME/workspace/toolchain/aarch64-buildroot-linux-gnu_sdk-buildroot/bin/aarch64-buildroot-linux-gnu-gcc" -dumpversion
+"$HOME/workspaces/toolchain/aarch64-buildroot-linux-gnu_sdk-buildroot/bin/aarch64-buildroot-linux-gnu-gcc" -dumpmachine
+"$HOME/workspaces/toolchain/aarch64-buildroot-linux-gnu_sdk-buildroot/bin/aarch64-buildroot-linux-gnu-gcc" -dumpversion
 ```
 
 预期目标为 `aarch64-buildroot-linux-gnu`，GCC 主版本为 `15`。
@@ -87,8 +86,8 @@ make -C output/am62x-sdk sdk BR2_SDK_PREFIX=am62x-gcc15-linux7-v1
 ```sh
 python3 sadboard-external/scripts/configure-am625.py \
   --output output/am625-shared-sdk \
-  --toolchain "$HOME/workspace/toolchain/aarch64-buildroot-linux-gnu_sdk-buildroot" \
-  --dl-dir "$HOME/workspace/dl"
+  --toolchain "$HOME/workspaces/toolchain/aarch64-buildroot-linux-gnu_sdk-buildroot" \
+  --dl-dir "$HOME/workspaces/dl"
 make -C output/am625-shared-sdk
 ```
 
@@ -99,7 +98,12 @@ make -C output/am625-shared-sdk
 
 ## 验证范围
 
-本次验证配置加载、工具链选项和包依赖，不代表新 SDK 已完成编译、解压或上板测试。
+现有 SDK 于 2026-10-31 构建、解压和重定位，记录位于公共目录的
+`toolchain/am62x-sdk-build-info.json`，记录的 GCC 为 15.2.0、GDB 为 15.2、目标为
+`aarch64-buildroot-linux-gnu`，SDK 归档 SHA256 为
+`255e9af16887da1905c916c36cb2d426c13ac990eec818496de29a2d5c0dc802`。
+本次清理重新执行了编译器目标/版本和 GDB 版本查询，结果一致；没有重新构建 SDK。
+SadBoard 使用该工具链的板卡与案例结果见 [实机验收档案](am625-debug-validation.md)。
 SDK 导出和重定位流程依据本仓库 Buildroot 的
 [`using-buildroot-toolchain.adoc`](../buildroot/docs/manual/using-buildroot-toolchain.adoc)
 及 [`Makefile`](../buildroot/Makefile)。

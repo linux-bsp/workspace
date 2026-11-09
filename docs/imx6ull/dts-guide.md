@@ -2,6 +2,9 @@
 
 本文是仓库级 DTS 配置与硬件验证通用指南，以 ALIENTEK ATK-DL6Y2C i.MX6ULL 开发板作为贯穿示例，说明从拿到硬件原理图和芯片手册，到编写 Linux DTS 节点，再到上板验证硬件功能的完整流程。
 
+本文是保留的 i.MX6ULL 板级参考，按该板原理图和内核源码阅读；不代表当前 SadBoard 已提供
+i.MX6ULL 构建配置或完成对应实机验收。AM625 案例统一见 [故障定位教材](../sadboard-debugging-handbook.md)。
+
 本文示例参考文件：
 
 - 原理图：`docs/imx6ull/schematics/Schematic.pdf`
