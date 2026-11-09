@@ -2,7 +2,7 @@
 
 ## Project Structure & Module Organization
 
-SadBoard develops on the `SadBoard` branch of `linux-bsp/workspace`, using existing BSP submodules. AM6254 provides a systemd debug profile, SSH and manual crash, cgroup OOM, CPU hotspot and mutex-wait scenarios. Random scenario orchestration and general automatic grading are not implemented. Record image build and board validation status separately.
+SadBoard develops on the `SadBoard` branch of `linux-bsp/workspace`, using existing BSP submodules. AM6254 provides a systemd debug profile, SSH and six manual scenarios: crash, cgroup OOM, CPU hotspot, mutex wait, isolated networking and startup panic recovery. Random scenario orchestration and general automatic grading are not implemented. Record image build and board validation status separately.
 
 - `README.md`: project scope, status, and documentation index.
 - `docs/am625-quickstart.md`: board startup and first experiment walkthrough.
@@ -50,3 +50,5 @@ Preserve Bootlin source links and CC BY-SA 3.0 attribution. Separate project pro
 ## Experiment Release Workflow
 
 Keep firmware at v0.0.1 and distinguish builds with full content IDs. Preserve matched vmlinux, source, configuration and symbols under images/debug/. Debug programs retain symbols; generic target binaries are stripped to fit the unchanged A/B slots. No scenario starts at boot. Verify the image and publish kernel/rootfs only, wait for the AM625 to report OTA success and pass scenario validation, then commit and push the scenario submodule before the SadBoard workspace branch. Never flash the generated factory image over the current device or change its partition layout as part of a debugging exercise.
+
+Use `sadboard status/check/reset RUN_DIRECTORY` for managed evidence. Network faults belong to owned namespaces, never the management eth0. The manual panic exercise requires a previously confirmed firmware, an extra reboot and an unsealed startup; pause confirmation with SIGSTOP/SIGCONT, since stopping its unit triggers OnFailure. Verify failed and healthy SPL/U-Boot/kernel archives, pstore and local recovery before committing that case. Preserve BusyBox configuration as well as kernel configuration: tool availability alone does not prove option support.

@@ -166,3 +166,12 @@ sadboard verify crash
 
 调试镜像的固件较大，OTA 缓存只保留当前完成包；data 空间不足时，应先归档现场，
 不要通过取消日志空间阈值或格式化存储来继续实验。
+
+## 网络与 panic
+
+`sadboard run network` 在专用 namespace 内注入延迟，`sadboard verify network` 对照
+基线、延迟、丢包及恢复，并保存 pcap；不影响 eth0 管理链路。参见 [网络案例](cases/network.md)。
+
+[panic 案例](cases/kernel-panic.md) 需要先确认固件正常，再额外重启并在未封存的启动
+窗口手动运行。它会使设备重启；恢复后用 `sadboard check RUN` 核对失败与正常两次
+启动、完整固件 ID、pstore 和健康结果。不要把普通参考修复命令替换成自动批量触发 panic。

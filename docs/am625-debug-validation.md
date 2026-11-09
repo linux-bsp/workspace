@@ -96,3 +96,64 @@ performance-validation、原始串口、Valgrind、strace、GDB 及火焰图。�
 
 工件：`output/validation/stage3-lifecycle-final/`，包含 source snapshot、发布审计、
 board-validation、lifecycle-validation 和逐项日志。初轮保留在 `stage3-lifecycle/`。
+
+
+## 阶段 4：隔离网络与启动 panic（2026-11-09）
+
+最终固件 `v0.0.1 / 7788272ef4d66cd5cae8746c0cfb94575953e32c4d8dc1cc8a6b61ebed32f323`，发布 123，设备 OTA success。
+恢复后的 boot ID `debf4655-3f99-4e29-8920-22f15dbf0e5d`，当前仍使用同一固件、已确认部署，SSH 正常。
+
+### 网络实测
+
+- RTT：无故障 0.248 ms → 注入单向 100 ms 后
+  100.284 ms → 移除后 0.244 ms。
+- 100% 丢包阶段如期全部丢失；两次 TCP 测试各发送并接收 1048576 字节，无少传数据。
+- pcap 为 2145666 字节、557 包，解析确认有 ICMP 和 TCP。
+- 实验结束/取消后 namespace 清理通过，eth0 地址、MAC 和全局路由逐项比较未变。
+- 1 MiB 短流的接收统计约 1 秒，包含测试和控制流程开销；该速率不代表真实网口带宽。
+
+### 单一 panic、持久证据与 SOL
+
+- 已确认固件额外正常重启，boot `ea4aa70e-995d-48ad-9e21-52477a1d0ea3` 在未封存窗口手动触发
+  SysRq panic；串口打印原因、实验 marker、调用栈及 3 秒重启倒计时。
+- 最终窗口没有附加的健康失败或 fw-confirm stop 事件；用 SIGSTOP/SIGCONT 暂停/恢复
+  确认进程，避免 OnFailure 参与。配套 vmlinux 解码到 drivers/tty/sysrq.c:154、
+  write_sysrq_trigger 等真实源行。
+- 下一正常启动 `debf4655-3f99-4e29-8920-22f15dbf0e5d` 通过健康确认，boot-state 的前一 Linux boot
+  匹配失败现场，previous_intent=operator，诊断为 linux-panic-observed。
+- logctl 导出含 crash-ramoops 的 recovery.tar.gz，SHA256
+  `565c4d7168a6b5c854900981a2847312ad3637f8c03abba41289c20f8c19b82c`。它是本次取证快照，不是内核内存 vmcore。
+- SOL 服务器收到失败和恢复两条独立启动记录，并完成两份 RAM bank 确认清除：
+
+| 记录 | Startup ID | R5 SPL | A53 SPL | U-Boot | Kernel |
+| --- | --- | ---: | ---: | ---: | ---: |
+| 异常启动 | ff388253-79cd-4981-837f-a63b235539a1 | 418 | 455 | 3029 | 26406 |
+| 正常恢复 | c0be1c87-c603-45c5-aa74-aa1f7f0d1da7 | 418 | 455 | 3029 | 24967 |
+
+表中大小单位为字节。异常 kernel 段包含对应实验 marker 和 panic 文本，四个阶段
+均有实质内容。Startup ID 是启动缓冲的标识，和 Linux boot ID 不同，需要用
+recovery-boot/boot-state 建立关联，不能直接把两个 UUID 当作同一字段。
+
+[异常启动原始四段日志](http://192.168.10.246:8090/api/sol/logs/1c-63-49-22-c4-f7/ff388253-79cd-4981-837f-a63b235539a1/all/0)
+与 [正常恢复原始四段日志](http://192.168.10.246:8090/api/sol/logs/1c-63-49-22-c4-f7/c0be1c87-c603-45c5-aa74-aa1f7f0d1da7/all/0)
+为服务器 JSON 接口；同时可在 SOL 页面按启动时间选择。
+
+### 回归与中间问题
+
+- 最终镜像回归六类现场；原有 crash/OOM/CPU/lock 的运行、参考修复、参数、取消、
+  不完整记录和外部 reset 拒绝测试通过，零失败服务。
+- 双 rootfs 槽检查、实际 kernel/rootfs 完整 SHA256、日志持久化/同步/归档确认、
+  UTC+8 校时和 SSH 主机指纹检查通过。
+- 原生 10 项、实际 FIT/恢复 4 项、真实 ARM64 initramfs 依赖执行检查通过；新 BusyBox
+  配置已导出并验证 FLOAT_DURATION，生成的便携 defconfig 包含对应片段。
+- 初轮 121 暴露 BusyBox 不支持小数时间、后台抓包继承忽略 INT。改为独立调试片段
+  启用 FLOAT_DURATION、TERM+wait 收尾，并用本案例 reset 清理残留 namespace。
+- 122 已捕获 panic 与恢复，但发现停止 fw-confirm 额外触发 OnFailure；改为暂停进程后
+  重新发布 123，复测只包含预期 panic。中间结果均保留，未据此提前提交阶段完成。
+- 终检脚本曾把准备阶段正常 reboot 的 stop 日志也计入故障窗口；更正为失败那次 kernel
+  的窗口后重新核对现有原始证据，没有为修复脚本断言再次触发 panic。
+
+最终工件：`output/validation/stage4-panic-isolated/`，包含 source snapshot、发布审计、
+board/network/panic/lifecycle-validation、完整原始串口、pcap、服务端四段 JSON、
+pstore 附件和 panic-decoded.log。前两轮分别保留在 stage4-network-panic/ 和
+stage4-network-panic-final/。本轮不刷写 SPL/U-Boot，不修改分区，不增加自动启动故障。

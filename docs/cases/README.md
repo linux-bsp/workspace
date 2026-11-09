@@ -9,10 +9,12 @@
 | [内存泄漏与 cgroup OOM](oom.md) | 内存趋势、cgroup、Valgrind | 按需分配、memcg 计费、回收与杀进程 |
 | [CPU 查找热点](cpu.md) | perf stat/record、火焰图 | 算法复杂度、PMU、中断采样与调用链 |
 | [持锁等待](lock.md) | 线程栈、strace、调度 trace | 用户态互斥锁、futex、睡眠与唤醒 |
+| [网络延迟与丢包](network.md) | ping、iperf3、tcpdump、ss、tc | namespace、veth、qdisc、TCP 时延与重传 |
+| [内核 panic 与启动恢复](kernel-panic.md) | 原始串口、栈解码、pstore、SOL | SysRq、panic、ramoops、跨启动关联 |
 
 [工具手册](../debug-tools.md) 解释通用参数、符号准备与常见误判；各案例给出具体分析流程。
 [场景管理](../scenario-lifecycle.md) 说明统一现场、参数、status/check/reset 和监督边界。
-网络和 kernel panic 案例尚在开发计划内，完成后补入本手册。
+上述六个案例均已完成 AM625 实机验收；具体固件 ID、采样数据和启动日志结果见实机记录。
 
 ## 源码与证据约定
 

@@ -21,7 +21,9 @@ sadboard-debug-check
 `fwctl version` 的日志使用短 ID；公共机器接口 `ota-status` 的 FWOTA2 记录含完整 ID，
 适合保留到原始证据，不能从短 ID 反推全值。保存精确命令、输入、stdout/stderr、
 退出码，性能原始文件和对应 ELF。目标时区为 UTC+8；时间未同步时另记 boot ID 和 uptime。
-`images/debug/build-info.json` 将源码、ELF、内核配置与固件关联起来。
+`images/debug/build-info.json` 将源码、ELF、内核和 BusyBox 配置与固件关联起来。
+嵌入式命令的选项常被裁剪；必要时查导出的配置及工具源码，不能只凭同名命令存在
+就套用主机用法。例如小数秒 sleep/ping 还依赖 BusyBox 的 FLOAT_DURATION。
 
 不要把 `vmlinux`、压缩 Image.gz、kernel.itb 混为同一用途：vmlinux 是带符号的 ELF，
 Image.gz 是启动内核载荷，ITB 是包含内核、initramfs、DTB 等的 FIT 容器。
