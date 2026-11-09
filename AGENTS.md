@@ -5,9 +5,8 @@
 SadBoard develops on the `SadBoard` branch of `linux-bsp/workspace`, using existing BSP submodules. AM6254 provides a systemd debug profile, SSH and seven manual scenarios: crash, FD exhaustion, cgroup OOM, CPU hotspot, mutex wait, isolated networking and startup panic recovery. Random scenario orchestration and general automatic grading are not implemented. Record image build and board validation status separately.
 
 - `README.md`: project scope, status, and documentation index.
-- `docs/am625-quickstart.md`: board startup and first experiment walkthrough.
-- `docs/cases/` and `docs/debug-tools.md`: detailed case mechanisms, pinned kernel source paths, investigation steps and tool parameters. Distinguish source-derived paths from captured stacks.
-- `docs/bootlin-linux-debugging-guide.md`: Chinese Bootlin study guide.
+- `docs/sadboard-debugging-handbook.md`: consolidated Chinese textbook, organized by case; includes preparation, tools, kernel reading, graded exercises, report template and Bootlin references. Extend the corresponding chapter rather than creating separate learning manuals. Distinguish source-derived paths from captured stacks.
+- `docs/am625-debug-validation.md`: dated build and board evidence, separate from learning instructions.
 - `docs/workspace-guide.md`: inherited workspace operations; check historical platform examples before use.
 - `buildroot/`, `linux/`, `uboot/`: build system and versioned source submodules.
 - `bsp-base-external/`: board support; keep the `LINUX_BSP` external identifier.
@@ -27,7 +26,7 @@ BR2_EXTERNAL="../bsp-base-external ../sadboard-external" \
   make sadboard_am625_debug_defconfig && make all
 ```
 
-Without `O=`, artifacts go to `buildroot/output/`; existing guides also use workspace `output/am625-debug/`. Keep output trees separate when changing toolchains. The Python helper remains optional for local toolchains and diagnostic variants. After changing baseline fragments, regenerate the checked-in defconfig with `--export-defconfig` in a fresh output directory and verify configuration equivalence. See `docs/am625-bootlin-debug-environment.md`. Run `python3 sadboard-external/tests/test-labs.py` for scenario regressions. `sadboard list`, `sadboard run crash` and `sadboard verify crash` are target commands; verification checks the reference repair, not an arbitrary learner patch. Bootlin commands remain external lab instructions.
+Without `O=`, artifacts go to `buildroot/output/`; the current board validation uses workspace `output/am625-debug-systemd/`. Keep output trees separate when changing toolchains. The Python helper remains optional for local toolchains and diagnostic variants. After changing baseline fragments, regenerate the checked-in defconfig with `--export-defconfig` in a fresh output directory and verify configuration equivalence; see the handbook's build appendix. Run `python3 sadboard-external/tests/test-labs.py` for scenario regressions. `sadboard list`, `sadboard run crash` and `sadboard verify crash` are target commands; verification checks the reference repair, not an arbitrary learner patch. Bootlin commands remain external lab instructions.
 
 Use `git diff --check`, `git diff --cached --check`, and `git status --short`. Review untracked files separately.
 

@@ -8,7 +8,7 @@ SadBoard 是一个面向嵌入式 Linux 的故障定位与分析练习项目。�
 
 ## 当前状态
 
-已完成 AM6254 systemd 调试基线和七个手动案例的实机验证：GDB/core、描述符泄漏、受限 OOM、CPU 热点、锁等待、隔离网络、启动 panic 与恢复取证。支持 SSH、匹配符号、完整现场记录及参考修复。随机题库和通用自动评分尚未实现。学习入口为 [案例学习手册](docs/cases/README.md) 和 [调试工具参数手册](docs/debug-tools.md)，入口与结果管理见 [场景生命周期](docs/scenario-lifecycle.md)。具体进度见 [开发计划](docs/sadboard-development.md) 和 [实机验证记录](docs/am625-debug-validation.md)。
+已完成 AM6254 systemd 调试基线和七个手动案例的实机验证：GDB/core、描述符泄漏、受限 OOM、CPU 热点、锁等待、隔离网络、启动 panic 与恢复取证。支持 SSH、匹配符号、完整现场记录及参考修复。随机题库和通用自动评分尚未实现。全部学习内容统一在 [嵌入式 Linux 故障定位与分析教材](docs/sadboard-debugging-handbook.md)，按用例分章，包含基础原理、工具参数、源码路径、分级练习和参考修复。具体进度见 [开发计划](docs/sadboard-development.md) 和 [实机验证记录](docs/am625-debug-validation.md)。
 
 ## Workspace 分支与 Buildroot 扩展层
 
@@ -34,7 +34,7 @@ BR2_EXTERNAL="../bsp-base-external ../sadboard-external" \
 
 不指定 `O=` 时，产物位于 `buildroot/output/images/`。Buildroot 会记住本输出目录使用的两个 external；后续 `make all` 无需再次指定。默认独立构建工具链，配置输入保存在 Git 中，输出目录由构建生成。
 
-在新克隆的工作区中，先运行 `git submodule update --init --recursive`。`libbmc` 使用 `git@github.com:wanguo99/libbmc.git` 的 `master` 分支。`make list-defconfigs` 可以查看本实验入口。可选工具链、独立输出目录和详细构建步骤见 [环境指南](docs/am625-bootlin-debug-environment.md)。
+在新克隆的工作区中，先运行 `git submodule update --init --recursive`。`libbmc` 使用 `git@github.com:wanguo99/libbmc.git` 的 `master` 分支。`make list-defconfigs` 可以查看本实验入口。可选工具链、独立输出目录和详细构建步骤见 [环境指南](docs/sadboard-debugging-handbook.md#build-extensions)。
 
 `sadboard-external` 包含 AM6254 配置生成脚本、Buildroot/内核配置片段、手动实验程序和目标端环境检查脚本，跟踪远端 `main` 分支。workspace 固定所有子模块的具体提交；复现实验时使用固定提交。`git submodule update --remote` 会尝试更新到跟踪分支的新提交。
 
@@ -153,19 +153,9 @@ QEMU 计划用于验证分析流程、逻辑故障和场景复现。依赖真实
 
 ## 文档
 
-- [故障定位教材与学习路线](docs/study-guide.md)、[共同基础](docs/debugging-foundations.md)：从现象、概念到取证和内核机制，由浅入深阅读。
-
-- [分级故障定位练习册](docs/workbook.md)、[实验报告模板](docs/lab-report-template.md)：先独立取证，再按 L1～L3 复盘。
-
-- [内核阅读笔记](docs/kernel-reading-notes.md)：区分源码关键路径、实际调用栈与证据边界。
-
-- [Workspace 目录与 AM62x SDK](docs/workspace-toolchain.md)：独立 SDK 配置、原生 `make sdk`、手动解压重定位和共享工具链。
-
-- [AM6254 快速上手](docs/am625-quickstart.md)：使用已有镜像、NFS/TFTP 启动、环境检查和第一个 GDB 实验。
-
-- [AM6254 Bootlin 调试环境](docs/am625-bootlin-debug-environment.md)：配置生成、构建、NFS 启动与实验验证。
-
-- [Bootlin Linux 调试课程详解与实验学习指南](docs/bootlin-linux-debugging-guide.md)：课程主题、官方实验、资料链接，以及与 SadBoard 目标的对应关系。
+- [嵌入式 Linux 故障定位与分析教材](docs/sadboard-debugging-handbook.md)：统一学习入口，按七个用例组织；准备步骤、工具、源码笔记和练习集中在同一文档，Bootlin 资料与报告模板放在附录。
+- [AM625 实机验收档案](docs/am625-debug-validation.md)：各阶段固件 ID、真实执行结果及附件位置。
+- [Workspace 目录与 AM62x SDK](docs/workspace-toolchain.md)：独立 SDK、共享下载缓存与工具链管理。
 
 ## 仓库
 
@@ -173,4 +163,4 @@ QEMU 计划用于验证分析流程、逻辑故障和场景复现。依赖真实
 
 ## 资料署名
 
-课程文档中对 Bootlin 实验手册的归纳和改编沿用 CC BY-SA 3.0，具体署名与来源见文档末尾。本文的项目设想不代表 Bootlin 官方课程安排。项目代码许可将在开始实现时另行确定。
+教材中对 Bootlin 实验手册的归纳和改编沿用 CC BY-SA 3.0，具体署名与来源见 [教材附录 C](docs/sadboard-debugging-handbook.md#bootlin)。项目设想不代表 Bootlin 官方课程安排，SadBoard 代码许可尚未确定。

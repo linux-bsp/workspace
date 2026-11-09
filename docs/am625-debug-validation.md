@@ -220,3 +220,40 @@ pcap 2135240 字节、430 包，包含 ICMP/TCP。取消与 namespace 清理、�
 原始串口、board/lifecycle/network/fd/GDB 验证 JSON、strace 与 core 原件。
 新增 FD 教材章节，并扩充六个已有案例的先修概念、计算模型、逐步取证、返回值判读、
 反例和实测样例；学习路线与练习册同步整理为七个章节。
+
+
+<a id="bootlin-build-history"></a>
+
+## 早期 Bootlin/NFS 构建验证档案（2026-10-30～31）
+
+以下保留当时的主机验证结果。文中的“本次”“尚未验证”指这个早期阶段；当前 systemd、OTA 和七个案例的实机结果见本文件前面的各阶段记录。当前操作统一使用 [调试教材](sadboard-debugging-handbook.md#preparation)。
+
+
+2026-10-30 至 2026-10-31，在当前 x86-64 主机完成以下验证：
+
+- 使用已有 GCC 15/glibc 工具链与共享下载缓存，`make -C output/am625-debug BR2_PRIMARY_SITE=https://sources.buildroot.net` 完整构建成功，退出码为 0。未修改基础 BSP、Buildroot 或 Linux 源码。
+- 默认内部工具链配置通过 Kconfig 检查，但未另行完整构建；本次实际产物来自外部工具链配置。
+- 基础调试内核为 Linux `7.0.0`，Buildroot 实际内核配置保留了全部基础片段要求。可选 KGDB 和 memory 片段分别通过配置检查，尚未独立编译或上板。
+- `rootfs.tar` 已核对 gdbserver、strace、ltrace、Valgrind、perf、trace-cmd、iperf3、tcpdump、stress-ng、ss、vmstat 和 iostat；检查脚本与启动脚本具有 root 所有权和可执行权限，内核模块目录为 `lib/modules/7.0.0/`。
+- 新的交叉 GDB 验证了 Python 支持，能读取 `linked_list` 的源码/符号及保存的 `vmlinux` 中的 `panic` 符号。
+- 官方 gdb、ltrace、valgrind、heap_profile、system_profiling、app_profiling 六个用户态示例均已交叉编译；未运行这些故障程序。
+- 配置脚本拒绝覆盖已有 `.config`，Python/shell 语法、文档相对链接和 Git 空白检查通过。
+
+| 产物 | 大小（字节） |
+| --- | ---: |
+| `images/Image.gz` | 9,665,893 |
+| `images/k3-am625-alientek.dtb` | 56,205 |
+| `images/rootfs.tar` | 356,167,680 |
+| `images/rootfs.squashfs` | 133,763,072 |
+
+SquashFS 已接近原 128 MiB 槽位容量，且本环境没有生成产品启动格式的整卡镜像，首次仍采用 NFS 验证。
+
+构建日志为 `output/am625-debug/build.log`；官方实验编译日志为 `output/bootlin-reference/labs-build.log`。现有工具链、BSP 外部层和内核目录未被本任务修改；下载缓存新增了所需源码包。
+
+**尚未验证**：AM6254 上电启动、SSH/串口连接、NFS 导出、真实 PMU 和网络性能、Valgrind 运行、KGDB、内核故障注入与 kdump。继续上板需要实际板卡连接及网络信息。
+
+### 标准入口验证补充
+
+已实际执行 `cd buildroot` 后通过环境变量传入两个 external，运行 `make sadboard_am625_debug_defconfig`。生成配置与原组合脚本的默认配置一致，仅 `BR2_DEFCONFIG` 的记录路径不同；入口可被 `make list-defconfigs` 列出。
+
+后续不传 `BR2_EXTERNAL` 的 `make printvars` 与 `make show-info` 均成功，确认 external 路径被记住、所需调试工具和本地源码软件包进入构建依赖图。本次验证了标准入口及配置一致性，没有重新执行内部工具链方式的完整 `make all`。
