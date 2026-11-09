@@ -49,7 +49,7 @@ crash 可选非负记录编号，默认 42；OOM 使用固定预算，不接受�
 | stdout.log / stderr.log | 案例标准输出与错误输出 |
 | supervisor.log | systemd-run 启动及监督信息 |
 | result | 原子写入场景退出码、监督器原始退出码、是否取消、完成时间；缺失表示没有完成记录 |
-| core.* / memory-*.events 等 | 各案例特有证据；详细解释见对应手册 |
+| core.* / memory-*.events / memory-*.limits 等 | 各案例特有证据；limits 从实际 cgroup 读回，详细解释见对应手册 |
 
 键值记录只作为数据读取，不要用 `source run.info` 执行。短 ID 用于普通日志，完整 ID
 用于证据匹配。必须保留镜像对应的 images/debug 才能分析具体源行。
@@ -65,8 +65,21 @@ sadboard reset /data/sadboard/RUN
 ```
 
 `status` 显示元数据与结束记录；缺结束记录明确显示 incomplete，不报告通过。
-`check` 对照预期信号和证据：crash 的 SIGSEGV 要有 core，OOM 要有正 oom_kill，
-正常完成还要有业务输出；参考修复必须成功完成自身的对照检查。
+`check` 通过私有工具 `check-result` 核对实际输入与证据；不依赖 Python，也不执行记录中的代码。
+数值 JSON 必须完整、字段唯一、类型及范围正确，拒绝空文件、重复字段和截断内容。
+
+| 案例 | 具体检查 |
+| --- | --- |
+| crash | 缺失记录退出 139，core 是本架构 ELF64 ET_CORE，段边界完整且有 CORE/NT_PRSTATUS；正常输入及参考修复输出符合契约 |
+| oom | 退出 137，实际限制为 32 MiB、禁用 swap、组终止，oom 和 oom_kill 均为正；参考版完成 64 次、checksum=532480、没有被 OOM 杀死 |
+| cpu | 两版参数与记录一致，根据查询序列独立重算 checksum，检查非零墙钟时间 |
+| lock | 每线程次数一致、完成总量为两倍次数，墙钟时间符合该版最低等待预算 |
+| network | pcap 结构及实验端点的 ICMP/TCP，延迟与 qdisc 一致；verify 还核对基线、100% 丢包和恢复 |
+
+core 检查只是结构与线程 note 的最低要求，具体崩溃信号、地址、线程栈仍需 GDB。
+网络自动检查未完整解析 iperf 的嵌套 JSON，传输字节与错误字段须另行核对。
+CPU/锁只打印单次时间比值并标记 `performance_verdict=manual`，不设置通用提升倍数。
+历史现场应配合其固件的工具与文档读取；旧现场缺少新证据时不会被补成“通过”。
 **故障复现检查通过与问题已修复是两个概念**，性能提升仍需读采样及同输入时序数据。
 
 `reset` 只停止该目录所属、本次 boot 的实验 unit，并保留证据；不会重置系统服务、

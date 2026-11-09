@@ -159,6 +159,8 @@ sadboard verify crash
 热点和持锁等待，`sadboard verify <案例>` 运行参考对照。实际命令中只填写一个案例名。
 完整问题说明、异常机制、内核源码路径及分步诊断见 [案例学习手册](cases/README.md)，
 参数含义见 [工具手册](debug-tools.md)。
+先独立练习可使用 [分级任务书](workbook.md)，按 [实验报告模板](lab-report-template.md)
+整理证据，再查阅 [内核阅读笔记](kernel-reading-notes.md) 中的条件分支。
 
 每次运行会记录完整固件 ID、boot ID、参数、输出和退出状态。
 用 `sadboard status <现场目录>` 查看，`sadboard check <现场目录>` 检查证据，

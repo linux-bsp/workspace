@@ -157,3 +157,30 @@ recovery-boot/boot-state 建立关联，不能直接把两个 UUID 当作同一�
 board/network/panic/lifecycle-validation、完整原始串口、pcap、服务端四段 JSON、
 pstore 附件和 panic-decoded.log。前两轮分别保留在 stage4-network-panic/ 和
 stage4-network-panic-final/。本轮不刷写 SPL/U-Boot，不修改分区，不增加自动启动故障。
+
+## 教材与证据验收增强（2026-11-09）
+
+固件保持 `v0.0.1`，内容 ID：
+`b9ea672a957c8046b31440a201453eb83372ffc42813a1b7683933eca58f942a`。
+发布 124 已实机升级并上报 success；启动 ID 为
+`065d4e23-193c-413e-91f9-c0bb304c27e8`。固件实际内容、两份 rootfs、持久日志、
+UTC+8 校时及关键服务检查通过。
+
+本轮新增 C 证据检查器，强化完整 JSON、实际工作量、独立 checksum、ELF core 结构、
+实际 cgroup 限制与 OOM 计数、pcap 包边界及网络恢复检查。主机 15 项回归通过；
+原生 FIT 完整性 4 项通过。实机完成 crash/OOM/CPU/lock 故障与参考版、参数与元数据、
+取消、缺结束记录、外部目录复位拒绝、cgroup 清理检查。
+
+网络实测基线/延迟/恢复 RTT 为 0.322/100.312/0.210 ms；两次 TCP 均传输 1048576
+字节，pcap 为 2139534 字节、482 包，含 ICMP/TCP。取消后 namespace 清理，eth0
+地址和路由不变，启动窗口之外的 panic 请求被拒绝。
+网络验证开始时短连接 SSH 握手两次超时，复用控制连接后全项通过；没有把连接失败
+记录当成案例通过。没有重复注入 panic，其既有跨启动验证保持独立，不冒充本轮重测。
+
+额外在实机备份并临时损坏本次证据：空 core、空 pcap、空业务 JSON、完成数错误、
+缺少 oom 事件、修复版工作量不足、缺少恢复回复均被 check 拒绝；随后恢复原始附件，
+重新检查通过。此项检验拒绝不完整现场，不是抵御恶意操作者伪造全部证据的认证机制。
+
+工件位于 `output/validation/stage5-evidence/`，包含发布审计、原始串口、板端验收、
+生命周期、网络与负例验证 JSON、源码快照及提交门禁。教材新增基础篇、学习路线、
+L1～L3 任务书、内核关键分支笔记及实验报告模板；扩展练习与实测结果分别标注。

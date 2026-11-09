@@ -49,7 +49,7 @@ glibc 的 malloc 管理用户堆，大申请可能通过 mmap 建立匿名 VMA�
 ## 由结果倒推原因
 
 1. 记录退出码；137 只是 SIGKILL 的线索，也可能来自人工 kill 或超时。
-2. 检查现场 `memory-bug.events` 的 `oom_kill`，并匹配内核时间、进程及 cgroup 名。
+2. 检查现场 `memory-bug.events` 的 `oom` 与 `oom_kill`，并匹配内核时间、进程及 cgroup 名；从 `.limits` 核对实际组限制。
 3. 对照 `memory-bug.peak` 与 33554432 上限，查看 fixed 对应文件。
 4. 在小输入上使用 Valgrind 找分配来源，避免高开销诊断器自己触及 32 MiB 限制。
 5. 修复后重跑相同 64 次处理，确认 checksum=532480、退出 0、oom_kill=0。
@@ -85,7 +85,7 @@ cat /sys/fs/cgroup/sadboard-oom-PID/memory.pressure
 [当前内核的 cgroup 文档](../../linux/linux-7.0/Documentation/admin-guide/cgroup-v2.rst)。
 
 实机启用 `memory.oom.group=1` 后，日志显示对同一 PID 的初始选择和组终止，
-`oom_kill` 为 2、`oom_group_kill` 为 1。判定条件应为退出 137 且 oom_kill 大于 0，
+`oom_kill` 为 2、`oom_group_kill` 为 1。判定应结合退出 137、正 oom 与 oom_kill、实际组限制，
 不能把计数硬编码成 1，也不能据此声称两个不同程序被杀。
 
 ## 用 Valgrind 定位到申请点
@@ -113,3 +113,11 @@ valgrind --leak-check=full --error-exitcode=99 \
 练习：区分内存泄漏、无界缓存、页缓存、碎片、memory.high 节流、RLIMIT_AS 限制
 及全局 OOM。解释为何 `malloc == NULL`、退出 137、内核 panic 是三种不同结果。
 脚本退出后应没有遗留的 `sadboard-oom-*` 组；保留证据后仅删除此次现场目录。
+
+## 证据验收与分级练习
+
+新现场保存 `memory-{bug,fixed}.limits`，从 cgroup 实际读回 memory.max、swap.max
+和 oom.group。`check` 要求故障版退出 137 且 oom、oom_kill 均为正；参考版完成全部
+64 次及 checksum=532480，未被 OOM 杀死。仅打印“被杀”或伪造一份正 kill 计数不够。
+按 [练习册](../workbook.md#2-服务运行一段时间后被杀死) 区分信号、组内 OOM 与泄漏根因，
+并用 [报告模板](../lab-report-template.md) 保存资源限制及分配栈。

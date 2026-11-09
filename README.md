@@ -153,6 +153,12 @@ QEMU 计划用于验证分析流程、逻辑故障和场景复现。依赖真实
 
 ## 文档
 
+- [故障定位教材与学习路线](docs/study-guide.md)、[共同基础](docs/debugging-foundations.md)：从现象、概念到取证和内核机制，由浅入深阅读。
+
+- [分级故障定位练习册](docs/workbook.md)、[实验报告模板](docs/lab-report-template.md)：先独立取证，再按 L1～L3 复盘。
+
+- [内核阅读笔记](docs/kernel-reading-notes.md)：区分源码关键路径、实际调用栈与证据边界。
+
 - [Workspace 目录与 AM62x SDK](docs/workspace-toolchain.md)：独立 SDK 配置、原生 `make sdk`、手动解压重定位和共享工具链。
 
 - [AM6254 快速上手](docs/am625-quickstart.md)：使用已有镜像、NFS/TFTP 启动、环境检查和第一个 GDB 实验。
