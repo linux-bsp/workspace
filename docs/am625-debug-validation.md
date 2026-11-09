@@ -358,6 +358,20 @@ NFS 参考构建为 `a3a9a46b13d41e1975a9c29cfe8a5b4896335d8273a10ebdda8e0a9c384
 
 最终工件位于 `output/validation/stage9-production-cases-arm64/`：源码快照、发布审计、SD/NFS 三轮 JSON/CSV、17 ELF 校验、GDB/strace/Valgrind、负例、中止清理和 panic/SOL 证据。首次失败与重建日志保留在 `output/validation/stage9-production-cases/`。两个目录均为本地主机验收附件，不提交大型构建文件。
 
+## 阶段 10：24 个基础案例全部落地（2026-11-10）
+
+最终固件 `v0.0.1 / 11146c22ffb0433b2b32d225c00128c20e2abcbda47edbcf53c64cd51f344843`，发布 131，AM625 实际 OTA success。新增的 B-CR/FD/MM/CPU/SYNC/NET 02～05 共 24 例均已有可运行故障版、参考版和证据契约；当前 34 例有代码，剩余 25 例继续实现。没有使用 QEMU。
+
+- 主机 24 项回归通过；其中新增的一项遍历 24 例的故障/参考与伪造完成数、截断 trace 负例。原生测试不代替下面的 AM625 验收。
+- 先回到 SD A/B 完成 OTA，19 项非 core 场景与原有 7 项参考对照通过；再部署匹配 TFTP/NFS，全部 24 个新基础案例及原有 7 项参考对照通过。
+- SIGABRT、线程栈 SIGSEGV、mmap SIGBUS、ENOMEM 后误用指针的实际 core 均可在 host 用配套 `case-suite` 还原到 fault_child/stack_frame/suite_mem；主机 UID 1000 直接读取现场。
+- 堆边界案例在设备 Valgrind 下实际报告 Invalid write，故障退出 99；参考版零内存错误。FD 引用增长、CLOSE_WAIT、丢唤醒、逻辑丢更新和 UDP 接收溢出均由真实计数/信号验证，没有用固定字符串伪造结果。
+- 首次候选 8e133f79（发布 130）在栈场景被 ARM64 glibc 的 128 KiB 最小线程栈拒绝，未视为全部通过。修复为读取平台最小栈并设置足以触发保护页的有界递归后，重新构建发布 11146c22 并完整复验。
+- 两种启动模式的管理 IP/路由及 namespace 前后相同；零失败服务。WDT 确认 active、timeout=60 秒。本阶段均为用户态故障，未主动令内核卡死、未损坏分区。
+- 新基础案例在受限子进程或私有 netns 中运行，控制器正常退出只表示完成取证。JSON 中 observed/auxiliary 与 trace 保存真实子进程状态，检查器同时验证本例契约。实验完成会释放测试资源。
+
+最终工件 `output/validation/stage10-basic-suite-arm64/`；首次候选与平台差异记录在 `output/validation/stage10-basic-suite/`，主机与构建日志在 `output/validation/remaining-cases/`。重新部署时保留旧 NFS 根和全部旧现场，逐文件核对 SHA256。此阶段未更新实机 SPL/U-Boot，未修改分区或使用工厂镜像。
+
 <a id="bootlin-build-history"></a>
 
 ## 早期 Bootlin/NFS 构建验证档案（2026-10-30～31）

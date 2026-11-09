@@ -5,7 +5,7 @@
 先提出判断并保存证据，再读参考分析；`verify` 验证镜像提供的参考版，不替代独立定位。
 
 当前固件版本为 **v0.0.1**，不同内容以完整 SHA256 区分，日志通常显示前八位。
-原有七例已在 AM625 完成实机验收，本阶段新增 deadline/backlog/tcp 三例也完成 SD/NFS 实机验证；其余 49 例为设计任务书，未实现统一命令、未上板。随机多故障与通用自动评分尚未实现。
+原有七例已在 AM625 完成实机验收，本阶段新增 deadline/backlog/tcp 三例也完成 SD/NFS 实机验证；本阶段再实现 24 个基础场景，当前共 34 例有代码；剩余 25 例仍为设计任务书。随机多故障与通用自动评分尚未实现。
 完整固件 ID、阶段结果和附件位置集中记录在 [实机验收档案](am625-debug-validation.md)。
 本文中的拓展命令没有被自动视为已执行，具体实测范围以该档案为准。
 新增反汇编取自已验收固件 `668ad82f52bae589bcf1a74c08734e7b29c309ec1899d7e3169382a323dcecdf`
@@ -1396,7 +1396,19 @@ a68: b9400400  ldr w0, [x0, #4]
 
 ### B-CR02：配置状态不一致触发 SIGABRT
 
-**状态：完成实验设计；尚未集成 sadboard 命令，未在 AM625 实测。** 以下是受控复现任务书，不能把建议步骤写成已执行记录。与本章现有命令对应的第 01 例保留原实现。
+**状态：已实现故障版、参考版和原始证据检查，已在 AM625 实机通过。**
+
+```sh
+sadboard run crash-abort
+sadboard verify crash-abort
+# 使用上一步打印的实际目录：sadboard check /srv/sadboard/实际目录
+```
+
+本例固定小负载，无额外参数；全部源文件安装在 `/usr/src/sadboard/src/`。实现入口为 [suite-fault.c](../sadboard-external/package/sadboard-labs/src/suite-fault.c)，公共调度器为 [suite.c](../sadboard-external/package/sadboard-labs/src/suite.c)。实际子进程触发 SIGABRT=6；参考版对不合法状态返回 2。用 GDB 的 set follow-fork-mode child 跟进 fault_child，定位业务断言。
+
+现场内 `crash-abort-{bug,fixed}.out` 保存结构化度量，`.trace` 保存实际事件/资源计数，stderr/core/Valgrind 文件按案例保留。check 同时核对 trace 与摘要以及本例信号/业务契约，不会仅检查一个 passed 字符串。故障被限制在子进程或私有 namespace；run 返回的是取证控制器退出状态，真实异常信号要查看 observed/auxiliary 和 stderr，不能只看最外层 shell 的 `$?`。
+
+
 
 **生产现场与异常现象。** 消费级网关配置热更新或车载服务重新初始化后，进程退出码变为 134；最后的 libc 栈容易掩盖最早的状态不变量失败。
 
@@ -1418,7 +1430,19 @@ a68: b9400400  ldr w0, [x0, #4]
 
 ### B-CR03：堆越界写延迟破坏邻接对象
 
-**状态：完成实验设计；尚未集成 sadboard 命令，未在 AM625 实测。** 以下是受控复现任务书，不能把建议步骤写成已执行记录。与本章现有命令对应的第 01 例保留原实现。
+**状态：已实现故障版、参考版和原始证据检查，已在 AM625 实机通过。**
+
+```sh
+sadboard run crash-overflow
+sadboard verify crash-overflow
+# 使用上一步打印的实际目录：sadboard check /srv/sadboard/实际目录
+```
+
+本例固定小负载，无额外参数；全部源文件安装在 `/usr/src/sadboard/src/`。实现入口为 [suite-fault.c](../sadboard-external/package/sadboard-labs/src/suite-fault.c)，公共调度器为 [suite.c](../sadboard-external/package/sadboard-labs/src/suite.c)。实际分配 32 B、故障写 33 B，Valgrind 记录 Invalid write，退出码 99；参考版写 32 B，退出 0。overflow-*.valgrind 保存独立原始记录。也可用 case-suite --overflow-child bug 直接在 GDB 中观察写入指令。
+
+现场内 `crash-overflow-{bug,fixed}.out` 保存结构化度量，`.trace` 保存实际事件/资源计数，stderr/core/Valgrind 文件按案例保留。check 同时核对 trace 与摘要以及本例信号/业务契约，不会仅检查一个 passed 字符串。故障被限制在子进程或私有 namespace；run 返回的是取证控制器退出状态，真实异常信号要查看 observed/auxiliary 和 stderr，不能只看最外层 shell 的 `$?`。
+
+
 
 **生产现场与异常现象。** 图像帧或网络报文的长度计算差一个字节，服务在几秒后 free 时退出，也可能继续运行但结果错误。
 
@@ -1440,7 +1464,19 @@ a68: b9400400  ldr w0, [x0, #4]
 
 ### B-CR04：递归或大栈数组耗尽工作线程栈
 
-**状态：完成实验设计；尚未集成 sadboard 命令，未在 AM625 实测。** 以下是受控复现任务书，不能把建议步骤写成已执行记录。与本章现有命令对应的第 01 例保留原实现。
+**状态：已实现故障版、参考版和原始证据检查，已在 AM625 实机通过。**
+
+```sh
+sadboard run crash-stack
+sadboard verify crash-stack
+# 使用上一步打印的实际目录：sadboard check /srv/sadboard/实际目录
+```
+
+本例固定小负载，无额外参数；全部源文件安装在 `/usr/src/sadboard/src/`。实现入口为 [suite-fault.c](../sadboard-external/package/sadboard-labs/src/suite-fault.c)，公共调度器为 [suite.c](../sadboard-external/package/sadboard-labs/src/suite.c)。子线程栈取平台最小值与 64 KiB 的较大者（当前 AM625 为 128 KiB），递归 65 层、每层触碰 4 KiB，实际 SIGSEGV=11。参考版执行深度上限检查，拒绝超限输入并返回 2；不是无限扩大线程栈。
+
+现场内 `crash-stack-{bug,fixed}.out` 保存结构化度量，`.trace` 保存实际事件/资源计数，stderr/core/Valgrind 文件按案例保留。check 同时核对 trace 与摘要以及本例信号/业务契约，不会仅检查一个 passed 字符串。故障被限制在子进程或私有 namespace；run 返回的是取证控制器退出状态，真实异常信号要查看 observed/auxiliary 和 stderr，不能只看最外层 shell 的 `$?`。
+
+
 
 **生产现场与异常现象。** 协议递归解析或图像处理函数加入大局部数组，线程偶发退出；全局内存看起来仍充足。
 
@@ -1462,7 +1498,19 @@ a68: b9400400  ldr w0, [x0, #4]
 
 ### B-CR05：mmap 文件截断引发 SIGBUS
 
-**状态：完成实验设计；尚未集成 sadboard 命令，未在 AM625 实测。** 以下是受控复现任务书，不能把建议步骤写成已执行记录。与本章现有命令对应的第 01 例保留原实现。
+**状态：已实现故障版、参考版和原始证据检查，已在 AM625 实机通过。**
+
+```sh
+sadboard run crash-sigbus
+sadboard verify crash-sigbus
+# 使用上一步打印的实际目录：sadboard check /srv/sadboard/实际目录
+```
+
+本例固定小负载，无额外参数；全部源文件安装在 `/usr/src/sadboard/src/`。实现入口为 [suite-fault.c](../sadboard-external/package/sadboard-labs/src/suite-fault.c)，公共调度器为 [suite.c](../sadboard-external/package/sadboard-labs/src/suite.c)。截断正在映射的同一 inode 实际触发 SIGBUS=7；参考版写新 inode 后 rename，旧映射仍读到完整旧内容。mapped-source.bin 为本现场专属文件。
+
+现场内 `crash-sigbus-{bug,fixed}.out` 保存结构化度量，`.trace` 保存实际事件/资源计数，stderr/core/Valgrind 文件按案例保留。check 同时核对 trace 与摘要以及本例信号/业务契约，不会仅检查一个 passed 字符串。故障被限制在子进程或私有 namespace；run 返回的是取证控制器退出状态，真实异常信号要查看 observed/auxiliary 和 stderr，不能只看最外层 shell 的 `$?`。
+
+
 
 **生产现场与异常现象。** 日志轮转、模型文件更新或共享数据文件替换后，映射读者出现 Bus error，容易被误判为硬件总线故障。
 
@@ -2000,7 +2048,19 @@ ffff8000803ec178: 93407c00  sxtw x0, w0
 
 ### B-FD02：dup 别名使文件描述符持续增长
 
-**状态：完成实验设计；尚未集成 sadboard 命令，未在 AM625 实测。** 以下是受控复现任务书，不能把建议步骤写成已执行记录。与本章现有命令对应的第 01 例保留原实现。
+**状态：已实现故障版、参考版和原始证据检查，已在 AM625 实机通过。**
+
+```sh
+sadboard run fd-dup
+sadboard verify fd-dup
+# 使用上一步打印的实际目录：sadboard check /srv/sadboard/实际目录
+```
+
+本例固定小负载，无额外参数；全部源文件安装在 `/usr/src/sadboard/src/`。实现入口为 [suite-fd.c](../sadboard-external/package/sadboard-labs/src/suite-fd.c)，公共调度器为 [suite.c](../sadboard-external/package/sadboard-labs/src/suite.c)。16 次 open→dup→close 原句柄后，故障版还持有 16 个副本，参考版为 0。观测后两版都释放实验资源，before/after FD 数必须相同。
+
+现场内 `fd-dup-{bug,fixed}.out` 保存结构化度量，`.trace` 保存实际事件/资源计数，stderr/core/Valgrind 文件按案例保留。check 同时核对 trace 与摘要以及本例信号/业务契约，不会仅检查一个 passed 字符串。故障被限制在子进程或私有 namespace；run 返回的是取证控制器退出状态，真实异常信号要查看 observed/auxiliary 和 stderr，不能只看最外层 shell 的 `$?`。
+
+
 
 **生产现场与异常现象。** 日志切换或设备句柄复制路径只关闭原 fd，长期运行后 open 返回 EMFILE。
 
@@ -2022,7 +2082,19 @@ ffff8000803ec178: 93407c00  sxtw x0, w0
 
 ### B-FD03：exec 继承管道写端导致读者等不到 EOF
 
-**状态：完成实验设计；尚未集成 sadboard 命令，未在 AM625 实测。** 以下是受控复现任务书，不能把建议步骤写成已执行记录。与本章现有命令对应的第 01 例保留原实现。
+**状态：已实现故障版、参考版和原始证据检查，已在 AM625 实机通过。**
+
+```sh
+sadboard run fd-cloexec
+sadboard verify fd-cloexec
+# 使用上一步打印的实际目录：sadboard check /srv/sadboard/实际目录
+```
+
+本例固定小负载，无额外参数；全部源文件安装在 `/usr/src/sadboard/src/`。实现入口为 [suite-fd.c](../sadboard-external/package/sadboard-labs/src/suite-fd.c)，公共调度器为 [suite.c](../sadboard-external/package/sadboard-labs/src/suite.c)。辅助进程通过握手证明已 exec，并保持到父进程明确释放，排除启动慢的误判。故障管道 100 ms 内等不到 EOF，参考管道可读到 EOF；辅助进程退出不靠外部 kill。
+
+现场内 `fd-cloexec-{bug,fixed}.out` 保存结构化度量，`.trace` 保存实际事件/资源计数，stderr/core/Valgrind 文件按案例保留。check 同时核对 trace 与摘要以及本例信号/业务契约，不会仅检查一个 passed 字符串。故障被限制在子进程或私有 namespace；run 返回的是取证控制器退出状态，真实异常信号要查看 observed/auxiliary 和 stderr，不能只看最外层 shell 的 `$?`。
+
+
 
 **生产现场与异常现象。** 升级助手或后台命令退出后，主服务仍阻塞在管道读取，表面像锁死。
 
@@ -2044,7 +2116,19 @@ ffff8000803ec178: 93407c00  sxtw x0, w0
 
 ### B-FD04：CLOSE_WAIT 累积暴露应用未关闭连接
 
-**状态：完成实验设计；尚未集成 sadboard 命令，未在 AM625 实测。** 以下是受控复现任务书，不能把建议步骤写成已执行记录。与本章现有命令对应的第 01 例保留原实现。
+**状态：已实现故障版、参考版和原始证据检查，已在 AM625 实机通过。**
+
+```sh
+sadboard run fd-closewait
+sadboard verify fd-closewait
+# 使用上一步打印的实际目录：sadboard check /srv/sadboard/实际目录
+```
+
+本例固定小负载，无额外参数；全部源文件安装在 `/usr/src/sadboard/src/`。实现入口为 [suite-fd.c](../sadboard-external/package/sadboard-labs/src/suite-fd.c)，公共调度器为 [suite.c](../sadboard-external/package/sadboard-labs/src/suite.c)。独立 netns 中建立 16 个真实 TCP 连接，收到 FIN/EOF 后核对 TCP_INFO 的 CLOSE_WAIT=8；故障版保留 16 个 fd，参考版立即关闭。最后统一清理。
+
+现场内 `fd-closewait-{bug,fixed}.out` 保存结构化度量，`.trace` 保存实际事件/资源计数，stderr/core/Valgrind 文件按案例保留。check 同时核对 trace 与摘要以及本例信号/业务契约，不会仅检查一个 passed 字符串。故障被限制在子进程或私有 namespace；run 返回的是取证控制器退出状态，真实异常信号要查看 observed/auxiliary 和 stderr，不能只看最外层 shell 的 `$?`。
+
+
 
 **生产现场与异常现象。** 设备网络看起来已断开，但服务连接数持续增加，运行一段时间后接受新连接失败。
 
@@ -2066,7 +2150,19 @@ ffff8000803ec178: 93407c00  sxtw x0, w0
 
 ### B-FD05：删除 epoll 注册却没有释放资源
 
-**状态：完成实验设计；尚未集成 sadboard 命令，未在 AM625 实测。** 以下是受控复现任务书，不能把建议步骤写成已执行记录。与本章现有命令对应的第 01 例保留原实现。
+**状态：已实现故障版、参考版和原始证据检查，已在 AM625 实机通过。**
+
+```sh
+sadboard run fd-epoll
+sadboard verify fd-epoll
+# 使用上一步打印的实际目录：sadboard check /srv/sadboard/实际目录
+```
+
+本例固定小负载，无额外参数；全部源文件安装在 `/usr/src/sadboard/src/`。实现入口为 [suite-fd.c](../sadboard-external/package/sadboard-labs/src/suite-fd.c)，公共调度器为 [suite.c](../sadboard-external/package/sadboard-labs/src/suite.c)。16 次 ADD→DEL 后，故障版仍持有 16 个 fd。trace 的 open_descriptors 是实际 /proc/self/fd 计数，DEL 不会代替 close。
+
+现场内 `fd-epoll-{bug,fixed}.out` 保存结构化度量，`.trace` 保存实际事件/资源计数，stderr/core/Valgrind 文件按案例保留。check 同时核对 trace 与摘要以及本例信号/业务契约，不会仅检查一个 passed 字符串。故障被限制在子进程或私有 namespace；run 返回的是取证控制器退出状态，真实异常信号要查看 observed/auxiliary 和 stderr，不能只看最外层 shell 的 `$?`。
+
+
 
 **生产现场与异常现象。** 设备重连流程认为 EPOLL_CTL_DEL 就完成清理，实际 fd 数每次重连增加。
 
@@ -2488,7 +2584,19 @@ checksum 累加、free 五类指令，分别说明谁负责用户分配器、谁
 
 ### B-MM02：malloc 返回空指针但并未发生 OOM kill
 
-**状态：完成实验设计；尚未集成 sadboard 命令，未在 AM625 实测。** 以下是受控复现任务书，不能把建议步骤写成已执行记录。与本章现有命令对应的第 01 例保留原实现。
+**状态：已实现故障版、参考版和原始证据检查，已在 AM625 实机通过。**
+
+```sh
+sadboard run memory-enomem
+sadboard verify memory-enomem
+# 使用上一步打印的实际目录：sadboard check /srv/sadboard/实际目录
+```
+
+本例固定小负载，无额外参数；全部源文件安装在 `/usr/src/sadboard/src/`。实现入口为 [suite-memory.c](../sadboard-external/package/sadboard-labs/src/suite-memory.c)，公共调度器为 [suite.c](../sadboard-external/package/sadboard-labs/src/suite.c)。仅子进程设置 16 MiB RLIMIT_AS，再 mmap 64 MiB，实际返回 ENOMEM=12；故障版继续使用空指针产生 SIGSEGV，参考版处理失败。此处没有把 ENOMEM 当作 OOM kill。
+
+现场内 `memory-enomem-{bug,fixed}.out` 保存结构化度量，`.trace` 保存实际事件/资源计数，stderr/core/Valgrind 文件按案例保留。check 同时核对 trace 与摘要以及本例信号/业务契约，不会仅检查一个 passed 字符串。故障被限制在子进程或私有 namespace；run 返回的是取证控制器退出状态，真实异常信号要查看 observed/auxiliary 和 stderr，不能只看最外层 shell 的 `$?`。
+
+
 
 **生产现场与异常现象。** 服务打印 Cannot allocate memory，却没有 OOM 日志；工程师误以为内核漏报。
 
@@ -2510,7 +2618,19 @@ checksum 累加、free 五类指令，分别说明谁负责用户分配器、谁
 
 ### B-MM03：虚拟地址很大但 RSS 仍小
 
-**状态：完成实验设计；尚未集成 sadboard 命令，未在 AM625 实测。** 以下是受控复现任务书，不能把建议步骤写成已执行记录。与本章现有命令对应的第 01 例保留原实现。
+**状态：已实现故障版、参考版和原始证据检查，已在 AM625 实机通过。**
+
+```sh
+sadboard run memory-residency
+sadboard verify memory-residency
+# 使用上一步打印的实际目录：sadboard check /srv/sadboard/实际目录
+```
+
+本例固定小负载，无额外参数；全部源文件安装在 `/usr/src/sadboard/src/`。实现入口为 [suite-memory.c](../sadboard-external/package/sadboard-labs/src/suite-memory.c)，公共调度器为 [suite.c](../sadboard-external/package/sadboard-labs/src/suite.c)。两版均映射 32 MiB，只触碰 4 MiB 的页，mincore 测得实际驻留。参考版解除未用的 28 MiB 映射，保留同样 4 MiB 数据与 checksum；解释地址空间和 RSS 的差异。
+
+现场内 `memory-residency-{bug,fixed}.out` 保存结构化度量，`.trace` 保存实际事件/资源计数，stderr/core/Valgrind 文件按案例保留。check 同时核对 trace 与摘要以及本例信号/业务契约，不会仅检查一个 passed 字符串。故障被限制在子进程或私有 namespace；run 返回的是取证控制器退出状态，真实异常信号要查看 observed/auxiliary 和 stderr，不能只看最外层 shell 的 `$?`。
+
+
 
 **生产现场与异常现象。** 进程 VIRT 增大几十 MiB，被误判成同量物理内存泄漏。
 
@@ -2532,7 +2652,19 @@ checksum 累加、free 五类指令，分别说明谁负责用户分配器、谁
 
 ### B-MM04：共享内存文件已删除却仍占用页
 
-**状态：完成实验设计；尚未集成 sadboard 命令，未在 AM625 实测。** 以下是受控复现任务书，不能把建议步骤写成已执行记录。与本章现有命令对应的第 01 例保留原实现。
+**状态：已实现故障版、参考版和原始证据检查，已在 AM625 实机通过。**
+
+```sh
+sadboard run memory-shmem
+sadboard verify memory-shmem
+# 使用上一步打印的实际目录：sadboard check /srv/sadboard/实际目录
+```
+
+本例固定小负载，无额外参数；全部源文件安装在 `/usr/src/sadboard/src/`。实现入口为 [suite-memory.c](../sadboard-external/package/sadboard-labs/src/suite-memory.c)，公共调度器为 [suite.c](../sadboard-external/package/sadboard-labs/src/suite.c)。在 /dev/shm 创建本进程专属 8 MiB 文件，unlink 名字后通过 fd/mmap 实际持有页；参考版 close+munmap。不会清空全局 /dev/shm，观测后故障版也清理。
+
+现场内 `memory-shmem-{bug,fixed}.out` 保存结构化度量，`.trace` 保存实际事件/资源计数，stderr/core/Valgrind 文件按案例保留。check 同时核对 trace 与摘要以及本例信号/业务契约，不会仅检查一个 passed 字符串。故障被限制在子进程或私有 namespace；run 返回的是取证控制器退出状态，真实异常信号要查看 observed/auxiliary 和 stderr，不能只看最外层 shell 的 `$?`。
+
+
 
 **生产现场与异常现象。** 采集服务清理了临时文件名，Shmem 却不下降，重启服务后才恢复。
 
@@ -2554,7 +2686,19 @@ checksum 累加、free 五类指令，分别说明谁负责用户分配器、谁
 
 ### B-MM05：外部 SIGKILL 被误判成 cgroup OOM
 
-**状态：完成实验设计；尚未集成 sadboard 命令，未在 AM625 实测。** 以下是受控复现任务书，不能把建议步骤写成已执行记录。与本章现有命令对应的第 01 例保留原实现。
+**状态：已实现故障版、参考版和原始证据检查，已在 AM625 实机通过。**
+
+```sh
+sadboard run memory-sigkill
+sadboard verify memory-sigkill
+# 使用上一步打印的实际目录：sadboard check /srv/sadboard/实际目录
+```
+
+本例固定小负载，无额外参数；全部源文件安装在 `/usr/src/sadboard/src/`。实现入口为 [suite-memory.c](../sadboard-external/package/sadboard-labs/src/suite-memory.c)，公共调度器为 [suite.c](../sadboard-external/package/sadboard-labs/src/suite.c)。故障版由父进程明确发送 SIGKILL=9，并保存 kill/wait 证据；参考版通过管道请求受控退出。它用于练习归因，不能仅凭退出 137 认定 OOM。
+
+现场内 `memory-sigkill-{bug,fixed}.out` 保存结构化度量，`.trace` 保存实际事件/资源计数，stderr/core/Valgrind 文件按案例保留。check 同时核对 trace 与摘要以及本例信号/业务契约，不会仅检查一个 passed 字符串。故障被限制在子进程或私有 namespace；run 返回的是取证控制器退出状态，真实异常信号要查看 observed/auxiliary 和 stderr，不能只看最外层 shell 的 `$?`。
+
+
 
 **生产现场与异常现象。** 服务退出 137，监控系统直接标注 OOM，实际是超时监督器发出的强制终止。
 
@@ -2985,7 +3129,19 @@ checksum。若将来 key 不再等于下标，这段指令虽然仍短，却可�
 
 ### B-CPU02：EAGAIN 忙轮询耗尽一个 CPU
 
-**状态：完成实验设计；尚未集成 sadboard 命令，未在 AM625 实测。** 以下是受控复现任务书，不能把建议步骤写成已执行记录。与本章现有命令对应的第 01 例保留原实现。
+**状态：已实现故障版、参考版和原始证据检查，已在 AM625 实机通过。**
+
+```sh
+sadboard run cpu-eagain
+sadboard verify cpu-eagain
+# 使用上一步打印的实际目录：sadboard check /srv/sadboard/实际目录
+```
+
+本例固定小负载，无额外参数；全部源文件安装在 `/usr/src/sadboard/src/`。实现入口为 [suite-cpu.c](../sadboard-external/package/sadboard-labs/src/suite-cpu.c)，公共调度器为 [suite.c](../sadboard-external/package/sadboard-labs/src/suite.c)。延迟生产者写入相同的 42；故障读者忙读并产生 EAGAIN，参考版 poll 后读取。completed/checksum 相同，observed 是实际 EAGAIN 次数，不用固定耗时断言判优。
+
+现场内 `cpu-eagain-{bug,fixed}.out` 保存结构化度量，`.trace` 保存实际事件/资源计数，stderr/core/Valgrind 文件按案例保留。check 同时核对 trace 与摘要以及本例信号/业务契约，不会仅检查一个 passed 字符串。故障被限制在子进程或私有 namespace；run 返回的是取证控制器退出状态，真实异常信号要查看 observed/auxiliary 和 stderr，不能只看最外层 shell 的 `$?`。
+
+
 
 **生产现场与异常现象。** 机器人传感器断流或遥测连接空闲时，业务吞吐为零但单核接近满载。
 
@@ -3007,7 +3163,19 @@ checksum。若将来 key 不再等于下标，这段指令虽然仍短，却可�
 
 ### B-CPU03：高频日志格式化与小写入放大开销
 
-**状态：完成实验设计；尚未集成 sadboard 命令，未在 AM625 实测。** 以下是受控复现任务书，不能把建议步骤写成已执行记录。与本章现有命令对应的第 01 例保留原实现。
+**状态：已实现故障版、参考版和原始证据检查，已在 AM625 实机通过。**
+
+```sh
+sadboard run cpu-logging
+sadboard verify cpu-logging
+# 使用上一步打印的实际目录：sadboard check /srv/sadboard/实际目录
+```
+
+本例固定小负载，无额外参数；全部源文件安装在 `/usr/src/sadboard/src/`。实现入口为 [suite-cpu.c](../sadboard-external/package/sadboard-labs/src/suite-cpu.c)，公共调度器为 [suite.c](../sadboard-external/package/sadboard-labs/src/suite.c)。同样 2048 行，读回逐条检查 index/value；故障逐行写 2048 次，参考每批 32 行写 64 次。使用 memfd 排除 SD/NFS 持久化干扰；持久化取舍留给进阶场景。
+
+现场内 `cpu-logging-{bug,fixed}.out` 保存结构化度量，`.trace` 保存实际事件/资源计数，stderr/core/Valgrind 文件按案例保留。check 同时核对 trace 与摘要以及本例信号/业务契约，不会仅检查一个 passed 字符串。故障被限制在子进程或私有 namespace；run 返回的是取证控制器退出状态，真实异常信号要查看 observed/auxiliary 和 stderr，不能只看最外层 shell 的 `$?`。
+
+
 
 **生产现场与异常现象。** 打开调试日志后，网关吞吐下降，故障又因为关日志而消失。
 
@@ -3029,7 +3197,19 @@ checksum。若将来 key 不再等于下标，这段指令虽然仍短，却可�
 
 ### B-CPU04：错误订阅 EPOLLOUT 导致空转
 
-**状态：完成实验设计；尚未集成 sadboard 命令，未在 AM625 实测。** 以下是受控复现任务书，不能把建议步骤写成已执行记录。与本章现有命令对应的第 01 例保留原实现。
+**状态：已实现故障版、参考版和原始证据检查，已在 AM625 实机通过。**
+
+```sh
+sadboard run cpu-epollout
+sadboard verify cpu-epollout
+# 使用上一步打印的实际目录：sadboard check /srv/sadboard/实际目录
+```
+
+本例固定小负载，无额外参数；全部源文件安装在 `/usr/src/sadboard/src/`。实现入口为 [suite-cpu.c](../sadboard-external/package/sadboard-labs/src/suite-cpu.c)，公共调度器为 [suite.c](../sadboard-external/package/sadboard-labs/src/suite.c)。故障版对没有发送任务的管道持续关注 EPOLLOUT，参考版只等待命令 eventfd；两版最终处理同一值 42，observed 是无用就绪通知次数。
+
+现场内 `cpu-epollout-{bug,fixed}.out` 保存结构化度量，`.trace` 保存实际事件/资源计数，stderr/core/Valgrind 文件按案例保留。check 同时核对 trace 与摘要以及本例信号/业务契约，不会仅检查一个 passed 字符串。故障被限制在子进程或私有 namespace；run 返回的是取证控制器退出状态，真实异常信号要查看 observed/auxiliary 和 stderr，不能只看最外层 shell 的 `$?`。
+
+
 
 **生产现场与异常现象。** 服务无待发送数据，却持续被事件循环唤醒，采样看起来主要在 epoll_wait。
 
@@ -3051,7 +3231,19 @@ checksum。若将来 key 不再等于下标，这段指令虽然仍短，却可�
 
 ### B-CPU05：访问顺序破坏缓存局部性
 
-**状态：完成实验设计；尚未集成 sadboard 命令，未在 AM625 实测。** 以下是受控复现任务书，不能把建议步骤写成已执行记录。与本章现有命令对应的第 01 例保留原实现。
+**状态：已实现故障版、参考版和原始证据检查，已在 AM625 实机通过。**
+
+```sh
+sadboard run cpu-locality
+sadboard verify cpu-locality
+# 使用上一步打印的实际目录：sadboard check /srv/sadboard/实际目录
+```
+
+本例固定小负载，无额外参数；全部源文件安装在 `/usr/src/sadboard/src/`。实现入口为 [suite-cpu.c](../sadboard-external/package/sadboard-labs/src/suite-cpu.c)，公共调度器为 [suite.c](../sadboard-external/package/sadboard-labs/src/suite.c)。相同 1024×1024 矩阵、4 轮访问，列优先与行优先完成 4194304 次，checksum 相同。observed 记录初始实际地址步长 4096/4 B，性能差异另用 perf 测量。
+
+现场内 `cpu-locality-{bug,fixed}.out` 保存结构化度量，`.trace` 保存实际事件/资源计数，stderr/core/Valgrind 文件按案例保留。check 同时核对 trace 与摘要以及本例信号/业务契约，不会仅检查一个 passed 字符串。故障被限制在子进程或私有 namespace；run 返回的是取证控制器退出状态，真实异常信号要查看 observed/auxiliary 和 stderr，不能只看最外层 shell 的 `$?`。
+
+
 
 **生产现场与异常现象。** 同样的标定表或图像统计计算换一块 ARM 板后变慢，指令数量变化不大。
 
@@ -3498,7 +3690,19 @@ completed++ 确实展开成读、加、写，不是一个普通不可打断的�
 
 ### B-SYNC02：ABBA 锁顺序造成互相等待
 
-**状态：完成实验设计；尚未集成 sadboard 命令，未在 AM625 实测。** 以下是受控复现任务书，不能把建议步骤写成已执行记录。与本章现有命令对应的第 01 例保留原实现。
+**状态：已实现故障版、参考版和原始证据检查，已在 AM625 实机通过。**
+
+```sh
+sadboard run sync-abba
+sadboard verify sync-abba
+# 使用上一步打印的实际目录：sadboard check /srv/sadboard/实际目录
+```
+
+本例固定小负载，无额外参数；全部源文件安装在 `/usr/src/sadboard/src/`。实现入口为 [suite-sync.c](../sadboard-external/package/sadboard-labs/src/suite-sync.c)，公共调度器为 [suite.c](../sadboard-external/package/sadboard-labs/src/suite.c)。故障两个线程在各自持有第一把锁后用 barrier 同步，确定性形成 ABBA。父进程超时后只杀掉本实验子进程；参考版统一锁顺序完成两个结果 42。
+
+现场内 `sync-abba-{bug,fixed}.out` 保存结构化度量，`.trace` 保存实际事件/资源计数，stderr/core/Valgrind 文件按案例保留。check 同时核对 trace 与摘要以及本例信号/业务契约，不会仅检查一个 passed 字符串。故障被限制在子进程或私有 namespace；run 返回的是取证控制器退出状态，真实异常信号要查看 observed/auxiliary 和 stderr，不能只看最外层 shell 的 `$?`。
+
+
 
 **生产现场与异常现象。** 设备重连与配置更新同时发生，两个线程都活着但业务停止。
 
@@ -3520,7 +3724,19 @@ completed++ 确实展开成读、加、写，不是一个普通不可打断的�
 
 ### B-SYNC03：条件变量丢失唤醒
 
-**状态：完成实验设计；尚未集成 sadboard 命令，未在 AM625 实测。** 以下是受控复现任务书，不能把建议步骤写成已执行记录。与本章现有命令对应的第 01 例保留原实现。
+**状态：已实现故障版、参考版和原始证据检查，已在 AM625 实机通过。**
+
+```sh
+sadboard run sync-condvar
+sadboard verify sync-condvar
+# 使用上一步打印的实际目录：sadboard check /srv/sadboard/实际目录
+```
+
+本例固定小负载，无额外参数；全部源文件安装在 `/usr/src/sadboard/src/`。实现入口为 [suite-sync.c](../sadboard-external/package/sadboard-labs/src/suite-sync.c)，公共调度器为 [suite.c](../sadboard-external/package/sadboard-labs/src/suite.c)。先 signal 再等待，故障版忽略已经成立的 predicate，实际 timedwait 返回 ETIMEDOUT=110；参考版用 while 检查状态，消费相同值 42。
+
+现场内 `sync-condvar-{bug,fixed}.out` 保存结构化度量，`.trace` 保存实际事件/资源计数，stderr/core/Valgrind 文件按案例保留。check 同时核对 trace 与摘要以及本例信号/业务契约，不会仅检查一个 passed 字符串。故障被限制在子进程或私有 namespace；run 返回的是取证控制器退出状态，真实异常信号要查看 observed/auxiliary 和 stderr，不能只看最外层 shell 的 `$?`。
+
+
 
 **生产现场与异常现象。** 工作队列明明有数据，消费者却偶尔睡到超时，重启或再来一个请求才恢复。
 
@@ -3542,7 +3758,19 @@ completed++ 确实展开成读、加、写，不是一个普通不可打断的�
 
 ### B-SYNC04：分开的检查与更新导致逻辑丢失
 
-**状态：完成实验设计；尚未集成 sadboard 命令，未在 AM625 实测。** 以下是受控复现任务书，不能把建议步骤写成已执行记录。与本章现有命令对应的第 01 例保留原实现。
+**状态：已实现故障版、参考版和原始证据检查，已在 AM625 实机通过。**
+
+```sh
+sadboard run sync-update
+sadboard verify sync-update
+# 使用上一步打印的实际目录：sadboard check /srv/sadboard/实际目录
+```
+
+本例固定小负载，无额外参数；全部源文件安装在 `/usr/src/sadboard/src/`。实现入口为 [suite-sync.c](../sadboard-external/package/sadboard-labs/src/suite-sync.c)，公共调度器为 [suite.c](../sadboard-external/package/sadboard-labs/src/suite.c)。读写各自加锁但更新事务不原子，barrier 保证丢更新而没有 C 数据竞争；64 次更新故障只得到 32，参考事务锁得到 64。
+
+现场内 `sync-update-{bug,fixed}.out` 保存结构化度量，`.trace` 保存实际事件/资源计数，stderr/core/Valgrind 文件按案例保留。check 同时核对 trace 与摘要以及本例信号/业务契约，不会仅检查一个 passed 字符串。故障被限制在子进程或私有 namespace；run 返回的是取证控制器退出状态，真实异常信号要查看 observed/auxiliary 和 stderr，不能只看最外层 shell 的 `$?`。
+
+
 
 **生产现场与异常现象。** 遥测累计计数偶尔偏小，线程安全检查没报出裸数据竞争。
 
@@ -3564,7 +3792,19 @@ completed++ 确实展开成读、加、写，不是一个普通不可打断的�
 
 ### B-SYNC05：退出路径等待一个永不完成的工作线程
 
-**状态：完成实验设计；尚未集成 sadboard 命令，未在 AM625 实测。** 以下是受控复现任务书，不能把建议步骤写成已执行记录。与本章现有命令对应的第 01 例保留原实现。
+**状态：已实现故障版、参考版和原始证据检查，已在 AM625 实机通过。**
+
+```sh
+sadboard run sync-shutdown
+sadboard verify sync-shutdown
+# 使用上一步打印的实际目录：sadboard check /srv/sadboard/实际目录
+```
+
+本例固定小负载，无额外参数；全部源文件安装在 `/usr/src/sadboard/src/`。实现入口为 [suite-sync.c](../sadboard-external/package/sadboard-labs/src/suite-sync.c)，公共调度器为 [suite.c](../sadboard-external/package/sadboard-labs/src/suite.c)。接收线程阻塞 read；故障版先 join 返回 ETIMEDOUT，参考版先 shutdown 唤醒再 join。超时后故障版也会唤醒并 join，FD 最终回基线。
+
+现场内 `sync-shutdown-{bug,fixed}.out` 保存结构化度量，`.trace` 保存实际事件/资源计数，stderr/core/Valgrind 文件按案例保留。check 同时核对 trace 与摘要以及本例信号/业务契约，不会仅检查一个 passed 字符串。故障被限制在子进程或私有 namespace；run 返回的是取证控制器退出状态，真实异常信号要查看 observed/auxiliary 和 stderr，不能只看最外层 shell 的 `$?`。
+
+
 
 **生产现场与异常现象。** 服务停止超时，被 systemd 强杀；主线程栈停在 pthread_join，真正阻塞点在另一个线程。
 
@@ -3987,7 +4227,19 @@ ffff800080c5a674: 97ffecfd  bl ffff800080c55a68 <qdisc_watchdog_schedule_range_n
 
 ### B-NET02：把 TCP 读取次数当成报文边界
 
-**状态：完成实验设计；尚未集成 sadboard 命令，未在 AM625 实测。** 以下是受控复现任务书，不能把建议步骤写成已执行记录。与本章现有命令对应的第 01 例保留原实现。
+**状态：已实现故障版、参考版和原始证据检查，已在 AM625 实机通过。**
+
+```sh
+sadboard run net-framing
+sadboard verify net-framing
+# 使用上一步打印的实际目录：sadboard check /srv/sadboard/实际目录
+```
+
+本例固定小负载，无额外参数；全部源文件安装在 `/usr/src/sadboard/src/`。实现入口为 [suite-network.c](../sadboard-external/package/sadboard-labs/src/suite-network.c)，公共调度器为 [suite.c](../sadboard-external/package/sadboard-labs/src/suite.c)。真实 TCP 流先发 3 B，接收者读到前缀后握手允许发送后续 9 B，不依赖随机时序。故障单次 recv 把短读误判为完整消息失败；参考重组 12 B 并校验 8 B 载荷。
+
+现场内 `net-framing-{bug,fixed}.out` 保存结构化度量，`.trace` 保存实际事件/资源计数，stderr/core/Valgrind 文件按案例保留。check 同时核对 trace 与摘要以及本例信号/业务契约，不会仅检查一个 passed 字符串。故障被限制在子进程或私有 namespace；run 返回的是取证控制器退出状态，真实异常信号要查看 observed/auxiliary 和 stderr，不能只看最外层 shell 的 `$?`。
+
+
 
 **生产现场与异常现象。** 小流量测试正常，上线后出现半条遥测、两条粘在一起或偶发校验失败。
 
@@ -4009,7 +4261,19 @@ ffff800080c5a674: 97ffecfd  bl ffff800080c55a68 <qdisc_watchdog_schedule_range_n
 
 ### B-NET03：长度字段端序错误放大内存请求
 
-**状态：完成实验设计；尚未集成 sadboard 命令，未在 AM625 实测。** 以下是受控复现任务书，不能把建议步骤写成已执行记录。与本章现有命令对应的第 01 例保留原实现。
+**状态：已实现故障版、参考版和原始证据检查，已在 AM625 实机通过。**
+
+```sh
+sadboard run net-endian
+sadboard verify net-endian
+# 使用上一步打印的实际目录：sadboard check /srv/sadboard/实际目录
+```
+
+本例固定小负载，无额外参数；全部源文件安装在 `/usr/src/sadboard/src/`。实现入口为 [suite-network.c](../sadboard-external/package/sadboard-labs/src/suite-network.c)，公共调度器为 [suite.c](../sadboard-external/package/sadboard-labs/src/suite.c)。真实传输网络序长度 1024；本 ARM64 小端平台直接解释得到 262144，触发长度上限拒绝；参考 ntohl 后得到 1024，仍保留 4096 上限检查。
+
+现场内 `net-endian-{bug,fixed}.out` 保存结构化度量，`.trace` 保存实际事件/资源计数，stderr/core/Valgrind 文件按案例保留。check 同时核对 trace 与摘要以及本例信号/业务契约，不会仅检查一个 passed 字符串。故障被限制在子进程或私有 namespace；run 返回的是取证控制器退出状态，真实异常信号要查看 observed/auxiliary 和 stderr，不能只看最外层 shell 的 `$?`。
+
+
 
 **生产现场与异常现象。** 跨平台协议原型正常，接入另一款处理器后报文长度变成巨大值并触发分配失败。
 
@@ -4031,7 +4295,19 @@ ffff800080c5a674: 97ffecfd  bl ffff800080c55a68 <qdisc_watchdog_schedule_range_n
 
 ### B-NET04：UDP 接收队列溢出而非链路丢包
 
-**状态：完成实验设计；尚未集成 sadboard 命令，未在 AM625 实测。** 以下是受控复现任务书，不能把建议步骤写成已执行记录。与本章现有命令对应的第 01 例保留原实现。
+**状态：已实现故障版、参考版和原始证据检查，已在 AM625 实机通过。**
+
+```sh
+sadboard run net-udpqueue
+sadboard verify net-udpqueue
+# 使用上一步打印的实际目录：sadboard check /srv/sadboard/实际目录
+```
+
+本例固定小负载，无额外参数；全部源文件安装在 `/usr/src/sadboard/src/`。实现入口为 [suite-network.c](../sadboard-external/package/sadboard-labs/src/suite-network.c)，公共调度器为 [suite.c](../sadboard-external/package/sadboard-labs/src/suite.c)。私有 netns 的 UDP 接收缓冲设为 4096，故障先突发 128×512 B 再读，实际 RcvbufErrors 增长；参考及时接收 128 条且 checksum=8128。丢失数与命名空间统计对账。
+
+现场内 `net-udpqueue-{bug,fixed}.out` 保存结构化度量，`.trace` 保存实际事件/资源计数，stderr/core/Valgrind 文件按案例保留。check 同时核对 trace 与摘要以及本例信号/业务契约，不会仅检查一个 passed 字符串。故障被限制在子进程或私有 namespace；run 返回的是取证控制器退出状态，真实异常信号要查看 observed/auxiliary 和 stderr，不能只看最外层 shell 的 `$?`。
+
+
 
 **生产现场与异常现象。** 抓包看到消息到达，应用序号仍跳跃，增大发送重试后反而更严重。
 
@@ -4053,7 +4329,19 @@ ffff800080c5a674: 97ffecfd  bl ffff800080c55a68 <qdisc_watchdog_schedule_range_n
 
 ### B-NET05：对端退出时 SIGPIPE、EOF 和复位处理错误
 
-**状态：完成实验设计；尚未集成 sadboard 命令，未在 AM625 实测。** 以下是受控复现任务书，不能把建议步骤写成已执行记录。与本章现有命令对应的第 01 例保留原实现。
+**状态：已实现故障版、参考版和原始证据检查，已在 AM625 实机通过。**
+
+```sh
+sadboard run net-disconnect
+sadboard verify net-disconnect
+# 使用上一步打印的实际目录：sadboard check /srv/sadboard/实际目录
+```
+
+本例固定小负载，无额外参数；全部源文件安装在 `/usr/src/sadboard/src/`。实现入口为 [suite-network.c](../sadboard-external/package/sadboard-labs/src/suite-network.c)，公共调度器为 [suite.c](../sadboard-external/package/sadboard-labs/src/suite.c)。分别观测真实 TCP FIN→EOF、SO_LINGER 复位→ECONNRESET=104，以及独立流写入已关闭端触发 SIGPIPE=13；参考 MSG_NOSIGNAL 返回 EPIPE=32。SIGPIPE 子实验使用 AF_UNIX，避免把 TCP 首次写入时序当作确定事实。
+
+现场内 `net-disconnect-{bug,fixed}.out` 保存结构化度量，`.trace` 保存实际事件/资源计数，stderr/core/Valgrind 文件按案例保留。check 同时核对 trace 与摘要以及本例信号/业务契约，不会仅检查一个 passed 字符串。故障被限制在子进程或私有 namespace；run 返回的是取证控制器退出状态，真实异常信号要查看 observed/auxiliary 和 stderr，不能只看最外层 shell 的 `$?`。
+
+
 
 **生产现场与异常现象。** 服务器升级期间设备客户端直接退出，或忙重连而失去原请求的最终状态。
 
@@ -4545,11 +4833,11 @@ ADRP+ADD 形成 panic 格式字符串地址 0xffff80008124ce28。主机 GDB 对�
 ### 8.1 范围、实现状态与学习顺序
 
 案例库设计共 **59 例**：七个基础方向各 **5 例**（35 例），性能、内存、网络三个进阶方向各 **8 例**（24 例）。同一工具可以在不同章节反复使用，根因与验收条件必须不同。
-原有七例保留；本阶段新增 `deadline`、`backlog`、`tcp` 三个可运行场景，其余 **49 例是完成设计的实验任务书，尚无统一命令和实机验收**。不要把设计数当作可运行程序数；本阶段固件的实测范围见验收档案。
+保留原有 10 例，并新增 24 个基础场景；当前 **34 例有可运行代码**。剩余 21 个进阶和 4 个启动/内核案例继续实现，当前 **25 例仍是任务书**。不要把设计数当作可运行程序数；本阶段固件的实测范围见验收档案。
 
-建议每条路径先完成 01 基础例，再挑本类 02～05 比较不同根因；进入进阶后先完成 P01/M01/N01，再做条件允许的设计实验。每例提交一份独立报告，复用附录 A 的模板。破坏内核、真实 DMA/IRQ/电源或整机内存的设计先放到一次性 VM 或专用环境，当前项目尚未提供可直接使用的 QEMU 镜像。
+建议每条路径先完成 01 基础例，再挑本类 02～05 比较不同根因；进入进阶后先完成 P01/M01/N01，再做条件允许的设计实验。每例提交一份独立报告，复用附录 A 的模板。全部案例按 AM625 实机方案实施；破坏内核和启动环境的入口必须先通过 WDT 与正常恢复镜像门禁，不能自行向生产分区写入异常固件。
 
-| 基础方向 | 01（保留的可运行案例） | 02（设计） | 03（设计） | 04（设计） | 05（设计） |
+| 基础方向 | 01（保留的可运行案例） | 02 | 03 | 04 | 05 |
 | --- | --- | --- | --- | --- | --- |
 | 崩溃 B-CR | [空对象解引用](#basic-cr01) | [SIGABRT](#basic-cr02) | [堆越界](#basic-cr03) | [线程栈耗尽](#basic-cr04) | [mmap SIGBUS](#basic-cr05) |
 | 描述符 B-FD | [open 泄漏](#basic-fd01) | [dup 别名](#basic-fd02) | [exec 管道继承](#basic-fd03) | [CLOSE_WAIT](#basic-fd04) | [epoll 生命周期](#basic-fd05) |
@@ -4564,6 +4852,26 @@ ADRP+ADD 形成 panic 格式字符串地址 0xffff80008124ce28。主机 GDB 对�
 | 性能 | [A-P01 遥测周期相位持续漂移，CPU 却很低](#adv-p01)；[A-P02 高优先级控制线程被低优先级锁持有者拖住](#adv-p02)；[A-P03 共享事件循环中的慢回调阻塞控制请求](#adv-p03)；[A-P04 独立计数器发生 false sharing](#adv-p04)；[A-P05 高频日志格式化与系统调用放大](#adv-p05)；[A-P06 同步落盘或 NFS 等待拖慢业务](#adv-p06)；[A-P07 冷启动缺页导致首帧长尾](#adv-p07)；[A-P08 CPU quota 周期性节流被误认成算法抖动](#adv-p08) |
 | 内存 | [A-M01 慢消费者使有效队列挤爆内存](#adv-m01)；[A-M02 全部 free 后 RSS 不降：分配器保留还是泄漏](#adv-m02)；[A-M03 数据流水线多次复制和缓冲池生命周期错误](#adv-m03)；[A-M04 memory.high 回收抖动先于 memory.max OOM](#adv-m04)；[A-M05 共享帧池跨进程引用未完成导致长期占用](#adv-m05)；[A-M06 socket 与 slab 增长被误判为用户堆泄漏](#adv-m06)；[A-M07 总空闲足够却申请不到连续 DMA 缓冲](#adv-m07)；[A-M08 线程扩张带来的栈、TLS 与调度预算失控](#adv-m08) |
 | 网络 | [A-N01 小遥测记录逐条 TCP send 导致 CPU 开销过高](#adv-n01)；[A-N02 UDP 突发超过接收队列，平均带宽却不高](#adv-n02)；[A-N03 慢对端背压使发送队列膨胀](#adv-n03)；[A-N04 epoll ET 未读空与单连接独占事件循环](#adv-n04)；[A-N05 MTU/PMTU 黑洞造成小包正常、大包卡住](#adv-n05)；[A-N06 softirq/NAPI 单核瓶颈限制多核吞吐](#adv-n06)；[A-N07 大文件与遥控共用队列产生队头阻塞](#adv-n07)；[A-N08 重连风暴放大故障与日志量](#adv-n08) |
+
+### 8.1.1 新基础案例的调试方法
+
+`case-suite` 将短实验封装在可取证的父进程内：因此最外层退出 0 表示“收集到了本次结果”，不等于子进程没有崩溃。`observed` 常记录信号、errno、队列/FD 或事件数，`auxiliary` 的含义由本例说明定义。参考检查器严格核对本例预期，并比较摘要与 trace。fault/sync 类里的 completed=1 表示一次故障尝试；不要把它误读为业务服务完成了一条正常请求。
+
+想逐条单步时，在本次专属目录内用 GDB 启动具体程序，源码路径由匹配符号映射：
+
+```sh
+R=$(sadboard results)
+mkdir -p "$R/manual-abort"
+cd "$R/manual-abort"
+gdb --args /usr/libexec/sadboard/case-suite crash-abort bug "$R/manual-abort"
+# GDB:
+# set follow-fork-mode child
+# break fault_child
+# run
+# bt full
+```
+
+`set follow-fork-mode child` 用于 fork 故障子进程；普通 CPU/memory/sync 流程可直接在 `suite_cpu/suite_mem/suite_sync` 设断点。线程与 Valgrind 会扰动时间，因此单步/GDB、strace/Valgrind、原生性能基准分别运行。网络与 CLOSE_WAIT 只在自己创建的 netns 中调试（`ip netns add sb-manual`、`ip -n sb-manual link set lo up`、`ip netns exec sb-manual gdb ...`），完成后删除自己的空间，不改管理 eth0。普通手工取证使用 `sadboard share 目录` 开放 host 读取。
 
 ### 8.2 公开岗位要求如何转成实验能力
 
