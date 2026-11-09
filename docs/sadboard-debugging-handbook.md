@@ -5,7 +5,7 @@
 先提出判断并保存证据，再读参考分析；`verify` 验证镜像提供的参考版，不替代独立定位。
 
 当前固件版本为 **v0.0.1**，不同内容以完整 SHA256 区分，日志通常显示前八位。
-原有七例已在 AM625 完成实机验收，本阶段新增 deadline/backlog/tcp 三例也完成 SD/NFS 实机验证；本阶段再实现 24 个基础场景，当前共 34 例有代码；剩余 25 例仍为设计任务书。随机多故障与通用自动评分尚未实现。
+原有七例已在 AM625 完成实机验收，本阶段新增 deadline/backlog/tcp 三例也完成 SD/NFS 实机验证；本阶段再实现 24 个基础场景，当前共 54 例有代码；剩余 5 个内核/启动/CMA 案例继续实现。随机多故障与通用自动评分尚未实现。
 完整固件 ID、阶段结果和附件位置集中记录在 [实机验收档案](am625-debug-validation.md)。
 本文中的拓展命令没有被自动视为已执行，具体实测范围以该档案为准。
 新增反汇编取自已验收固件 `668ad82f52bae589bcf1a74c08734e7b29c309ec1899d7e3169382a323dcecdf`
@@ -4833,7 +4833,7 @@ ADRP+ADD 形成 panic 格式字符串地址 0xffff80008124ce28。主机 GDB 对�
 ### 8.1 范围、实现状态与学习顺序
 
 案例库设计共 **59 例**：七个基础方向各 **5 例**（35 例），性能、内存、网络三个进阶方向各 **8 例**（24 例）。同一工具可以在不同章节反复使用，根因与验收条件必须不同。
-保留原有 10 例，并新增 24 个基础场景；当前 **34 例有可运行代码**。剩余 21 个进阶和 4 个启动/内核案例继续实现，当前 **25 例仍是任务书**。不要把设计数当作可运行程序数；本阶段固件的实测范围见验收档案。
+保留原有 10 例，并新增 24 个基础场景；本阶段继续新增 20 个普通进阶场景，当前 **54 例有可运行代码**。剩余 4 个启动/内核与 1 个 CMA 场景继续实现。不要把设计数当作可运行程序数；本阶段固件的实测范围见验收档案。
 
 建议每条路径先完成 01 基础例，再挑本类 02～05 比较不同根因；进入进阶后先完成 P01/M01/N01，再做条件允许的设计实验。每例提交一份独立报告，复用附录 A 的模板。全部案例按 AM625 实机方案实施；破坏内核和启动环境的入口必须先通过 WDT 与正常恢复镜像门禁，不能自行向生产分区写入异常固件。
 
@@ -4859,19 +4859,37 @@ ADRP+ADD 形成 panic 格式字符串地址 0xffff80008124ce28。主机 GDB 对�
 
 想逐条单步时，在本次专属目录内用 GDB 启动具体程序，源码路径由匹配符号映射：
 
+当前镜像安装的是 gdbserver，完整交叉 GDB 在 host。先在设备创建专属结果目录，再从 host 启动匹配 GDB：
+
 ```sh
+# 设备
 R=$(sadboard results)
 mkdir -p "$R/manual-abort"
-cd "$R/manual-abort"
-gdb --args /usr/libexec/sadboard/case-suite crash-abort bug "$R/manual-abort"
-# GDB:
-# set follow-fork-mode child
-# break fault_child
-# run
-# bt full
+# host，先把下方路径换成这次构建的真实 images/：
+output/am625-debug-systemd/host/bin/aarch64-buildroot-linux-gnu-gdb \
+  output/am625-debug-systemd/images/debug/labs/case-suite
 ```
 
-`set follow-fork-mode child` 用于 fork 故障子进程；普通 CPU/memory/sync 流程可直接在 `suite_cpu/suite_mem/suite_sync` 设断点。线程与 Valgrind 会扰动时间，因此单步/GDB、strace/Valgrind、原生性能基准分别运行。网络与 CLOSE_WAIT 只在自己创建的 netns 中调试（`ip netns add sb-manual`、`ip -n sb-manual link set lo up`、`ip netns exec sb-manual gdb ...`），完成后删除自己的空间，不改管理 eth0。普通手工取证使用 `sadboard share 目录` 开放 host 读取。
+```gdb
+set sysroot output/am625-debug-systemd/staging
+set substitute-path /usr/src/sadboard output/am625-debug-systemd/images/debug/source
+set follow-fork-mode child
+set detach-on-fork off
+target remote | ssh -T root@192.168.10.211 gdbserver --once - /usr/libexec/sadboard/case-suite crash-abort bug /srv/sadboard/manual-abort
+break fault_child
+continue
+bt full
+```
+
+最后一项必须是上一步真实结果目录，本地 SD 根则换成 `/data/sadboard/...`。stdio 通道不需要另开调试端口；SSH 主机指纹按现有环境核对。`set detach-on-fork off` 保留父子进程都在 GDB 控制下，父进程停住期间不会由它的短实验计时器杀掉正在单步的子进程。退出前用 `info inferiors` 检查并终止自己创建的 inferior，或让它们完整结束；这个方式已在 AM625 实测跟进到 fault_child。
+
+普通 CPU/memory/sync 流程在 `suite_cpu/suite_mem/suite_sync` 设断点。网络/CLOSE_WAIT 的手工单步只在自建 namespace 中运行 gdbserver，仍可通过相同 SSH stdio 通道连接，结束后删除自己的空间。PMTU/RPS/优先队列入口自动保存 pcap、qdisc 和对端证据；先用 tcpdump离线分析，再按 `run-network-suite` 中的拓扑步骤复现。GDB、strace/Valgrind、原生性能基准分开执行，手工结果用 `sadboard share 目录` 开放 host 读取。
+
+### 8.1.2 进阶运行约束
+
+每个普通案例的资源上限仍为128 MiB、30秒，默认16个任务；memory-threads为了容纳12个真实worker与监督脚本，任务上限为24。进阶 suite 保留 -O0/-g3、帧指针和不内联，便于源码单步；时序结果属于这个调试构建，不当作生产 -O2 的性能保证。需要评估优化编译时，保持业务校验与同一输入，单独构建并保存对应符号，不能混用旧 ELF。
+
+CPUAccounting 与默认值 CPUWeight=100 只用于实验 transient unit，后者显式启用 v2 CPU 控制器（只启用计数并不足够）；cpu.max、memory.high/max只写到以本次结果目录名归属的私有子组。cgroup子进程有父死亡保护，取消会清理归属本现场的组。真实网络实验只使用自建netns/veth/路由，TC丢弃ICMP、RPS绑核与整形均不会作用于管理eth0。
 
 ### 8.2 公开岗位要求如何转成实验能力
 
@@ -5023,11 +5041,23 @@ trace-cmd list -e
 
 ### A-P02：高优先级控制线程被低优先级锁持有者拖住
 
-**状态：完成实验设计；尚未集成 sadboard 命令，未在 AM625 实测。以下是实现/练习任务书，不是执行记录。**
+**状态：已实现故障版、参考版与原始证据契约；实机状态见阶段验收档案。**
+
+```sh
+sadboard run perf-priority
+sadboard verify perf-priority
+# 完成后使用打印的实际目录执行 sadboard check
+```
+
+本例为固定有界负载，无额外参数。源码 [suite-performance.c](../sadboard-external/package/sadboard-labs/src/suite-performance.c)；CPU3 上实际使用 SCHED_FIFO 低/中/高优先级 10/30/50；主控制器在 CPU0。低线程持锁、高线程等锁、中线程消耗 60 ms CPU。observed 为高线程等待 ns；auxiliary 表示高线程拿锁时中线程是否已完成，故障为 1、PI 参考为 0。固定工作结果 84。
+
+`perf-priority-{bug,fixed}.out/.trace` 分别保存摘要与原始事件，字段 observed/auxiliary 的含义以上述本例定义为准。摘要、trace 和完成数必须相符。与正常业务输出不同的故障结果会由本例契约明确识别；不能拿最外层退出0证明没有异常。性能题同时保留 cpu_ns/wall_ns，至少三次再评价时序，不只看资源上界或一次漂亮数字。
+
+
 
 **生产现场与现象。** 车载状态线程或机器人控制线程偶发超时，CPU 总负载不高；中优先级计算线程运行时问题显著。
 
-**受控复现设计。** 仅在一次性 VM 或经能力检查的私有 cgroup 中建立 L/M/H 三线程、固定短工作量与 watchdog 超时，构造 L 持锁、H 等锁、M 抢占 L。先用普通调度器观察，再在允许条件下限定单 CPU 的 SCHED_FIFO 小窗口；不修改 AM625 管理线程调度。
+**实际复现负载。** CPU3 上实际使用 SCHED_FIFO 低/中/高优先级 10/30/50；主控制器在 CPU0。低线程持锁、高线程等锁、中线程消耗 60 ms CPU。observed 为高线程等待 ns；auxiliary 表示高线程拿锁时中线程是否已完成，故障为 1、PI 参考为 0。固定工作结果 84。
 
 **原理与因果关系。** 等待锁使 H 无法运行，M 可能延迟 L 释放锁。优先级继承让实际锁拥有者继承等待者优先级，不会自动缩短业务临界区，也不能修复死锁。pthread 默认 mutex 不等于 PI mutex。
 
@@ -5045,11 +5075,23 @@ trace-cmd list -e
 
 ### A-P03：共享事件循环中的慢回调阻塞控制请求
 
-**状态：完成实验设计；尚未集成 sadboard 命令，未在 AM625 实测。以下是实现/练习任务书，不是执行记录。**
+**状态：已实现故障版、参考版与原始证据契约；实机状态见阶段验收档案。**
+
+```sh
+sadboard run perf-eventloop
+sadboard verify perf-eventloop
+# 完成后使用打印的实际目录执行 sadboard check
+```
+
+本例为固定有界负载，无额外参数。源码 [suite-performance.c](../sadboard-external/package/sadboard-labs/src/suite-performance.c)；4 个各 50 ms 的数据回调与 32 个 1 ms 间隔的控制事件并存。故障同步回调先占用事件线程，参考用有界的独立数据 worker。observed 是最大控制等待；before/after 分别为数据完成与首个控制处理时刻。两版 completed=36、checksum=896。
+
+`perf-eventloop-{bug,fixed}.out/.trace` 分别保存摘要与原始事件，字段 observed/auxiliary 的含义以上述本例定义为准。摘要、trace 和完成数必须相符。与正常业务输出不同的故障结果会由本例契约明确识别；不能拿最外层退出0证明没有异常。性能题同时保留 cpu_ns/wall_ns，至少三次再评价时序，不只看资源上界或一次漂亮数字。
+
+
 
 **生产现场与现象。** 图像/日志上传发生时，轻量遥控命令也延迟几百毫秒，进程 CPU 远未打满。
 
-**受控复现设计。** 在本地 socketpair 的单事件循环内混合小控制消息与 50 ms 模拟存储回调，固定输入序列和序号；参考版把慢操作交给有界 worker，并用事件通知完成。
+**实际复现负载。** 4 个各 50 ms 的数据回调与 32 个 1 ms 间隔的控制事件并存。故障同步回调先占用事件线程，参考用有界的独立数据 worker。observed 是最大控制等待；before/after 分别为数据完成与首个控制处理时刻。两版 completed=36、checksum=896。
 
 **原理与因果关系。** epoll 解决等待多个 fd，不会替业务并行执行回调。事件循环被同步回调占用时其他已就绪事件也无法处理；属于应用队头阻塞，区别于内核网络拥塞。
 
@@ -5067,11 +5109,23 @@ trace-cmd list -e
 
 ### A-P04：独立计数器发生 false sharing
 
-**状态：完成实验设计；尚未集成 sadboard 命令，未在 AM625 实测。以下是实现/练习任务书，不是执行记录。**
+**状态：已实现故障版、参考版与原始证据契约；实机状态见阶段验收档案。**
+
+```sh
+sadboard run perf-sharing
+sadboard verify perf-sharing
+# 完成后使用打印的实际目录执行 sadboard check
+```
+
+本例为固定有界负载，无额外参数。源码 [suite-performance.c](../sadboard-external/package/sadboard-labs/src/suite-performance.c)；两个绑核线程各做 500000 次独立原子递增，比较同缓存行与相距 64 B。observed 是实际指针间距 8/64，completed/checksum=1000000；性能收益另看 CPU/wall 与 PMU，不作单次倍率保证。
+
+`perf-sharing-{bug,fixed}.out/.trace` 分别保存摘要与原始事件，字段 observed/auxiliary 的含义以上述本例定义为准。摘要、trace 和完成数必须相符。与正常业务输出不同的故障结果会由本例契约明确识别；不能拿最外层退出0证明没有异常。性能题同时保留 cpu_ns/wall_ns，至少三次再评价时序，不只看资源上界或一次漂亮数字。
+
+
 
 **生产现场与现象。** 多核数据采集增加线程后吞吐反而下降，锁统计却没有明显竞争。
 
-**受控复现设计。** 两个线程各更新自己的原子计数器，比较同一 cache line 与分离对齐两种布局；固定增量总数与线程亲和性，保留单线程对照。不要先假设 ARM64 的缓存行长度。
+**实际复现负载。** 两个绑核线程各做 500000 次独立原子递增，比较同缓存行与相距 64 B。observed 是实际指针间距 8/64，completed/checksum=1000000；性能收益另看 CPU/wall 与 PMU，不作单次倍率保证。
 
 **原理与因果关系。** 逻辑上独立的数据可能共享缓存一致性粒度，写入导致缓存行所有权反复转移。原子指令开销、真实共享与 false sharing 是三个假设，需布局及单核/双核对照排除。
 
@@ -5089,11 +5143,23 @@ trace-cmd list -e
 
 ### A-P05：高频日志格式化与系统调用放大
 
-**状态：完成实验设计；尚未集成 sadboard 命令，未在 AM625 实测。以下是实现/练习任务书，不是执行记录。**
+**状态：已实现故障版、参考版与原始证据契约；实机状态见阶段验收档案。**
+
+```sh
+sadboard run perf-logbatch
+sadboard verify perf-logbatch
+# 完成后使用打印的实际目录执行 sadboard check
+```
+
+本例为固定有界负载，无额外参数。源码 [suite-performance.c](../sadboard-external/package/sadboard-labs/src/suite-performance.c)；固定 1024 行日志，逐行 write+fdatasync 对比每 32 行批量提交。读回核对全部记录与 checksum=523776。observed/auxiliary 是真实成功 write/提交次数 1024→32；断电损失窗口随批处理改变，必须在工程方案中明确。
+
+`perf-logbatch-{bug,fixed}.out/.trace` 分别保存摘要与原始事件，字段 observed/auxiliary 的含义以上述本例定义为准。摘要、trace 和完成数必须相符。与正常业务输出不同的故障结果会由本例契约明确识别；不能拿最外层退出0证明没有异常。性能题同时保留 cpu_ns/wall_ns，至少三次再评价时序，不只看资源上界或一次漂亮数字。
+
+
 
 **生产现场与现象。** 网关开启调试日志后吞吐下降，关闭日志又难以定位故障；CPU 火焰图停在格式化、锁和 write。
 
-**受控复现设计。** 固定一万个状态记录，在私有普通文件和 /dev/null 两个输出目标上比较逐条格式化写入与有界批量；保留相同记录数、内容校验和、最终 flush。
+**实际复现负载。** 固定 1024 行日志，逐行 write+fdatasync 对比每 32 行批量提交。读回核对全部记录与 checksum=523776。observed/auxiliary 是真实成功 write/提交次数 1024→32；断电损失窗口随批处理改变，必须在工程方案中明确。
 
 **原理与因果关系。** 代价包括用户态格式化、日志锁、系统调用和文件系统等待。写到 /dev/null 仍慢可削弱“存储太慢”假设；减少日志内容不能伪装成同语义优化。
 
@@ -5111,11 +5177,23 @@ trace-cmd list -e
 
 ### A-P06：同步落盘或 NFS 等待拖慢业务
 
-**状态：完成实验设计；尚未集成 sadboard 命令，未在 AM625 实测。以下是实现/练习任务书，不是执行记录。**
+**状态：已实现故障版、参考版与原始证据契约；实机状态见阶段验收档案。**
+
+```sh
+sadboard run perf-syncio
+sadboard verify perf-syncio
+# 完成后使用打印的实际目录执行 sadboard check
+```
+
+本例为固定有界负载，无额外参数。源码 [suite-performance.c](../sadboard-external/package/sadboard-labs/src/suite-performance.c)；固定 64×4096 B 文件块，分别每块 fsync 和每 8 块 fsync；读回验证每字节。observed 为提交次数 64→8，auxiliary=262144 B，checksum=8257536。保留文件和 CPU/wall 时间，strace -T 可逐次观察等待。
+
+`perf-syncio-{bug,fixed}.out/.trace` 分别保存摘要与原始事件，字段 observed/auxiliary 的含义以上述本例定义为准。摘要、trace 和完成数必须相符。与正常业务输出不同的故障结果会由本例契约明确识别；不能拿最外层退出0证明没有异常。性能题同时保留 cpu_ns/wall_ns，至少三次再评价时序，不只看资源上界或一次漂亮数字。
+
+
 
 **生产现场与现象。** 遥测处理计算很快，写结果时却周期性停顿；换成 NFS 调试根后变得更明显。
 
-**受控复现设计。** 只写结果目录中的限额文件，比较每条 fsync、每批 fsync、纯内存模拟三组。限制总量到 8 MiB；不拔卡、不切断管理网、不对设备根执行全局压测。
+**实际复现负载。** 固定 64×4096 B 文件块，分别每块 fsync 和每 8 块 fsync；读回验证每字节。observed 为提交次数 64→8，auxiliary=262144 B，checksum=8257536。保留文件和 CPU/wall 时间，strace -T 可逐次观察等待。
 
 **原理与因果关系。** write 完成不等于持久化完成；fsync 可能等待文件数据与元数据，NFS 还涉及服务器提交语义。低 CPU 和长 wall 时间常指向等待，但并不自动证明存储坏了。
 
@@ -5133,11 +5211,23 @@ trace-cmd list -e
 
 ### A-P07：冷启动缺页导致首帧长尾
 
-**状态：完成实验设计；尚未集成 sadboard 命令，未在 AM625 实测。以下是实现/练习任务书，不是执行记录。**
+**状态：已实现故障版、参考版与原始证据契约；实机状态见阶段验收档案。**
+
+```sh
+sadboard run perf-prefault
+sadboard verify perf-prefault
+# 完成后使用打印的实际目录执行 sadboard check
+```
+
+本例为固定有界负载，无额外参数。源码 [suite-performance.c](../sadboard-external/package/sadboard-labs/src/suite-performance.c)；16 MiB 匿名映射明确禁用 THP，比较业务阶段首次触页与初始化预触页。observed 为业务前 mincore 实测非驻留页 4096→0，auxiliary 为业务阶段 minor faults；两版处理相同 4096 页、checksum=172032。
+
+`perf-prefault-{bug,fixed}.out/.trace` 分别保存摘要与原始事件，字段 observed/auxiliary 的含义以上述本例定义为准。摘要、trace 和完成数必须相符。与正常业务输出不同的故障结果会由本例契约明确识别；不能拿最外层退出0证明没有异常。性能题同时保留 cpu_ns/wall_ns，至少三次再评价时序，不只看资源上界或一次漂亮数字。
+
+
 
 **生产现场与现象。** 机器人首帧或桥接服务首次处理大消息很慢，随后正常，重启后重新出现。
 
-**受控复现设计。** 进程新建 16 MiB 匿名映射，分别按需访问与初始化阶段预触碰；使用多次新进程，不执行全局 drop_caches，不 mlock 整个系统。
+**实际复现负载。** 16 MiB 匿名映射明确禁用 THP，比较业务阶段首次触页与初始化预触页。observed 为业务前 mincore 实测非驻留页 4096→0，auxiliary 为业务阶段 minor faults；两版处理相同 4096 页、checksum=172032。
 
 **原理与因果关系。** 首次匿名写需要分配页并建立映射，可产生 minor fault 而没有磁盘读取。文件 major fault、COW、THP/压缩又有不同代价。预触页把成本移到初始化，不等于消除成本。
 
@@ -5155,11 +5245,23 @@ trace-cmd list -e
 
 ### A-P08：CPU quota 周期性节流被误认成算法抖动
 
-**状态：完成实验设计；尚未集成 sadboard 命令，未在 AM625 实测。以下是实现/练习任务书，不是执行记录。**
+**状态：已实现故障版、参考版与原始证据契约；实机状态见阶段验收档案。**
+
+```sh
+sadboard run perf-quota
+sadboard verify perf-quota
+# 完成后使用打印的实际目录执行 sadboard check
+```
+
+本例为固定有界负载，无额外参数。源码 [suite-performance.c](../sadboard-external/package/sadboard-labs/src/suite-performance.c)；仅自建 cgroup 的子进程运行相同 30000000 次 32 位 LCG，cpu.max 为 25000/100000 或 max。observed/throttled_usec 来自 cpu.stat；checksum=213978538。子进程设置父死亡 SIGKILL，组有独立 memory/pids 上限，完成/取消清理归属本现场的组。
+
+`perf-quota-{bug,fixed}.out/.trace` 分别保存摘要与原始事件，字段 observed/auxiliary 的含义以上述本例定义为准。摘要、trace 和完成数必须相符。与正常业务输出不同的故障结果会由本例契约明确识别；不能拿最外层退出0证明没有异常。性能题同时保留 cpu_ns/wall_ns，至少三次再评价时序，不只看资源上界或一次漂亮数字。
+
+
 
 **生产现场与现象。** 容器化边缘服务每隔一段时间出现整段停顿，主机整体 CPU 仍有空闲。
 
-**受控复现设计。** 在 transient 实验 unit 的自有 cgroup 设置 CPUQuota=25%，启动有限 CPU 作业，与无配额的相同输入对照；不调整 system.slice 或管理服务。
+**实际复现负载。** 仅自建 cgroup 的子进程运行相同 30000000 次 32 位 LCG，cpu.max 为 25000/100000 或 max。observed/throttled_usec 来自 cpu.stat；checksum=213978538。子进程设置父死亡 SIGKILL，组有独立 memory/pids 上限，完成/取消清理归属本现场的组。
 
 **原理与因果关系。** CFS 带宽预算耗尽后即使机器其他核有空闲，该组也可能等待下个补充窗口。亲和性、cpufreq/温度和 IRQ 压力会有相似现象，必须按证据区分。
 
@@ -5263,11 +5365,23 @@ sadboard share "$R/manual-backlog"
 
 ### A-M02：全部 free 后 RSS 不降：分配器保留还是泄漏
 
-**状态：完成实验设计；尚未集成 sadboard 命令，未在 AM625 实测。以下是实现/练习任务书，不是执行记录。**
+**状态：已实现故障版、参考版与原始证据契约；实机状态见阶段验收档案。**
+
+```sh
+sadboard run memory-allocator
+sadboard verify memory-allocator
+# 完成后使用打印的实际目录执行 sadboard check
+```
+
+本例为固定有界负载，无额外参数。源码 [suite-advanced-memory.c](../sadboard-external/package/sadboard-labs/src/suite-advanced-memory.c)；8192 个 1 KiB 小对象使用进程内 mallopt 禁止自动 trim，全部正确释放；参考额外 malloc_trim。observed 为释放前记录的堆页面在 free/trim 后仍驻留的实际字节（逐页 mincore，已解除映射计零），auxiliary 为活跃分配字节；fordblks 和 RSS 另行记录。AArch64 glibc 的 malloc_trim 可以用 MADV_DONTNEED 回收 arena 内部页面而不缩小 fordblks，因此不能要求 fordblks 随 RSS 一起下降。相同 8192 次与 checksum=1044480，不把 allocator 保留说成丢失块。
+
+`memory-allocator-{bug,fixed}.out/.trace` 分别保存摘要与原始事件，字段 observed/auxiliary 的含义以上述本例定义为准。摘要、trace 和完成数必须相符。与正常业务输出不同的故障结果会由本例契约明确识别；不能拿最外层退出0证明没有异常。性能题同时保留 cpu_ns/wall_ns，至少三次再评价时序，不只看资源上界或一次漂亮数字。
+
+
 
 **生产现场与现象。** 模型加载/卸载后业务对象数归零，但 RSS 仍较高，重复重启只能暂时改善。
 
-**受控复现设计。** 单进程交错分配小/大块，总触页预算 32 MiB，逐步释放并标记阶段；再做同尺寸池与可选 malloc_trim 对照，不先设置全局分配器参数。
+**实际复现负载。** 8192 个 1 KiB 小对象使用进程内 mallopt 禁止自动 trim，全部正确释放；参考额外 malloc_trim。observed 为释放前记录的堆页面在 free/trim 后仍驻留的实际字节（逐页 mincore，已解除映射计零），auxiliary 为活跃分配字节；fordblks 和 RSS 另行记录。AArch64 glibc 的 malloc_trim 可以用 MADV_DONTNEED 回收 arena 内部页面而不缩小 fordblks，因此不能要求 fordblks 随 RSS 一起下降。相同 8192 次与 checksum=1044480，不把 allocator 保留说成丢失块。
 
 **原理与因果关系。** free 归还给分配器，不保证每个空闲块立即解除映射。arena、碎片、线程缓存和仍活跃对象可能阻止页归还；真实悬挂引用则是另一类原因。
 
@@ -5285,11 +5399,23 @@ sadboard share "$R/manual-backlog"
 
 ### A-M03：数据流水线多次复制和缓冲池生命周期错误
 
-**状态：完成实验设计；尚未集成 sadboard 命令，未在 AM625 实测。以下是实现/练习任务书，不是执行记录。**
+**状态：已实现故障版、参考版与原始证据契约；实机状态见阶段验收档案。**
+
+```sh
+sadboard run memory-frames
+sadboard verify memory-frames
+# 完成后使用打印的实际目录执行 sadboard check
+```
+
+本例为固定有界负载，无额外参数。源码 [suite-advanced-memory.c](../sadboard-external/package/sadboard-labs/src/suite-advanced-memory.c)；64 个 256 KiB 帧按每批 4 帧处理，三段复制对比借用 4 个固定池槽。observed 为复制字节 33554432→0，auxiliary 为分配次数 192→4，峰值 3 MiB→1 MiB，最终 live=0；每字节校验和相同。此例是用户态帧所有权，不冒充已接相机/DMA。
+
+`memory-frames-{bug,fixed}.out/.trace` 分别保存摘要与原始事件，字段 observed/auxiliary 的含义以上述本例定义为准。摘要、trace 和完成数必须相符。与正常业务输出不同的故障结果会由本例契约明确识别；不能拿最外层退出0证明没有异常。性能题同时保留 cpu_ns/wall_ns，至少三次再评价时序，不只看资源上界或一次漂亮数字。
+
+
 
 **生产现场与现象。** 相机、载荷数据或媒体网关每一级都复制整帧，CPU 与峰值内存同时升高。
 
-**受控复现设计。** 用合成 256 KiB 帧、固定 64 帧、三阶段 CPU pipeline 比较复制与有界引用池；不声称当前 AM625 接入真实相机/DMA。每帧保存序号和校验。
+**实际复现负载。** 64 个 256 KiB 帧按每批 4 帧处理，三段复制对比借用 4 个固定池槽。observed 为复制字节 33554432→0，auxiliary 为分配次数 192→4，峰值 3 MiB→1 MiB，最终 live=0；每字节校验和相同。此例是用户态帧所有权，不冒充已接相机/DMA。
 
 **原理与因果关系。** 复制数×帧大小×并发在途数决定带宽/内存需求。减少复制必须明确谁拥有缓冲区、什么时候可复用；引用计数错会引入泄漏或 use-after-free，零拷贝不是免费正确性。
 
@@ -5307,11 +5433,23 @@ sadboard share "$R/manual-backlog"
 
 ### A-M04：memory.high 回收抖动先于 memory.max OOM
 
-**状态：完成实验设计；尚未集成 sadboard 命令，未在 AM625 实测。以下是实现/练习任务书，不是执行记录。**
+**状态：已实现故障版、参考版与原始证据契约；实机状态见阶段验收档案。**
+
+```sh
+sadboard run memory-high
+sadboard verify memory-high
+# 完成后使用打印的实际目录执行 sadboard check
+```
+
+本例为固定有界负载，无额外参数。源码 [suite-advanced-memory.c](../sadboard-external/package/sadboard-labs/src/suite-advanced-memory.c)；真实私有 cgroup 的 memory.high=8 MiB、max=32 MiB。相同 4096 个工作项，故障保留 16 MiB 工作集，参考复用 4 MiB；准备后再降低 high 并触发一页真实分配。observed 是 high 事件，auxiliary 是 oom_kill（必须为 0），保留 current/peak 与耗时。
+
+`memory-high-{bug,fixed}.out/.trace` 分别保存摘要与原始事件，字段 observed/auxiliary 的含义以上述本例定义为准。摘要、trace 和完成数必须相符。与正常业务输出不同的故障结果会由本例契约明确识别；不能拿最外层退出0证明没有异常。性能题同时保留 cpu_ns/wall_ns，至少三次再评价时序，不只看资源上界或一次漂亮数字。
+
+
 
 **生产现场与现象。** 服务未被杀死却逐渐失去响应，CPU/内存压力上升；只监控 oom_kill 看不出问题。
 
-**受控复现设计。** 仅在自有 transient unit 中给 memory.high 与 memory.max 不同上限，有限访问匿名页和私有文件，逐步增加到预算附近；禁止整机 OOM。
+**实际复现负载。** 真实私有 cgroup 的 memory.high=8 MiB、max=32 MiB。相同 4096 个工作项，故障保留 16 MiB 工作集，参考复用 4 MiB；准备后再降低 high 并触发一页真实分配。observed 是 high 事件，auxiliary 是 oom_kill（必须为 0），保留 current/peak 与耗时。
 
 **原理与因果关系。** memory.high 超限可让任务进入回收与节流，memory.max 是不同的硬限制。回收、refault、swap 能让服务长时间停在性能退化阶段，而不是立即 OOM。
 
@@ -5329,11 +5467,23 @@ sadboard share "$R/manual-backlog"
 
 ### A-M05：共享帧池跨进程引用未完成导致长期占用
 
-**状态：完成实验设计；尚未集成 sadboard 命令，未在 AM625 实测。以下是实现/练习任务书，不是执行记录。**
+**状态：已实现故障版、参考版与原始证据契约；实机状态见阶段验收档案。**
+
+```sh
+sadboard run memory-session
+sadboard verify memory-session
+# 完成后使用打印的实际目录执行 sadboard check
+```
+
+本例为固定有界负载，无额外参数。源码 [suite-advanced-memory.c](../sadboard-external/package/sadboard-labs/src/suite-advanced-memory.c)；通过 SCM_RIGHTS 实际传递 8 个 memfd，消费者核对内容后退出但不回应用槽确认。故障软件表仍占 8 槽，参考在证明旧进程退出后切换 generation 并清空，拒绝旧代次。OS FD 最终都回基线，用于区分协议状态泄漏和内核引用。
+
+`memory-session-{bug,fixed}.out/.trace` 分别保存摘要与原始事件，字段 observed/auxiliary 的含义以上述本例定义为准。摘要、trace 和完成数必须相符。与正常业务输出不同的故障结果会由本例契约明确识别；不能拿最外层退出0证明没有异常。性能题同时保留 cpu_ns/wall_ns，至少三次再评价时序，不只看资源上界或一次漂亮数字。
+
+
 
 **生产现场与现象。** 录制端重启后共享帧池被耗尽，生产者无可用槽；主进程内存泄漏工具看不出全部引用。
 
-**受控复现设计。** 在受控进程组创建 8 个带 generation 的 memfd 槽，生产/消费显式传递 fd，注入消费者取消前未归还状态；参考版引入会话代次、租约或重建协议。
+**实际复现负载。** 通过 SCM_RIGHTS 实际传递 8 个 memfd，消费者核对内容后退出但不回应用槽确认。故障软件表仍占 8 槽，参考在证明旧进程退出后切换 generation 并清空，拒绝旧代次。OS FD 最终都回基线，用于区分协议状态泄漏和内核引用。
 
 **原理与因果关系。** 对象的内核引用、用户协议中的“槽占用”是两件事。即使 close 释放了内核引用，生产者的软件账本也可能认为仍在使用；盲目超时复用则可能破坏仍存活的读者。
 
@@ -5351,11 +5501,23 @@ sadboard share "$R/manual-backlog"
 
 ### A-M06：socket 与 slab 增长被误判为用户堆泄漏
 
-**状态：完成实验设计；尚未集成 sadboard 命令，未在 AM625 实测。以下是实现/练习任务书，不是执行记录。**
+**状态：已实现故障版、参考版与原始证据契约；实机状态见阶段验收档案。**
+
+```sh
+sadboard run memory-sockets
+sadboard verify memory-sockets
+# 完成后使用打印的实际目录执行 sadboard check
+```
+
+本例为固定有界负载，无额外参数。源码 [suite-advanced-memory.c](../sadboard-external/package/sadboard-labs/src/suite-advanced-memory.c)；16 个真实 TCP 连接各处理 64 KiB，故障先向所有连接排队后再消费，参考每 4 KiB 及时读取并限制并发。observed 从 SO_MEMINFO 读取内核 rmem_alloc，峰值连接 16→1；两版完成 1 MiB 并逐字节验证，未用用户 RSS 冒充 socket 内存。
+
+`memory-sockets-{bug,fixed}.out/.trace` 分别保存摘要与原始事件，字段 observed/auxiliary 的含义以上述本例定义为准。摘要、trace 和完成数必须相符。与正常业务输出不同的故障结果会由本例契约明确识别；不能拿最外层退出0证明没有异常。性能题同时保留 cpu_ns/wall_ns，至少三次再评价时序，不只看资源上界或一次漂亮数字。
+
+
 
 **生产现场与现象。** 大量连接或突发包到达时 MemAvailable 下降，应用 malloc 活跃量变化不大。
 
-**受控复现设计。** 私有 netns 中建立最多 32 个连接并给收发队列设置有限上限，短时让接收者落后；前后采集 socket、cgroup 与 slab 计数。没有 root/内核计费能力时只做对应可见部分。
+**实际复现负载。** 16 个真实 TCP 连接各处理 64 KiB，故障先向所有连接排队后再消费，参考每 4 KiB 及时读取并限制并发。observed 从 SO_MEMINFO 读取内核 rmem_alloc，峰值连接 16→1；两版完成 1 MiB 并逐字节验证，未用用户 RSS 冒充 socket 内存。
 
 **原理与因果关系。** 内核 socket 队列、协议对象和 slab 也需要内存；部分会计到 memcg，不能仅将总内存减去用户 RSS 就叫泄漏。释放延迟、缓存复用与真正泄漏需要趋势和生命周期证明。
 
@@ -5395,11 +5557,23 @@ sadboard share "$R/manual-backlog"
 
 ### A-M08：线程扩张带来的栈、TLS 与调度预算失控
 
-**状态：完成实验设计；尚未集成 sadboard 命令，未在 AM625 实测。以下是实现/练习任务书，不是执行记录。**
+**状态：已实现故障版、参考版与原始证据契约；实机状态见阶段验收档案。**
+
+```sh
+sadboard run memory-threads
+sadboard verify memory-threads
+# 完成后使用打印的实际目录执行 sadboard check
+```
+
+本例为固定有界负载，无额外参数。源码 [suite-advanced-memory.c](../sadboard-external/package/sadboard-labs/src/suite-advanced-memory.c)；相同 12 个任务，对比 12 个线程与 4 worker；线程栈 512 KiB，实际触碰栈/TLS。observed 从 /proc/self/task 读取活跃 worker 12→4，VmSize/RSS 另记；任务 checksum=66。此例的 transient unit TasksMax=24，其余仍为 16。
+
+`memory-threads-{bug,fixed}.out/.trace` 分别保存摘要与原始事件，字段 observed/auxiliary 的含义以上述本例定义为准。摘要、trace 和完成数必须相符。与正常业务输出不同的故障结果会由本例契约明确识别；不能拿最外层退出0证明没有异常。性能题同时保留 cpu_ns/wall_ns，至少三次再评价时序，不只看资源上界或一次漂亮数字。
+
+
 
 **生产现场与现象。** 每连接一线程的网关在连接增长时 RSS/VIRT 与延迟迅速增加，单请求逻辑没有泄漏。
 
-**受控复现设计。** 受控子进程逐步创建最多 12 个线程，每线程触碰限定栈和 TLS；与固定 4 worker 的同请求数对照，保持 launcher TasksMax=16。
+**实际复现负载。** 相同 12 个任务，对比 12 个线程与 4 worker；线程栈 512 KiB，实际触碰栈/TLS。observed 从 /proc/self/task 读取活跃 worker 12→4，VmSize/RSS 另记；任务 checksum=66。此例的 transient unit TasksMax=24，其余仍为 16。
 
 **原理与因果关系。** 每线程都需要栈映射、guard、TLS、内核任务和调度对象。虚拟预留与实际驻留不同；缩栈过头又会制造栈溢出，线程池则需要有界排队和取消。
 
@@ -5512,11 +5686,23 @@ fb8: tbz x0, #63, f90       // ssize_t 非负则检查 0/累加；负值走错�
 
 ### A-N02：UDP 突发超过接收队列，平均带宽却不高
 
-**状态：完成实验设计；尚未集成 sadboard 命令，未在 AM625 实测。以下是实现/练习任务书，不是执行记录。**
+**状态：已实现故障版、参考版与原始证据契约；实机状态见阶段验收档案。**
+
+```sh
+sadboard run net-udpburst
+sadboard verify net-udpburst
+# 完成后使用打印的实际目录执行 sadboard check
+```
+
+本例为固定有界负载，无额外参数。源码 [suite-advanced-network.c](../sadboard-external/package/sadboard-labs/src/suite-advanced-network.c)；私有 loopback 预排 128×512 B 的有界突发，recv 单条与 recvmmsg 每批 16 条对照，真实接收调用 128→8。全部序号和字节核对，checksum=8128。接收队列足够容纳这组突发；队列溢出另见基础 B-NET04，不声称批处理能消除长期速率失配。
+
+`net-udpburst-{bug,fixed}.out/.trace` 分别保存摘要与原始事件，字段 observed/auxiliary 的含义以上述本例定义为准。摘要、trace 和完成数必须相符。与正常业务输出不同的故障结果会由本例契约明确识别；不能拿最外层退出0证明没有异常。性能题同时保留 cpu_ns/wall_ns，至少三次再评价时序，不只看资源上界或一次漂亮数字。
+
+
 
 **生产现场与现象。** 传感器每帧突发发送，平均只有几 Mbps，但应用周期性缺序号；链路没有持续满载。
 
-**受控复现设计。** 自有 netns loopback/veth 中限定 burst 数、最大速率和总包数，接收者每轮模拟短处理；与批量接收/合理缓冲版比较，包里有 sequence 和 send time。
+**实际复现负载。** 私有 loopback 预排 128×512 B 的有界突发，recv 单条与 recvmmsg 每批 16 条对照，真实接收调用 128→8。全部序号和字节核对，checksum=8128。接收队列足够容纳这组突发；队列溢出另见基础 B-NET04，不声称批处理能消除长期速率失配。
 
 **原理与因果关系。** 平均速率低不代表瞬时队列不溢出。UDP 没有 TCP 的可靠重传，应用调度延迟、socket 缓冲和设备队列都可丢包，需定位具体层而不是只调一个 rmem 参数。
 
@@ -5534,11 +5720,23 @@ fb8: tbz x0, #63, f90       // ssize_t 非负则检查 0/累加；负值走错�
 
 ### A-N03：慢对端背压使发送队列膨胀
 
-**状态：完成实验设计；尚未集成 sadboard 命令，未在 AM625 实测。以下是实现/练习任务书，不是执行记录。**
+**状态：已实现故障版、参考版与原始证据契约；实机状态见阶段验收档案。**
+
+```sh
+sadboard run net-backpressure
+sadboard verify net-backpressure
+# 完成后使用打印的实际目录执行 sadboard check
+```
+
+本例为固定有界负载，无额外参数。源码 [suite-advanced-network.c](../sadboard-external/package/sadboard-labs/src/suite-advanced-network.c)；真实 TCP 接收方启动先等 100 ms，有限发送窗口使 send 阻塞；生产端 64×4 KiB 消息比较无约束队列与 8 条高水位。observed 为实际应用队列峰值，auxiliary 为 TIOCOUTQ 高水位；全部 64 条处理完，checksum=2016。
+
+`net-backpressure-{bug,fixed}.out/.trace` 分别保存摘要与原始事件，字段 observed/auxiliary 的含义以上述本例定义为准。摘要、trace 和完成数必须相符。与正常业务输出不同的故障结果会由本例契约明确识别；不能拿最外层退出0证明没有异常。性能题同时保留 cpu_ns/wall_ns，至少三次再评价时序，不只看资源上界或一次漂亮数字。
+
+
 
 **生产现场与现象。** 下游服务器读得慢，AM625 的发送任务卡住，控制消息也排在大量数据之后。
 
-**受控复现设计。** 私有 TCP 服务延迟读取，限定连接数和最大字节，对比无界用户队列与带高低水位的生产者；与 N01 的快接收者场景区分。
+**实际复现负载。** 真实 TCP 接收方启动先等 100 ms，有限发送窗口使 send 阻塞；生产端 64×4 KiB 消息比较无约束队列与 8 条高水位。observed 为实际应用队列峰值，auxiliary 为 TIOCOUTQ 高水位；全部 64 条处理完，checksum=2016。
 
 **原理与因果关系。** 用户队列、socket Send-Q、对端接收窗口与拥塞控制共同决定推进速度。send 成功只代表接受到发送路径，不等于对端业务已处理；可靠传输不会自动保证应用内存有界。
 
@@ -5556,11 +5754,23 @@ fb8: tbz x0, #63, f90       // ssize_t 非负则检查 0/累加；负值走错�
 
 ### A-N04：epoll ET 未读空与单连接独占事件循环
 
-**状态：完成实验设计；尚未集成 sadboard 命令，未在 AM625 实测。以下是实现/练习任务书，不是执行记录。**
+**状态：已实现故障版、参考版与原始证据契约；实机状态见阶段验收档案。**
+
+```sh
+sadboard run net-edgebudget
+sadboard verify net-edgebudget
+# 完成后使用打印的实际目录执行 sadboard check
+```
+
+本例为固定有界负载，无额外参数。源码 [suite-advanced-network.c](../sadboard-external/package/sadboard-labs/src/suite-advanced-network.c)；两个真实非阻塞流同时就绪：大流 64 B、控制 1 B。故障 ET 一次只读 1 B，随后没有新边沿而留 63 B；参考保留内部 runnable 状态、每轮最多 8 B 并处理控制。recv(MSG_PEEK|MSG_DONTWAIT) 实测未读数据 63→0，全部内容可对账；FIONREAD 单独保留原始值，UNIX 流实现可能报告整个 skb 的长度，不能混作已消费后的可读长度。
+
+`net-edgebudget-{bug,fixed}.out/.trace` 分别保存摘要与原始事件，字段 observed/auxiliary 的含义以上述本例定义为准。摘要、trace 和完成数必须相符。与正常业务输出不同的故障结果会由本例契约明确识别；不能拿最外层退出0证明没有异常。性能题同时保留 cpu_ns/wall_ns，至少三次再评价时序，不只看资源上界或一次漂亮数字。
+
+
 
 **生产现场与现象。** 高负载时某个连接长时间无响应，另一个连接一直有数据；改成 busy polling 又导致 CPU 满。
 
-**受控复现设计。** 自有 socketpair/loopback 上同时输入大流与小控制流，先构造 ET 每次只读一段、再构造无预算 drain；参考版非阻塞读到 EAGAIN 并引入可继续调度的公平预算。
+**实际复现负载。** 两个真实非阻塞流同时就绪：大流 64 B、控制 1 B。故障 ET 一次只读 1 B，随后没有新边沿而留 63 B；参考保留内部 runnable 状态、每轮最多 8 B 并处理控制。recv(MSG_PEEK|MSG_DONTWAIT) 实测未读数据 63→0，全部内容可对账；FIONREAD 单独保留原始值，UNIX 流实现可能报告整个 skb 的长度，不能混作已消费后的可读长度。
 
 **原理与因果关系。** ET 是状态变化通知，不保证每次未消费数据都会再次通知；但无限处理同一就绪 fd 又会饿死其他任务。正确性与公平性必须一起设计，不能简单套“读到空就结束所有工作”。
 
@@ -5578,11 +5788,23 @@ fb8: tbz x0, #63, f90       // ssize_t 非负则检查 0/累加；负值走错�
 
 ### A-N05：MTU/PMTU 黑洞造成小包正常、大包卡住
 
-**状态：完成实验设计；尚未集成 sadboard 命令，未在 AM625 实测。以下是实现/练习任务书，不是执行记录。**
+**状态：已实现故障版、参考版与原始证据契约；实机状态见阶段验收档案。**
+
+```sh
+sadboard run net-pmtu
+sadboard verify net-pmtu
+# 完成后使用打印的实际目录执行 sadboard check
+```
+
+本例为固定有界负载，无额外参数。源码 [suite-advanced-network.c](../sadboard-external/package/sadboard-labs/src/suite-advanced-network.c)；三个私有 netns 构成真实 IPv4 路由，第一段 MTU1500、路由出口600。故障在本实验源入口丢弃 ICMP，64 B 探测可通而 1400 B DF 数据无返回；参考允许 ICMP，IP_RECVERR 得 EMSGSIZE=90、缓存 PMTU600，再按512 B分块恢复相同1400 B内容。保留 ingress 丢包统计、pcap 和接收端证明。
+
+`net-pmtu-{bug,fixed}.out/.trace` 分别保存摘要与原始事件，字段 observed/auxiliary 的含义以上述本例定义为准。摘要、trace 和完成数必须相符。与正常业务输出不同的故障结果会由本例契约明确识别；不能拿最外层退出0证明没有异常。性能题同时保留 cpu_ns/wall_ns，至少三次再评价时序，不只看资源上界或一次漂亮数字。
+
+
 
 **生产现场与现象。** ping 小包与 TCP 握手正常，上传固件或大块遥测停住，重传不断。
 
-**受控复现设计。** 只在自建两端 veth namespace 设置不同 MTU，受控过滤实验路径所需 ICMP，限定 5 秒连接超时；不动实际交换机/管理网。工具缺失时不得把命令示意当已验证。
+**实际复现负载。** 三个私有 netns 构成真实 IPv4 路由，第一段 MTU1500、路由出口600。故障在本实验源入口丢弃 ICMP，64 B 探测可通而 1400 B DF 数据无返回；参考允许 ICMP，IP_RECVERR 得 EMSGSIZE=90、缓存 PMTU600，再按512 B分块恢复相同1400 B内容。保留 ingress 丢包统计、pcap 和接收端证明。
 
 **原理与因果关系。** 路径 MTU 发现依赖正确的大小约束和反馈；丢弃必要 ICMP 可使大数据重复失败。UDP 分片、TCP MSS、PMTU 与 offload 是不同层次，小 ping 正常不能证明全路径适合大包。
 
@@ -5600,11 +5822,23 @@ fb8: tbz x0, #63, f90       // ssize_t 非负则检查 0/累加；负值走错�
 
 ### A-N06：softirq/NAPI 单核瓶颈限制多核吞吐
 
-**状态：完成实验设计；尚未集成 sadboard 命令，未在 AM625 实测。以下是实现/练习任务书，不是执行记录。**
+**状态：已实现故障版、参考版与原始证据契约；实机状态见阶段验收档案。**
+
+```sh
+sadboard run net-rps
+sadboard verify net-rps
+# 完成后使用打印的实际目录执行 sadboard check
+```
+
+本例为固定有界负载，无额外参数。源码 [suite-advanced-network.c](../sadboard-external/package/sadboard-labs/src/suite-advanced-network.c)；在 AM625 的私有 veth 上真实设置 RX rps_cpus=0/8，发送进程绑 CPU2，参考分流到 CPU3；接收端从 SO_INCOMING_CPU 报告实际协议接收 CPU。两版完整传输262144 B、checksum=11010048。它验证软件 RPS，不冒充物理 CPSW RSS 能力或线速。
+
+`net-rps-{bug,fixed}.out/.trace` 分别保存摘要与原始事件，字段 observed/auxiliary 的含义以上述本例定义为准。摘要、trace 和完成数必须相符。与正常业务输出不同的故障结果会由本例契约明确识别；不能拿最外层退出0证明没有异常。性能题同时保留 cpu_ns/wall_ns，至少三次再评价时序，不只看资源上界或一次漂亮数字。
+
+
 
 **生产现场与现象。** 多核板整体 CPU 没满，一个核却持续忙于收包；增加应用线程收效有限。
 
-**受控复现设计。** 先用 /proc/interrupts、softirqs、网卡队列信息观察；仅有可用的第二数据链路或明确隔离的测试 NIC 才做负载/IRQ 改动。当前 AM625 管理口只读取证，不能自动绑核或 flood。
+**实际复现负载。** 在 AM625 的私有 veth 上真实设置 RX rps_cpus=0/8，发送进程绑 CPU2，参考分流到 CPU3；接收端从 SO_INCOMING_CPU 报告实际协议接收 CPU。两版完整传输262144 B、checksum=11010048。它验证软件 RPS，不冒充物理 CPSW RSS 能力或线速。
 
 **原理与因果关系。** RSS 硬件分流、RPS 软件分流、NAPI poll budget 与应用亲和性共同影响局部热点；单流哈希不一定跨核，软件分流还增加 IPI/缓存代价。
 
@@ -5622,11 +5856,23 @@ fb8: tbz x0, #63, f90       // ssize_t 非负则检查 0/累加；负值走错�
 
 ### A-N07：大文件与遥控共用队列产生队头阻塞
 
-**状态：完成实验设计；尚未集成 sadboard 命令，未在 AM625 实测。以下是实现/练习任务书，不是执行记录。**
+**状态：已实现故障版、参考版与原始证据契约；实机状态见阶段验收档案。**
+
+```sh
+sadboard run net-priority
+sadboard verify net-priority
+# 完成后使用打印的实际目录执行 sadboard check
+```
+
+本例为固定有界负载，无额外参数。源码 [suite-advanced-network.c](../sadboard-external/package/sadboard-labs/src/suite-advanced-network.c)；私有 veth 共享 1 Mbit/s 队列，先发送64个512 B bulk，再发送16个64 B控制；FIFO TBF 对比带控制高优先级的 HTB。逐项 ACK 测 RTT，全部80包及 checksum=2136必须完成；保留 qdisc/pcap，不改变管理链路。
+
+`net-priority-{bug,fixed}.out/.trace` 分别保存摘要与原始事件，字段 observed/auxiliary 的含义以上述本例定义为准。摘要、trace 和完成数必须相符。与正常业务输出不同的故障结果会由本例契约明确识别；不能拿最外层退出0证明没有异常。性能题同时保留 cpu_ns/wall_ns，至少三次再评价时序，不只看资源上界或一次漂亮数字。
+
+
 
 **生产现场与现象。** 固件或日志传输期间，几十字节遥控消息响应显著变慢，平均带宽仍满足需求。
 
-**受控复现设计。** 自有 veth 上把数据流与控制流引入有限带宽 qdisc，比较单队列和有界优先/公平队列；记录序号和发送/接收时间。不修改实际平台链路。
+**实际复现负载。** 私有 veth 共享 1 Mbit/s 队列，先发送64个512 B bulk，再发送16个64 B控制；FIFO TBF 对比带控制高优先级的 HTB。逐项 ACK 测 RTT，全部80包及 checksum=2136必须完成；保留 qdisc/pcap，不改变管理链路。
 
 **原理与因果关系。** 排队时延来自等待的字节数与服务速率，长队列可在零丢包时造成 bufferbloat。应用层共用 TCP 流还存在字节顺序约束，仅改 qdisc 不能越过同一流中的前置字节。
 
@@ -5644,11 +5890,23 @@ fb8: tbz x0, #63, f90       // ssize_t 非负则检查 0/累加；负值走错�
 
 ### A-N08：重连风暴放大故障与日志量
 
-**状态：完成实验设计；尚未集成 sadboard 命令，未在 AM625 实测。以下是实现/练习任务书，不是执行记录。**
+**状态：已实现故障版、参考版与原始证据契约；实机状态见阶段验收档案。**
+
+```sh
+sadboard run net-reconnect
+sadboard verify net-reconnect
+# 完成后使用打印的实际目录执行 sadboard check
+```
+
+本例为固定有界负载，无额外参数。源码 [suite-advanced-network.c](../sadboard-external/package/sadboard-labs/src/suite-advanced-network.c)；私有 loopback 服务在100 ms后才listen。故障20次立即重试耗尽预算；参考带固定种子 jitter 的有上限指数退避，在同一恢复时间线成功收到42。记录每次 errno/尝试次数，全部 fd 回到基线；不向外网或管理服务器发重连风暴。
+
+`net-reconnect-{bug,fixed}.out/.trace` 分别保存摘要与原始事件，字段 observed/auxiliary 的含义以上述本例定义为准。摘要、trace 和完成数必须相符。与正常业务输出不同的故障结果会由本例契约明确识别；不能拿最外层退出0证明没有异常。性能题同时保留 cpu_ns/wall_ns，至少三次再评价时序，不只看资源上界或一次漂亮数字。
+
+
 
 **生产现场与现象。** 上游服务器短时不可达，设备立即循环连接，CPU、FD、日志同时增长；服务恢复后所有设备又同时冲击服务器。
 
-**受控复现设计。** 只连接私有 loopback 端点，模拟拒绝、超时、恢复三阶段；总重试≤20、总运行≤10秒，对比固定立即重试与带上限指数退避/确定种子 jitter。不得压测公网或管理服务器。
+**实际复现负载。** 私有 loopback 服务在100 ms后才listen。故障20次立即重试耗尽预算；参考带固定种子 jitter 的有上限指数退避，在同一恢复时间线成功收到42。记录每次 errno/尝试次数，全部 fd 回到基线；不向外网或管理服务器发重连风暴。
 
 **原理与因果关系。** 重试是新的负载。多个设备同步重试会放大拥塞；DNS、ARP、TCP 握手、业务认证有不同失败阶段，所有错误不能简化为“网络断开”。
 

@@ -372,6 +372,18 @@ NFS 参考构建为 `a3a9a46b13d41e1975a9c29cfe8a5b4896335d8273a10ebdda8e0a9c384
 
 最终工件 `output/validation/stage10-basic-suite-arm64/`；首次候选与平台差异记录在 `output/validation/stage10-basic-suite/`，主机与构建日志在 `output/validation/remaining-cases/`。重新部署时保留旧 NFS 根和全部旧现场，逐文件核对 SHA256。此阶段未更新实机 SPL/U-Boot，未修改分区或使用工厂镜像。
 
+## 阶段 11：20 个进阶应用场景全部实机验证（2026-11-10）
+
+固件 **v0.0.1 / 8184926229677117b3ce2deaa53fa38ac6b8a7e091f668eecfd602718c164dbf**，发布 134，设备已回报 success。当前共 54 例有实现并通过 AM625 验证，剩余 CMA 与四项启动/内核实验继续开发。
+
+- 主机 25 项回归通过；SD A/B OTA 后先验证 7 个依赖板端能力的代表案例，再部署同构建 TFTP/NFS，全部 20 个新增进阶案例通过。性能 7 例及网络优先级各做 3 轮，共 36 组进阶故障/参考对照。
+- NFS 下全部 24 个基础案例、4 份真实 core 的配套 host GDB 还原通过；原 10 例回归通过，包括真实 OOM、网络测试和新一轮 panic/恢复。panic 的失败及健康启动均含 R5 SPL、A53 SPL、U-Boot、kernel，pstore 可查，恢复后零失败服务。
+- 私有 CPU 配额实际出现约 12 次节流，参考无节流；PI 高优先级等待约 66 ms→6 ms；memory.high 记录实际回收事件而无 OOM kill；虚拟 veth 的接收 CPU 由 2→3；真实 PMTU 错误反馈 90/MTU600，1400 B 数据重试完整。这里只证明实验模型，不等同物理网卡 RSS 或生产实时指标。
+- 发现并修正 ARM64 差异：CPUWeight 激活实验 cgroup CPU 控制器；malloc_trim 用 mincore 验证已释放堆页驻留而不假设 fordblks 清零；ET 未读长度改用 MSG_PEEK，另存 FIONREAD；tcpdump 等待真实监听就绪并启用 immediate-mode，避免短实验只留下空 pcap。
+- 管理 IP/路由、namespace 和私有 cgroup 清理均通过，WDT active/60 秒。重新部署保留既有 NFS 证据并核对 SHA256。未改分区、未刷工厂镜像，实机 SPL/U-Boot 未更新。
+
+完整证据：`output/validation/stage11-advanced-final/`。原候选与平台差异保留在 `stage11-advanced-suite/`、`stage11-advanced-controller/`；主机回归/构建日志在 `output/validation/remaining-cases/`。独立记录 SD 固件内容 ID 与 SBNET1 参考构建 ID，不能混为同一个哈希。
+
 <a id="bootlin-build-history"></a>
 
 ## 早期 Bootlin/NFS 构建验证档案（2026-10-30～31）

@@ -2,7 +2,7 @@
 
 ## Project Structure & Module Organization
 
-SadBoard develops on the `SadBoard` branch of `linux-bsp/workspace`, using existing BSP submodules. AM6254 defaults to TFTP kernel/DTB and NFS root, with independent U-Boot switches and local SD A/B fallback. It provides systemd, SSH and 34 manual scenarios, including: crash, FD exhaustion, cgroup OOM, CPU hotspot, mutex wait, isolated networking, startup panic recovery, periodic drift, queue backlog and TCP batching. The handbook has 59 case designs (35 basic and 24 advanced); 25 have no implementation yet. Random scenario orchestration and general automatic grading are not implemented. Record image build and board validation status separately.
+SadBoard develops on the `SadBoard` branch of `linux-bsp/workspace`, using existing BSP submodules. AM6254 defaults to TFTP kernel/DTB and NFS root, with independent U-Boot switches and local SD A/B fallback. It provides systemd, SSH and 54 manual scenarios, including: crash, FD exhaustion, cgroup OOM, CPU hotspot, mutex wait, isolated networking, startup panic recovery, periodic drift, queue backlog and TCP batching. The handbook has 59 case designs (35 basic and 24 advanced); 5 have no implementation yet. Random scenario orchestration and general automatic grading are not implemented. Record image build and board validation status separately.
 
 - `README.md`: project scope, status, and documentation index.
 - `docs/sadboard-debugging-handbook.md`: consolidated Chinese textbook, organized by case; includes preparation, tools, kernel reading, graded exercises, report template and Bootlin references. Extend the corresponding chapter rather than creating separate learning manuals. Distinguish source-derived paths from captured stacks.
