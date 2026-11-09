@@ -273,6 +273,42 @@ TFTP/NFS 模式额外完成一次主动 SysRq panic 和恢复：
 发布审计、各模式验证、未改写启动区哈希、案例检查和 panic/SOL 附件。
 操作方法统一见[教材网络启动章节](sadboard-debugging-handbook.md#netboot)。
 
+## 阶段 8：NFS 实验产物共享（2026-11-09）
+
+固件保持 `v0.0.1`，OTA 内容 ID 为
+`b3eeb4443a652df34813f5f160eee7765a105e71f83aafdf399a205f21f1cb9c`，
+发布 127，设备已上报 success。NFS 参考构建为
+`82de782ae597dcfdc2bb35ea93a85ec273848cb71a6b3ebdd702645ea26f91a7`。
+本次没有更新 SPL/U-Boot，也没有调整或格式化 SD 分区。
+
+按实际根挂载类型选择实验目录：NFS 为 `/srv/sadboard`，本地根为 `/data/sadboard`。
+`sadboard results` 查询路径，`SADBOARD_RESULTS` 可覆盖；空间门禁检查所选结果文件系统。
+NFS 现场在运行时允许主机遍历/读取普通输出，完成时开放 core 等文件的读权限。
+`sadboard share` 用于手工采集目录，限制在结果根目录的直接子目录，不跟随内部符号链接。
+SD 模式保持私有权限；设备日志、OTA 缓存、启动确认仍使用 SD data。
+
+实机与主机验证结果：
+
+- 完整构建和调试清单校验通过；18 项原案例回归、4 项网络启动回归、4 项目录策略回归通过。
+- 本地 OTA 后创建 crash 现场，结果仍在 `/data/sadboard`，目录 0700、core/元数据 0600，
+  原始退出 139 与证据检查通过。
+- 重新部署匹配 NFS 根目录后，crash、FD、OOM、CPU/锁参考对照、网络参考流程的
+  结果均位于 `/srv/sadboard`。主机 UID 1000 直接读取 64 个现场文件，无需 sudo 或 SCP；
+  core 可用配套交叉 GDB 还原 process_request/key=42，pcap 可读，管理网口保持正常。
+- 手工 perf 文件初始 0600，普通主机用户无法读取；执行 share 后变为 0644，主机直接
+  读取的 SHA256 与设备端一致，栈文本中保留 lookup_linear。
+- 153 个旧 SD 条目复制到 NFS，逐个核对 1,201 个普通文件、25,464,691 字节的 SHA256，
+  原 SD 文件保留。此前火焰图的 perf.data 已在共享目录可读。原 NFS 根也已完整另存。
+- 工作区 `output/board-results` 链接到 `/srv/nfs/sadboard-am625/srv/sadboard`。
+- NFS 目录下实际触发一次 panic：失败 boot 为 `b9894f23-19f0-4eab-9280-1c3f7cdf51ba`，
+  恢复 boot 为 `c50b47a0-07d9-40d7-8997-297492c98467`。check、pstore、串口与 SOL
+  的失败/健康两组四阶段日志验证通过。恢复附件为 0644，主机 UID 1000 可直接读取，
+  SHA256 为 `eaba4f3dafefcd32532ccfee787e6a864d15f467fa7a9c418a7cb59b07da8c87`。
+
+工件位于 `output/validation/stage8-shared-results/`，包含源码快照、构建与发布审计、
+本地/NFS 权限检查、主机 GDB、旧现场复制清单及 panic/SOL 恢复证据。
+教材的手工采集命令已统一通过 `sadboard results` 选择目录。
+
 <a id="bootlin-build-history"></a>
 
 ## 早期 Bootlin/NFS 构建验证档案（2026-10-30～31）

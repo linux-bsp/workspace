@@ -205,7 +205,8 @@ run fw_boot
 #### 调试模式的边界与确认方式
 
 任一网络开关启用都会添加 `sadboard.netboot=1`。这种模式保留 `blkdevparts`，因此
-SD `/data` 仍用于日志、SSH 主机密钥和实验结果。TFTP 单开时直接挂载本地 SquashFS，
+SD `/data` 仍用于设备日志、SSH 主机密钥和启动确认。NFS 根下的实验结果写入
+`/srv/sadboard`；TFTP 单开时根仍在 SD，实验结果也继续写 SD。TFTP 单开时直接挂载本地 SquashFS，
 不经过 initramfs/dm-verity；要验证生产完整性检查和网络恢复，应切回两个开关均关闭。
 网络调试依赖主机/交换机可达，NFS 中断可能阻塞系统，不是独立运行的生产启动方式。
 
@@ -246,7 +247,42 @@ cat /sys/kernel/tracing/available_tracers
 ```
 
 检查脚本只检查能力；`perf stat` 进一步检验事件实际可用性。基本服务及对应模式的
-健康确认完成后，再启动故障案例。内存、perf 与 trace 数据写 `/data/sadboard/`。
+健康确认完成后，再启动故障案例。用 `sadboard results` 获取结果目录：NFS 根启动时
+为 `/srv/sadboard`，本地 SD 根启动时为 `/data/sadboard`。本章后续命令中的
+`SADBOARD_RESULTS` 都从该接口获取，不应再固定写 `/data`。
+
+#### 在主机直接读取实验产物
+
+默认 NFS 配置的路径对应关系如下，结果写入 root 所在的 NFS 导出目录，不写 SD data：
+
+| 位置 | 结果目录 |
+| --- | --- |
+| 板卡 | `/srv/sadboard` |
+| 当前开发主机 | `/srv/nfs/sadboard-am625/srv/sadboard` |
+
+本机还建立了工作区快捷链接 `output/board-results`，指向上面的主机目录。新环境可在
+工作区创建同样的链接：
+
+```sh
+mkdir -p output
+ln -s /srv/nfs/sadboard-am625/srv/sadboard output/board-results
+```
+
+每次 `sadboard run/verify` 会打印完整现场路径。NFS 模式下，现场目录可遍历，普通输出
+可读；命令结束时还会开放 core 等显式以 0600 创建的文件，因此主机普通用户可以直接
+读取、拷贝。SD 模式保留私有权限。空闲空间检查使用结果实际所在的文件系统，最低
+64 MiB。可通过 `SADBOARD_RESULTS=/自定义目录 sadboard ...` 覆盖默认位置。
+
+手工运行 perf、trace-cmd 等工具后，可将目录中的文件开放给主机读取：
+
+```sh
+SADBOARD_RESULTS=$(sadboard results)
+sadboard share "$SADBOARD_RESULTS/manual-cpu"
+```
+
+`share` 接受结果根目录下的一个直接子目录，不跟随内部符号链接，也不删除数据。
+设备启动日志、OTA 缓存、SSH 密钥及启动确认状态继续由 SD `/data` 保存；实验产物
+与它们使用各自的目录。旧 SD 现场保留原件，另行复制到 NFS 后可从新路径读取。
 
 <a id="ssh"></a>
 
@@ -427,7 +463,7 @@ crash 可选非负记录编号，默认 42；OOM 使用固定预算，不接受�
 
 ### 0.9 现场格式
 
-每次创建私有目录 `/data/sadboard/<案例>-<本地时间戳>-<随机后缀>/`，UTC+8 时间戳便于
+每次创建独立目录 `${SADBOARD_RESULTS}/<案例>-<本地时间戳>-<随机后缀>/`，UTC+8 时间戳便于
 查找，随机后缀避免同秒重复。实际开始时间附时区，boot ID 负责区分时钟回拨前后启动。
 
 | 文件 | 作用 |
@@ -449,9 +485,10 @@ crash 可选非负记录编号，默认 42；OOM 使用固定预算，不接受�
 复制入口打印的实际目录替换下面的 RUN：
 
 ```sh
-sadboard status /data/sadboard/RUN
-sadboard check /data/sadboard/RUN
-sadboard reset /data/sadboard/RUN
+SADBOARD_RESULTS=$(sadboard results)
+sadboard status ${SADBOARD_RESULTS}/RUN
+sadboard check ${SADBOARD_RESULTS}/RUN
+sadboard reset ${SADBOARD_RESULTS}/RUN
 ```
 
 `status` 显示元数据与结束记录；缺结束记录明确显示 incomplete，不报告通过。
@@ -981,8 +1018,9 @@ GDB 参数含义见 [工具手册](#case-crash-tools)。
 
 ### 1.7 定位流程二：离线 core
 
-`sadboard run crash` 在私有现场目录生成 `core.crash-bug.<PID>`。记录文件 SHA256，
-复制到主机；本设备没有 SFTP 服务，使用 SCP 的传统协议：
+`sadboard run crash` 在现场目录生成 `core.crash-bug.<PID>`。记录文件 SHA256。
+NFS 模式下，可直接在主机的 `/srv/nfs/sadboard-am625/srv/sadboard/对应现场/` 读取它，
+无需 SCP。以下是本地 SD 模式的拷贝方法；本设备没有 SFTP 服务，使用 SCP 的传统协议：
 
 ```sh
 scp -O root@192.168.10.211:/data/sadboard/crash-XXXXXXXX/core.crash-bug.PID ./core
@@ -1177,7 +1215,8 @@ CONFIG_CORE_DUMP_DEFAULT_ELF_HEADERS=y
 对于已启用 core 文件保存的系统，也可在实验子进程中临时设置：
 
 ```sh
-cd /data/sadboard/自己的现场目录
+SADBOARD_RESULTS=$(sadboard results)
+cd ${SADBOARD_RESULTS}/自己的现场目录
 sh -c 'echo 0x33 > /proc/self/coredump_filter; ulimit -c 65536; exec /usr/libexec/sadboard/crash-bug 42'
 ```
 
@@ -1376,10 +1415,11 @@ printf 'exit=%s\n' "$rc"
 作为返回码**；它不是 `128 + 信号`。复制输出中的实际现场目录，检查：
 
 ```sh
-sadboard status /data/sadboard/实际现场目录
-sadboard check /data/sadboard/实际现场目录
-cat /data/sadboard/实际现场目录/fd-bug.out
-cat /data/sadboard/实际现场目录/stderr.log
+SADBOARD_RESULTS=$(sadboard results)
+sadboard status ${SADBOARD_RESULTS}/实际现场目录
+sadboard check ${SADBOARD_RESULTS}/实际现场目录
+cat ${SADBOARD_RESULTS}/实际现场目录/fd-bug.out
+cat ${SADBOARD_RESULTS}/实际现场目录/stderr.log
 ```
 
 不要把其他 shell 中相同的退出数字自动解释为 EMFILE；系统调用返回值和程序逻辑
@@ -1494,10 +1534,11 @@ strace。为了观察增长，可以单独运行稍慢的同一负载。以下�
 操作者应自行保存固件 ID、输入和结果；进程仍受内部 64 FD 与十秒预算约束。
 
 ```sh
-mkdir -p /data/sadboard/manual-fd
+SADBOARD_RESULTS=$(sadboard results)
+mkdir -p ${SADBOARD_RESULTS}/manual-fd
 /usr/libexec/sadboard/fd-bug 128 50 \
-  > /data/sadboard/manual-fd/bug.json \
-  2> /data/sadboard/manual-fd/bug.err &
+  > ${SADBOARD_RESULTS}/manual-fd/bug.json \
+  2> ${SADBOARD_RESULTS}/manual-fd/bug.err &
 pid=$!
 cat /proc/$pid/limits
 ls -l /proc/$pid/fd
@@ -1522,10 +1563,11 @@ printf 'exit=%s\n' "$?"
 ### 2.6 第二步取证：用 strace 找到未配对的生命周期
 
 ```sh
+SADBOARD_RESULTS=$(sadboard results)
 strace -f -tt -T -e trace=openat,close,prlimit64 \
-  -o /data/sadboard/manual-fd/bug.strace \
+  -o ${SADBOARD_RESULTS}/manual-fd/bug.strace \
   /usr/libexec/sadboard/fd-bug 128 0 \
-  > /data/sadboard/manual-fd/traced-bug.json
+  > ${SADBOARD_RESULTS}/manual-fd/traced-bug.json
 ```
 
 | 参数 | 作用 | 使用理由 |
@@ -1707,9 +1749,10 @@ ltrace 观察可见的动态库调用，适合追踪 libc API。内联、静态�
 调用可能不出现在 ltrace 中；不能把“没看到”当作“没调用”。
 
 ```sh
+SADBOARD_RESULTS=$(sadboard results)
 strace -f -tt -T -s 128 -e trace=openat,read,write,futex \
-  -o /data/sadboard/syscalls.txt /usr/libexec/sadboard/lock-bug 20 50000
-ltrace -o /data/sadboard/libcalls.txt /usr/libexec/sadboard/crash-fixed 1
+  -o ${SADBOARD_RESULTS}/syscalls.txt /usr/libexec/sadboard/lock-bug 20 50000
+ltrace -o ${SADBOARD_RESULTS}/libcalls.txt /usr/libexec/sadboard/crash-fixed 1
 ```
 
 | 参数 | 含义 |
@@ -2047,9 +2090,10 @@ cat /sys/fs/cgroup/sadboard-oom-PID/memory.pressure
 ### 3.9 用 Valgrind 定位到申请点
 
 ```sh
-mkdir -p /data/sadboard/manual-oom
+SADBOARD_RESULTS=$(sadboard results)
+mkdir -p ${SADBOARD_RESULTS}/manual-oom
 valgrind --leak-check=full --show-leak-kinds=all --num-callers=20 \
-  --error-exitcode=99 --log-file=/data/sadboard/manual-oom/leak.log \
+  --error-exitcode=99 --log-file=${SADBOARD_RESULTS}/manual-oom/leak.log \
   /usr/libexec/sadboard/memory-bug 4 0
 valgrind --leak-check=full --error-exitcode=99 \
   /usr/libexec/sadboard/memory-fixed 4 0
@@ -2109,8 +2153,9 @@ Valgrind 日志先看错误类别和块数量，再沿分配栈回到 malloc 所
 ### 3.13 工具参数与使用边界
 
 ```sh
+SADBOARD_RESULTS=$(sadboard results)
 valgrind --tool=memcheck --leak-check=full --show-leak-kinds=all \
-  --num-callers=20 --error-exitcode=99 --log-file=/data/sadboard/memcheck.txt \
+  --num-callers=20 --error-exitcode=99 --log-file=${SADBOARD_RESULTS}/memcheck.txt \
   /usr/libexec/sadboard/memory-bug 4 0
 ```
 
@@ -2384,11 +2429,13 @@ perf stat -r 3 -e task-clock,cycles,instructions,context-switches,page-faults --
 ### 4.8 第二步：从函数占比追到代码
 
 ```sh
-mkdir -p /data/sadboard/manual-cpu
-perf record -F 99 -g -o /data/sadboard/manual-cpu/perf.data -- \
+SADBOARD_RESULTS=$(sadboard results)
+mkdir -p ${SADBOARD_RESULTS}/manual-cpu
+perf record -F 99 -g -o ${SADBOARD_RESULTS}/manual-cpu/perf.data -- \
   /usr/libexec/sadboard/cpu-bug 4096 500000 42
-perf report --no-inline --stdio -i /data/sadboard/manual-cpu/perf.data
-perf script --no-inline -i /data/sadboard/manual-cpu/perf.data > /data/sadboard/manual-cpu/stacks.txt
+perf report --no-inline --stdio -i ${SADBOARD_RESULTS}/manual-cpu/perf.data
+perf script --no-inline -i ${SADBOARD_RESULTS}/manual-cpu/perf.data > ${SADBOARD_RESULTS}/manual-cpu/stacks.txt
+sadboard share "$SADBOARD_RESULTS/manual-cpu"
 ```
 
 `-F 99` 请求约 99 Hz，实际受 PMU、限流及运行时长影响。`-g` 记录调用链，默认 frame
@@ -2409,12 +2456,14 @@ pointer 方式依赖可展开的栈；源码构建保留 frame pointer 与函数
 
 ### 4.9 第三步：生成并正确阅读火焰图
 
-将 stacks.txt 拷到服务器，使用主机上的官方
+NFS 模式直接读取主机的
+`/srv/nfs/sadboard-am625/srv/sadboard/manual-cpu/stacks.txt`；本地 SD 模式将文件复制到主机。
+使用主机上的官方
 [FlameGraph](https://github.com/brendangregg/FlameGraph) 脚本：
 
 ```sh
 FlameGraph/stackcollapse-perf.pl stacks.txt > cpu.folded
-FlameGraph/flamegraph.pl --title 'SadBoard CPU lookup' cpu.folded > cpu.svg
+FlameGraph/flamegraph.pl --countname cycles --title 'SadBoard CPU lookup' cpu.folded > cpu.svg
 ```
 
 本次工具来源固定为 `41fee1f99f9276008b7cd112fca19dc3ea84ac32`，放在忽略的
@@ -2787,9 +2836,10 @@ pthread mutex 是 libc 的用户态同步对象。无竞争时通常通过原子
 ### 5.8 第二步：strace 看等待的位置与时间
 
 ```sh
-mkdir -p /data/sadboard/manual-lock
+SADBOARD_RESULTS=$(sadboard results)
+mkdir -p ${SADBOARD_RESULTS}/manual-lock
 strace -f -T -tt -e trace=futex,clock_nanosleep \
-  -o /data/sadboard/manual-lock/waits.txt \
+  -o ${SADBOARD_RESULTS}/manual-lock/waits.txt \
   /usr/libexec/sadboard/lock-bug 20 50000
 ```
 
@@ -2832,10 +2882,11 @@ thread apply all bt
 ### 5.10 第四步：需要时追踪调度
 
 ```sh
-trace-cmd record -o /data/sadboard/manual-lock/sched.dat \
+SADBOARD_RESULTS=$(sadboard results)
+trace-cmd record -o ${SADBOARD_RESULTS}/manual-lock/sched.dat \
   -e sched:sched_switch -e sched:sched_wakeup -- \
   /usr/libexec/sadboard/lock-bug 20 50000
-trace-cmd report -i /data/sadboard/manual-lock/sched.dat
+trace-cmd report -i ${SADBOARD_RESULTS}/manual-lock/sched.dat
 ```
 
 这是扩展练习。按本次 TID 过滤，区分“已唤醒但尚未上 CPU”和“仍在睡眠”。
@@ -2904,10 +2955,11 @@ ftrace 是内核跟踪框架，tracefs 暴露控制与缓冲区。trace-cmd 负�
 不是另一个内核跟踪实现。SadBoard 的准备服务挂载 debugfs/tracefs，不自动开全量跟踪。
 
 ```sh
+SADBOARD_RESULTS=$(sadboard results)
 cat /sys/kernel/tracing/available_tracers
 cat /sys/kernel/tracing/available_events | head -20
-trace-cmd record -o /data/sadboard/sched.dat -e sched:sched_switch -- sleep 1
-trace-cmd report -i /data/sadboard/sched.dat
+trace-cmd record -o ${SADBOARD_RESULTS}/sched.dat -e sched:sched_switch -- sleep 1
+trace-cmd report -i ${SADBOARD_RESULTS}/sched.dat
 ```
 
 `record` 录制，`-e SUBSYSTEM:EVENT` 选择事件，`-o` 保存二进制，`report -i` 解码。
@@ -3162,9 +3214,10 @@ bit/s 与 byte、毫秒与秒不能混用。例如假设 100 Mbit/s、100 ms，�
 ### 6.6 复现与结果文件
 
 ```sh
+SADBOARD_RESULTS=$(sadboard results)
 sadboard run network
 sadboard verify network
-sadboard check /data/sadboard/实际现场目录
+sadboard check ${SADBOARD_RESULTS}/实际现场目录
 ```
 
 run 在左侧出口增加 100 ms 延迟，记录 ping、固定 1 MiB TCP 传输、ss 和 pcap，
@@ -3282,7 +3335,8 @@ namespace 负责网络对象的隔离，cgroup 负责资源预算，二者不互
 `-i` 指定实验接口、`-w` 保存原始 pcap。完成后可以离线读：
 
 ```sh
-tcpdump -nn -tttt -r /data/sadboard/RUN/network.pcap
+SADBOARD_RESULTS=$(sadboard results)
+tcpdump -nn -tttt -r ${SADBOARD_RESULTS}/RUN/network.pcap
 ```
 
 `-nn` 同时避免地址和端口名称替换，`-tttt` 显示可读时间戳，`-r` 读文件而非实时抓包。
@@ -3550,7 +3604,7 @@ vpanic 是共同终止路径，要向下看调用者。本例 sysrq_handle_crash
 3. 正常 reboot，等待 SSH 可连接，立即执行 `sadboard run panic`。可以使用 SSH
    连接重试脚本，但必须先确认 boot ID 已改变，不能误连到尚未退出的旧启动。
 4. 记下输出的现场目录。连接中断是预期现象，不把 SSH 的 255 当成固件安装失败。
-5. 等待下一次自动启动、健康确认，再运行 `sadboard check /data/sadboard/RUN`。
+5. 等待下一次自动启动、健康确认，再运行 `sadboard check ${SADBOARD_RESULTS}/RUN`。
 6. 核对 SOL 中失败启动和恢复启动的记录，并导出现场附件。
 
 helper 用 SIGSTOP 暂停当次 `fw-confirm.service` 内的进程，确认 `startup-state=collecting`；
@@ -3638,15 +3692,16 @@ CROSS_COMPILE="$PWD/output/am625-debug-systemd/host/bin/aarch64-buildroot-linux-
 仍保留内存，机制依据见 [ramoops 官方说明](https://www.kernel.org/doc/html/latest/admin-guide/ramoops.html)。
 
 ```sh
+SADBOARD_RESULTS=$(sadboard results)
 logctl boot-state
 logctl diagnostic-reason previous
 logctl status
 logctl verify-boot
-sadboard check /data/sadboard/RUN
+sadboard check ${SADBOARD_RESULTS}/RUN
 ```
 
 check 同时要求：boot ID 改变、前一 Linux boot 与现场相同、找到 Linux panic 证据、
-新启动健康确认、当前实际启动固件的完整 ID 与原来相同、无 pending，最后导出
+新启动健康确认；网络模式比较 SBNET1 参考构建 ID，本地模式比较实际部署 ID 并要求无 pending，最后导出
 `recovery.tar.gz` 并写 `recovery.result`。只看到“重启过”不足以判定通过。
 最初那次 panic 不会正常返回，所以不能要求其具有普通案例的 result；恢复结果要看
 新的独立证明，不能用空结果默认成功。
