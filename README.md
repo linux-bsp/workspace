@@ -8,7 +8,9 @@ SadBoard 是一个面向嵌入式 Linux 的故障定位与分析练习项目。�
 
 ## 当前状态
 
-已完成 AM6254 systemd 调试基线和七个手动案例的实机验证：GDB/core、描述符泄漏、受限 OOM、CPU 热点、锁等待、隔离网络、启动 panic 与恢复取证。支持 SSH、匹配符号、完整现场记录及参考修复。随机题库和通用自动评分尚未实现。全部学习内容统一在 [嵌入式 Linux 故障定位与分析教材](docs/sadboard-debugging-handbook.md)，按用例分章，包含基础原理、工具参数、源码路径、分级练习和参考修复。固件身份与已执行的验证见 [实机验证记录](docs/am625-debug-validation.md)。
+已完成 AM6254 systemd 调试基线；原有七个手动案例已实机验证：GDB/core、描述符泄漏、受限 OOM、CPU 热点、锁等待、隔离网络、启动 panic 与恢复取证。另新增周期相位漂移、队列内存积压、TCP 小记录批处理三个进阶案例，均完成 SD/NFS 实机验证，详见验收档案。支持 SSH、匹配符号、完整现场记录及参考修复。随机题库和通用自动评分尚未实现。全部学习内容统一在 [嵌入式 Linux 故障定位与分析教材](docs/sadboard-debugging-handbook.md)，按用例分章，包含基础原理、工具参数、源码路径、分级练习和参考修复。固件身份与已执行的验证见 [实机验证记录](docs/am625-debug-validation.md)。
+
+案例库共设计 **59 例**：七类基础各 5 例（35 例），性能、内存、网络进阶各 8 例（24 例）。目前 **10 例有代码，49 例为设计任务书**，实现与实测状态分别标明。完整索引、岗位能力映射、根因与取证任务见[案例地图](docs/sadboard-debugging-handbook.md#advanced-index)。
 
 SadBoard 默认使用 **TFTP 加载内核/DTB、NFS 挂载根文件系统**，普通 AM625 BSP 保持 SD A/B 启动。两个独立的 U-Boot 配置项 `CONFIG_AM62X_BOOT_TFTP_KERNEL`、`CONFIG_AM62X_BOOT_NFS_ROOT` 支持四种组合；配置、主机部署和运行时切换见[网络调试启动](docs/sadboard-debugging-handbook.md#netboot)。NFS 下实验结果保存在板端 `/srv/sadboard`，主机可直接读取 `/srv/nfs/sadboard-am625/srv/sadboard`；本地启动仍使用 `/data/sadboard`。`sadboard results` 可查看当前路径。
 
@@ -118,7 +120,7 @@ SadBoard 希望提供一组可重复练习的现场，帮助学习者回答：
 
 QEMU 计划用于验证分析流程、逻辑故障和场景复现。依赖真实 PMU、缓存、DMA、网卡中断或实际吞吐的实验，需要单独适配并在对应硬件上验证。
 
-现阶段已建立七个单故障案例及统一入口、取证、参考修复和复位流程。后续可扩展随机抽题、兼容的多故障组合、QEMU 和更多板级问题；这些仍是项目方向，未记作已实现功能。
+现阶段已建立十个手动案例及统一入口、取证、参考修复和复位流程；其余案例按教材任务书逐步实现。后续可扩展随机抽题、兼容的多故障组合、QEMU 和更多板级问题；这些仍是项目方向，未记作已实现功能。
 
 ## 参考项目与学习资料
 
@@ -133,7 +135,7 @@ QEMU 计划用于验证分析流程、逻辑故障和场景复现。依赖真实
 
 ## 文档
 
-- [嵌入式 Linux 故障定位与分析教材](docs/sadboard-debugging-handbook.md)：按七个用例组织，包含内核调用流程、关键分支、ARM64 汇编、真实反汇编对照、工具参数与练习；Bootlin 资料和报告模板放在附录。
+- [嵌入式 Linux 故障定位与分析教材](docs/sadboard-debugging-handbook.md)：按七个基础方向与三个进阶方向组织，共 59 个案例设计，包含内核调用流程、关键分支、ARM64 汇编、真实反汇编对照、工具参数与练习；Bootlin 资料和报告模板放在附录。
 - [AM625 实机验收档案](docs/am625-debug-validation.md)：各阶段固件 ID、真实执行结果及附件位置。
 - [EDK libbmc 与 SadBoard 专利候选分析](docs/patent-candidate-analysis.md)：候选技术机制、源码依据、现有技术对照及公开时间与权属条件。
 - [Workspace 目录与 AM62x SDK](docs/workspace-toolchain.md)：独立 SDK、共享下载缓存与工具链管理。

@@ -309,6 +309,55 @@ SD 模式保持私有权限；设备日志、OTA 缓存、启动确认仍使用 
 本地/NFS 权限检查、主机 GDB、旧现场复制清单及 panic/SOL 恢复证据。
 教材的手工采集命令已统一通过 `sadboard results` 选择目录。
 
+<a id="production-cases"></a>
+
+## 阶段 9：案例库扩展与生产问题首批落地（2026-11-09）
+
+本阶段案例设计共 **59 例**：崩溃、FD、内存/OOM、CPU、同步、网络、内核/启动各 5 例；性能、内存、网络进阶各 8 例。统一教材收录任务书、生产背景、原理、固定内核源码入口、定位流程、修复取舍、验收与评审题。**10 例有可运行实现并完成验证，其余 49 例是设计任务书，无统一命令、未上板。** 公开岗位和 issue 只作为课程设计的一手依据，不冒充企业事故的已证实根因或真实面试题。
+
+最终固件保持 `v0.0.1`，内容 ID 为
+`2e7850c3939178505badc32eda92b7285752a804d17ba2a622399a05aa0fda8c`，发布 129，设备上报 success。
+NFS 参考构建为 `a3a9a46b13d41e1975a9c29cfe8a5b4896335d8273a10ebdda8e0a9c384e0818`。TFTP/NFS 调试根可变，参考 ID 不证明整个运行目录始终不变；本次核对了运行中的 17 个实验 ELF 与对应构建导出的 SHA256。
+本次只更新 kernel/rootfs，未更新实机 SPL/U-Boot、覆盖工厂镜像或改变 SD 分区。
+
+### 过程发现与构建修正
+
+首次候选 `070dd0bf`（发布 128）能完成系统健康确认，但第一个案例执行失败：源码目录中的主机版 ELF 被 local 包同步保留，make 根据时间戳没有重新交叉编译。它没有被视为案例验收通过。
+修复为每次构建实验包使用目标编译器强制重编译；原生测试只在临时目录构建。部署检查同时验证 ELF64、小端与 AArch64 machine，原错误产物被新门禁拒绝，补充 x86-64/ARM32/截断头/错误端序负例。最终 2e7850c3 重新发布并通过下列检查。
+
+### 实机结果
+
+- 主机 23 项实验回归、4 项网络启动回归、4 项结果目录策略回归通过；调试清单、架构、源码、符号与 SHA256 校验通过。
+- 先在 SD A/B 模式完成 OTA，再在 SD 和匹配 TFTP/NFS 两种模式分别对 `deadline/backlog/tcp` 做三轮默认负载对照，同时验证 run、非默认参数及 `sadboard check`。
+- 两种模式下原 crash、FD、OOM、CPU、lock、network 六类回归通过，管理 eth0 地址/路由与 namespace 状态前后相同。crash core 用匹配交叉 GDB 在 host 还原到 `process_request/key=42`。
+- NFS 结果由 host UID 1000 直接读取，输出 SHA256 与设备相同；重新部署前完整归档旧 NFS 根，保留 1280 个既有现场普通文件并逐个核对 SHA256，未删除旧 SD/NFS 证据。
+- 实机 strace 确认绝对定时标志；backlog 的 Valgrind 对照无丢失块且零错误；1024 条 TCP 记录的 strace 实际 sendto 次数为 1024 → 16。
+- 截断原始时间 CSV、篡改 completed、篡改 TCP checksum 的复制现场均被拒绝。运行中 reset 返回取消状态，检查器不接受取消现场为通过，TCP namespace 清理正常。
+
+下面是默认输入下 **三次中位数**，每格故障版 → 参考版。时序与 CPU 数值仅说明这块 AM625 在本负载下的结果，不作为硬实时保证，也不把 loopback 数据外推成网口线速。
+
+| 观察量 | SD A/B | TFTP/NFS |
+| --- | --- | --- |
+| deadline：200 周期、10 ms 周期、2 ms 处理，释放误差 P99 / ms | 420.42 → 0.162 | 419.958 → 0.095 |
+| deadline：最后一次相位误差 / ms | 424.678 → 0.063 | 424.268 → 0.063 |
+| backlog：512 条×64 KiB，队列高水位 / 条 | 366 → 8 | 367 → 8 |
+| backlog：有效载荷峰值 / KiB | 23488 → 576 | 23552 → 576 |
+| backlog：进程 RSS 高水位 / KiB | 26108 → 3520 | 25484 → 3908 |
+| tcp：8192 条×64 B，send 调用 / 次 | 8192 → 128 | 8192 → 128 |
+| tcp：进程累计 CPU / ms | 217.612 → 8.722 | 214.556 → 8.627 |
+
+三组参考版都完成相同工作与 checksum。backlog 最终载荷归零，队列最多 8 条、含消费者在途对象最多 9 块；背压节省峰值内存，没有伪装成提高下游吞吐。TCP 接收校验全部序号/字节；send 调用数不是线上包数。
+
+### panic 与完整启动日志回归
+
+在已经健康确认的 NFS 构建上额外重启，手动触发一次受控 SysRq panic：
+
+- 失败 boot：`77ab26a5-b491-436a-ae6a-0da51339a940`；恢复 boot：`9948dca9-8138-4e70-a3dc-9a43d1313f33`。
+- `sadboard check`、原始串口、pstore 与 SOL 均核对到 panic 和对应实验 marker；失败/正常两次归档各含 r5-spl、a53-spl、uboot、kernel。
+- 恢复附件 SHA256：`439240362c98416e76e940fc7aee7dc54976712bd664258c4584f22ba7ba103c`；设备重新通过网络调试健康确认，零失败服务。未故意损坏分区、未进行断电试验。
+
+最终工件位于 `output/validation/stage9-production-cases-arm64/`：源码快照、发布审计、SD/NFS 三轮 JSON/CSV、17 ELF 校验、GDB/strace/Valgrind、负例、中止清理和 panic/SOL 证据。首次失败与重建日志保留在 `output/validation/stage9-production-cases/`。两个目录均为本地主机验收附件，不提交大型构建文件。
+
 <a id="bootlin-build-history"></a>
 
 ## 早期 Bootlin/NFS 构建验证档案（2026-10-30～31）
