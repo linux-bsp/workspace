@@ -384,6 +384,20 @@ NFS 参考构建为 `a3a9a46b13d41e1975a9c29cfe8a5b4896335d8273a10ebdda8e0a9c384
 
 完整证据：`output/validation/stage11-advanced-final/`。原候选与平台差异保留在 `stage11-advanced-suite/`、`stage11-advanced-controller/`；主机回归/构建日志在 `output/validation/remaining-cases/`。独立记录 SD 固件内容 ID 与 SBNET1 参考构建 ID，不能混为同一个哈希。
 
+## 阶段 12：59 个案例全部完成 AM625 验证（2026-11-10）
+
+固件 **v0.0.1 / 2d3b5221fe3822d001c05bb79242e9213ebde35af475a7d6f2b502bc3299e5f8**，设备 OTA 已回报 success。共 35 个基础、24 个进阶案例：57 个设备端入口，2 个主机 UART 控制的真实板端 RAM 启动实验。全程未使用 QEMU。
+
+- 新增真实 CMA、内核 Oops、soft/hard lockup、PID 1 加载器缺库与 VFS 根挂载失败。内核模块手动加载、默认空闲，无开机自动注入。
+- SD A/B 完成 OTA/健康确认，再做 7 个代表对照；在本地 SD 固件上分别完成真实硬件 WDT、Oops、全核 IRQ-off 锁死的自动复位与健康恢复。首次 SPL 延迟约 75.91 / 6.27 / 44.24 秒；WDT/锁死确认实际 ESM，soft lockup 实际报告 CPU#2 stuck for 4s。配置 timeout=60 与停喂命令到复位时间不等同，窗口喂狗细节见教材。
+- NFS 全部 21 个新增进阶（37 组故障/参考对照）、24 个新增基础及原有 10 例回归通过。4 份实际 core 在匹配 host GDB 中还原；panic/pstore/SOL 原有恢复链再次通过。
+- CMA 实际空闲 16440 页、maxchunk 463 页时，4096 页连续申请返回 ENOMEM/12；释放本例 DMA 块后同样请求成功，used 回到实验前的 200 页。所有资源均归还，没有用普通 malloc 失败替代 DMA/CMA 现场。
+- RAM 缺库实际触发 exitcode=0x00007f00 的 PID 1 panic；独立守护的 10 秒期限实际复位；完整依赖副本完成 rootfs SHA256/dm-verity、switch_root 与 SD 健康确认。错误 p99 根设备不带 rootwait，实际 VFS panic；参考使用已确认 rootfs，并正常返回网络启动。
+- 每项异常恢复核对失败/正常两份 R5 SPL、A53 SPL、U-Boot、kernel 的 SOL 归档；RAM 原始串口还保存加载器的直接输出。立即 Oops 可能快于 live 文件落盘，检查器从校验过的导出归档/pstore 补充证据，不拿空缺尾部当未触发。
+- 最终保持 TFTP+NFS 1/1，WDT active，零失败服务。旧 NFS 现场逐文件 SHA256 核对保留。没有写坏分区、保存错误启动参数、刷新 SPL/U-Boot 或使用工厂镜像。
+
+工件 `output/validation/stage12-final/` 保存 source snapshot、发布/验收 JSON、匹配符号、原始串口、pstore、SOL 四阶段日志及 RAM 正反工件。先前候选保留在 `stage12-kernel-board/` 与 `stage12-kernel-fixed/`：先后修正 CMA 传参、过早判 SSH 为健康、立即 Oops 的 live 日志缺尾判断；一次网络启动 ARP 超时由 UART 重试恢复，随后将破坏性恢复测试改为本地 SD，并为主机控制器增加最多两次正常网络启动重试。当前 USB UART 不透传 BREAK，RAM 参考 init 使用独立超时恢复子进程。
+
 <a id="bootlin-build-history"></a>
 
 ## 早期 Bootlin/NFS 构建验证档案（2026-10-30～31）

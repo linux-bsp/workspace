@@ -4742,11 +4742,11 @@ ADRP+ADD 形成 panic 格式字符串地址 0xffff80008124ce28。主机 GDB 对�
 
 ### B-BOOT02：initramfs 动态加载器缺库导致 PID 1 退出
 
-**状态：完成实验设计；尚未集成 sadboard 命令，未在 AM625 实测。** 以下是受控复现任务书，不能把建议步骤写成已执行记录。与本章现有命令对应的第 01 例保留原实现。
+**状态：已提供真实 AM625 实现。** 本阶段构建与实机结果单独见验收档案；操作入口与故障/参考流程见本节末尾。
 
 **生产现场与异常现象。** OTA 后 Run /init 紧接 loader error，随后 Attempted to kill init；表面是 kernel panic，根因可能在打包。
 
-**复现条件与故障注入。** 仅在一次性 QEMU 客体的私有 initramfs 副本移除一个真实 DT_NEEDED 依赖，保留健康副本。当前 AM625 不部署该损坏镜像，也不把 PID namespace 中 init 退出当成整机 panic。 操作前记录版本/构建 ID、boot ID、输入、资源上限和超时。取证对象必须是自己的实验进程，设计卡中的 PID 均指该子进程。
+**复现条件与故障注入。** 在 AM625 的 RAM-only initramfs 副本移除专用 DT_NEEDED 库，保留健康副本；用 WDT 与保存的正常网络启动配置恢复，不写坏 SD 分区，不以 PID namespace 替代整机 panic。 操作前记录版本/构建 ID、boot ID、输入、资源上限和超时。内核/启动故障会影响整机；核对完整固件 ID、WDT 与保存的正常启动路径。
 
 **原理与容易误判的地方。** 内核执行 /init 后动态加载器先工作；缺库时业务 main 可能尚未运行。真正的系统 PID 1 退出会进入 do_exit 的特殊保护并 panic。该链路与 init 程序自己发生空指针不同。
 
@@ -4754,9 +4754,9 @@ ADRP+ADD 形成 panic 格式字符串地址 0xffff80008124ce28。主机 GDB 对�
 
 **定位分析流程。** 按时间保存最早 loader 错误，readelf -l/-d 核对解释器与 DT_NEEDED，解包 initramfs 核对文件/符号链接/架构。不要只解码最后的 panic 栈。 对照本章参数表逐项说明命令回答了什么问题；信号/退出码、资源计数、业务完成数和时间轴必须能互相验证。优化前后采用同输入，至少保留一次负例，排除“异常只是没有触发”。
 
-**修复方案与代价。** 构建时递归检查依赖闭包，在隔离客体实际启动 /init；不要用从另一版 rootfs 拷贝单个 so 的方式形成混合 ABI。
+**修复方案与代价。** 构建时递归检查依赖闭包，在真实 AM625 的 RAM 副本实际启动 /init；不要用从另一版 rootfs 拷贝单个 so 的方式形成混合 ABI。
 
-**量化验收与现场恢复。** 缺库故障在客体中稳定可复现，完整副本可启动；依赖检查在打包阶段拒绝缺失文件。 最后停止实验进程，释放私有文件、描述符或 namespace；保存证据再清理，不删除系统日志，不影响管理网络。
+**量化验收与现场恢复。** 缺库故障在真实设备稳定可复现，完整副本可启动；依赖检查在打包阶段拒绝缺失文件。 最后核对恢复启动的固件身份、健康检查与日志归档；不清除系统历史记录。
 
 **面试/评审追问。** 为什么 /init 存在仍可能 ENOENT？ELF 解释器缺失与共享库缺失的表现有什么区别？ 请提交：候选假设、可证伪实验、原始数据、关键源码分支、修复前后对照和未覆盖边界。只给一个参数调整或一个“修好了”的截图不算完成。
 
@@ -4764,11 +4764,11 @@ ADRP+ADD 形成 panic 格式字符串地址 0xffff80008124ce28。主机 GDB 对�
 
 ### B-BOOT03：根设备或文件系统参数错误导致 VFS 启动失败
 
-**状态：完成实验设计；尚未集成 sadboard 命令，未在 AM625 实测。** 以下是受控复现任务书，不能把建议步骤写成已执行记录。与本章现有命令对应的第 01 例保留原实现。
+**状态：已提供真实 AM625 实现。** 本阶段构建与实机结果单独见验收档案；操作入口与故障/参考流程见本节末尾。
 
 **生产现场与异常现象。** 更换介质或分区命名后出现 unable to mount root fs，CPU 与内核主体已正常运行。
 
-**复现条件与故障注入。** 在独立 QEMU 镜像上只修改一次 root= 或 rootfstype=，同时保存正常命令行。AM625 的 NFS 根与 SD A/B 启动参数仅作为阅读对照，不破坏当前卡。 操作前记录版本/构建 ID、boot ID、输入、资源上限和超时。取证对象必须是自己的实验进程，设计卡中的 PID 均指该子进程。
+**复现条件与故障注入。** 在 AM625 的一次 RAM 启动中使用错误 root=，参考使用已确认 rootfs；不持久化错误命令行，不破坏 SD 卡。 操作前记录版本/构建 ID、boot ID、输入、资源上限和超时。内核/启动故障会影响整机；核对完整固件 ID、WDT 与保存的正常启动路径。
 
 **原理与容易误判的地方。** 无 initramfs 与有 initramfs 的根挂载阶段不同。块设备出现时序、驱动是否内建、文件系统支持和参数中的设备身份都会影响定位；unknown-block 的主次设备号是线索而非唯一根因。
 
@@ -4778,7 +4778,7 @@ ADRP+ADD 形成 panic 格式字符串地址 0xffff80008124ce28。主机 GDB 对�
 
 **修复方案与代价。** 将根设备身份与实际部署匹配，在构建/启动验证中检查所需驱动内建；只在确需等待时采用 rootwait，不能用它修复错误设备名。
 
-**量化验收与现场恢复。** 正确参数恢复启动，错误参数在日志中可唯一归因；记录具体层次，不把所有根挂载失败统称为文件系统损坏。 最后停止实验进程，释放私有文件、描述符或 namespace；保存证据再清理，不删除系统日志，不影响管理网络。
+**量化验收与现场恢复。** 正确参数恢复启动，错误参数在日志中可唯一归因；记录具体层次，不把所有根挂载失败统称为文件系统损坏。 最后核对恢复启动的固件身份、健康检查与日志归档；不清除系统历史记录。
 
 **面试/评审追问。** 为什么驱动编成模块后早期根挂载可能失败？NFS root 与 switch_root 的职责分别是什么？ 请提交：候选假设、可证伪实验、原始数据、关键源码分支、修复前后对照和未覆盖边界。只给一个参数调整或一个“修好了”的截图不算完成。
 
@@ -4786,11 +4786,11 @@ ADRP+ADD 形成 panic 格式字符串地址 0xffff80008124ce28。主机 GDB 对�
 
 ### B-BOOT04：内核 Oops 与 panic 策略的区别
 
-**状态：完成实验设计；尚未集成 sadboard 命令，未在 AM625 实测。** 以下是受控复现任务书，不能把建议步骤写成已执行记录。与本章现有命令对应的第 01 例保留原实现。
+**状态：已提供真实 AM625 实现。** 本阶段构建与实机结果单独见验收档案；操作入口与故障/参考流程见本节末尾。
 
 **生产现场与异常现象。** 驱动错误后有时只死一个任务，有时整机重启，日志标题都被监控标成 panic。
 
-**复现条件与故障注入。** 仅在隔离客体加载自建测试模块触发受控无效访问，比较客体不同 panic_on_oops 设置；保留干净重启快照。禁止在当前 AM625 改全局策略或加载故障模块。 操作前记录版本/构建 ID、boot ID、输入、资源上限和超时。取证对象必须是自己的实验进程，设计卡中的 PID 均指该子进程。
+**复现条件与故障注入。** 在已确认固件的一次未封存 AM625 启动中，手动模块执行 BUG；实验设置 panic_on_oops=1、panic=3，复位后恢复正常默认策略。其他 Oops 策略以源码阅读分析，不将未执行的组合写成实测。 操作前记录版本/构建 ID、boot ID、输入、资源上限和超时。内核/启动故障会影响整机；核对完整固件 ID、WDT 与保存的正常启动路径。
 
 **原理与容易误判的地方。** Oops 是内核异常诊断，后续动作取决于上下文和策略。进程上下文、IRQ 上下文、PID 1 和锁状态都可能改变后果；任务退出也不证明内核状态仍可继续信任。
 
@@ -4800,7 +4800,7 @@ ADRP+ADD 形成 panic 格式字符串地址 0xffff80008124ce28。主机 GDB 对�
 
 **修复方案与代价。** 修复对象生命周期或访问逻辑，并保留明确的异常策略；不能通过关闭 panic_on_oops 来宣称驱动修好。
 
-**量化验收与现场恢复。** 同一错误的上下文和策略差异可解释，修复后故障输入不再触发 Oops，正常设备路径仍有效。 最后停止实验进程，释放私有文件、描述符或 namespace；保存证据再清理，不删除系统日志，不影响管理网络。
+**量化验收与现场恢复。** 同一错误的上下文和策略差异可解释，修复后故障输入不再触发 Oops，正常设备路径仍有效。 最后核对恢复启动的固件身份、健康检查与日志归档；不清除系统历史记录。
 
 **面试/评审追问。** 为什么一次 Oops 后重试成功仍不足以验证修复？中断上下文中的异常有哪些额外风险？ 请提交：候选假设、可证伪实验、原始数据、关键源码分支、修复前后对照和未覆盖边界。只给一个参数调整或一个“修好了”的截图不算完成。
 
@@ -4808,11 +4808,11 @@ ADRP+ADD 形成 panic 格式字符串地址 0xffff80008124ce28。主机 GDB 对�
 
 ### B-BOOT05：soft lockup、RCU stall 与硬件 watchdog 复位归因
 
-**状态：完成实验设计；尚未集成 sadboard 命令，未在 AM625 实测。** 以下是受控复现任务书，不能把建议步骤写成已执行记录。与本章现有命令对应的第 01 例保留原实现。
+**状态：已提供真实 AM625 实现。** 本阶段构建与实机结果单独见验收档案；操作入口与故障/参考流程见本节末尾。
 
 **生产现场与异常现象。** 系统卡顿后重启，只有 watchdog 标签时难以知道是 CPU 死循环、调度阻塞还是喂狗链路失败。
 
-**复现条件与故障注入。** 用一次性客体分别设计有限 CPU 忙循环与受控长临界区，检查客体是否具备检测器；不在 AM625 禁中断或修改 watchdog。缺少 detector 时必须记录未覆盖。 操作前记录版本/构建 ID、boot ID、输入、资源上限和超时。取证对象必须是自己的实验进程，设计卡中的 PID 均指该子进程。
+**复现条件与故障注入。** 先在真实 AM625 验证硬件 WDT，随后由手动内核模块触发有界 soft lockup 与全 CPU 禁中断锁死，由 WDT 复位；必须核对检测器配置与真实日志。 操作前记录版本/构建 ID、boot ID、输入、资源上限和超时。内核/启动故障会影响整机；核对完整固件 ID、WDT 与保存的正常启动路径。
 
 **原理与容易误判的地方。** soft lockup、hard lockup、RCU stall 和硬件 watchdog 的检测对象与时钟不同。CPU 百分百的普通用户进程通常仍可被抢占，并不自动等于内核 soft lockup。
 
@@ -4822,18 +4822,77 @@ ADRP+ADD 形成 panic 格式字符串地址 0xffff80008124ce28。主机 GDB 对�
 
 **修复方案与代价。** 修复长时间不可调度区间，设计健康评估与喂狗职责，并验证日志在复位前后的接力；不能只延长 watchdog 超时。
 
-**量化验收与现场恢复。** 受控故障原因与复位证据对应，健康负载不误复位；检测器不可用、断电 RAM 不保留等边界单独标记。 最后停止实验进程，释放私有文件、描述符或 namespace；保存证据再清理，不删除系统日志，不影响管理网络。
+**量化验收与现场恢复。** 受控故障原因与复位证据对应，健康负载不误复位；检测器不可用、断电 RAM 不保留等边界单独标记。 最后核对恢复启动的固件身份、健康检查与日志归档；不清除系统历史记录。
 
 **面试/评审追问。** CPU 满载、任务 D 状态、RCU stall 和 watchdog 触发可以互相等价吗？ 请提交：候选假设、可证伪实验、原始数据、关键源码分支、修复前后对照和未覆盖边界。只给一个参数调整或一个“修好了”的截图不算完成。
 
 <a id="advanced-index"></a>
+
+#### AM625 RAM 启动实验的共同操作方法
+
+B-BOOT02/03 在真实 AM625 执行。主机的 `scripts/sadboard-board.py` 仅控制串口、TFTP 和验收；设备上的 PID 1、动态加载器、内核挂载过程都是真实代码，没有使用 QEMU 或 PID namespace 替代整机故障。构建自动生成 `images/sadboard/`，正常 OTA 的 FIT/rootfs 不含这些故障副本。
+
+先将本次正常固件经 SD A/B OTA 升级并确认，再部署配套 TFTP/NFS，保留 `tftp_kernel=1`、`nfs_root=1`。串口工具需要独占串口，关闭其他串口终端/采集程序；日志由工具自己保存。示例在 workspace 根执行，`--output` 必须是新目录：
+
+```sh
+python3 sadboard-external/scripts/sadboard-board.py boot-initlib \
+  --images output/am625-debug-systemd/images --serial /dev/ttyACM2 \
+  --known-hosts output/validation/STAGE/ssh-known-hosts \
+  --output output/validation/boot-initlib-$(date +%Y%m%dT%H%M%S)
+# 根挂载实验用同样参数，将 boot-initlib 改为 boot-root，并换一个 output。
+```
+
+工具校验工件 SHA256，记录基线，将 U-Boot 中的参数只改在 RAM 内，启动硬件 WDT，分别运行故障与参考副本。过程中不执行 saveenv、不写分区、不更新 SPL/U-Boot。若正常网络启动因 PHY/ARP/TFTP 重试退回 U-Boot，主机工具最多重试两次原有 fw_boot，记录重试次数；NFS 调试依赖主机服务，本地 SD 恢复另行实测。故障 kernel 的 `panic=3` 尝试三秒后复位；WDT 为后备。后续复位重新使用保存的正常网络启动配置。每次参考 SD 启动通过健康检查后，再回到正常 TFTP+NFS。当前 USB 串口不透传 BREAK，不依赖串口 SysRq 救援；RAM 参考 init 带独立 120 秒恢复守护，只有看到 PID 1 根目录下的健康确认才退出，卡在持续喂狗的 recovery 内也会强制复位。额外 guard 对照将此期限设为 10 秒，实测该路径再继续正常参考启动。`serial.log` 是完整原始串口，`bug-serial.log` / `fixed-serial.log` 是分段证据，`result.json` 记录对应启动与恢复。
+
+缺库例中 `/init` 是一个依赖专用 `libsadboard-init.so` 的 ELF。故障副本仅缺这一个库；参考副本补齐后调用生产 `fwctl init`，完成 rootfs SHA256/dm-verity 校验与 switch_root。用 `readelf -lW images/sadboard/init` 查看解释器，`readelf -dW` 查看 DT_NEEDED/RUNPATH，再用交叉 `objdump -drS` 比较 main、库调用和 PLT。实际故障发生在 main 前的加载器阶段；exit_group(127) 最终进入 do_group_exit/do_exit 的全局 PID 1 保护并 panic。不要将它与普通业务进程 SIGSEGV 混为一谈。
+
+根挂载例两版都不传 initramfs。故障只设不存在的 `/dev/mmcblk1p99`，并故意不加 rootwait，避免无限等待掩盖 VFS 错误。参考使用本次确认 deployment 对应的 rootfs 分区，带 rootwait、rootfstype=squashfs。同一个 Image 和绑定 rootfs 校验信息的 DTB 用于对照。沿 `kernel_init_freeable → prepare_namespace → mount_root` 阅读 `init/main.c`、`init/do_mounts.c`；实际函数与偏移以串口栈和匹配 vmlinux 为准。rootwait 解决异步设备发现，不能修正错误的设备号或文件系统类型。
+
+#### AM625 内核模块实验的共同操作方法
+
+故障模块是 SadBoard 专用 `sadboard-faults.ko`，不自动加载、不在开机时触发。入口是 root 可写 debugfs，加载时检查 AM625 compatible；默认空闲。符号保存在 `images/debug/kernel/`，源代码在 `package/sadboard-labs/kernel/` 与设备 `/usr/src/sadboard/kernel/`。
+
+先在本次固件上正常启动一次，等待确认，再额外重启，SSH 就绪后、日志封存前执行 `sadboard run kernel-oops` 或 `sadboard run watchdog-probe`。入口暂停 fw-confirm 的进程（STOP/CONT），保留 systemd unit，记录操作意图和唯一 run 标记，拒绝尚未确认的 OTA 固件。重启后执行 `sadboard check RUN_DIRECTORY`；检查相同固件、健康状态、失败启动标记并导出日志。立即 Oops 可能来不及写完上一轮 live kernel 文件；检查器先验证导出归档 CRC，再从该文件或本次恢复归档中的 pstore 查找唯一 run 标记，不把 live 文件缺尾当成没有发生异常。
+
+`kernel-oops` 在模块写入回调内执行真实 BUG，设置 panic_on_oops=1、panic=3。沿 ARM64 BRK/异常入口、BUG 报告、Oops/panic、停止其他 CPU 的路径读源码。用 `aarch64-buildroot-linux-gnu-objdump -drS images/debug/kernel/sadboard-faults.ko` 找 BUG 指令与回调偏移，再结合实际 Call trace；模块地址需要本次 `/sys/module/sadboard_faults/sections/.text`，不能直接把运行时绝对地址当 ELF 文件偏移。修复对照在正常启动后手动运行：
+
+```sh
+modprobe sadboard-faults
+echo 'safe reference' > /sys/kernel/debug/sadboard-faults/control
+modprobe -r sadboard-faults
+```
+
+它只执行有界可调度操作，无 BUG。
+
+`kernel-lockup` 分两步。先运行 watchdog-probe：暂停实际持有 /dev/watchdog0 的 PID 1 喂狗进程，内核与探测器保持运行。探测器不设置 PTRACE_O_EXITKILL；若硬件未复位，130 秒后 detach 恢复 PID 1。必须从串口确认真实 ESM 复位及超时时间、同一固件恢复、失败/正常 SOL 日志后，才记录 `/data/sadboard/watchdog-proven`（完整运行固件 ID）。主机使用上述同一套 images/serial/known-hosts/output 参数，将 case 改为 watchdog-probe 即可自动执行这套门禁并写入证明。该证明不应靠手动写字符串替代；换 hash 后必须重新验证。
+
+本地 SD 模式先将 tftp_kernel/nfs_root 置 0/0、正常启动并确认，再额外重启执行 watchdog-probe。恢复后先 `sadboard check RUN_DIRECTORY`，核对串口 ESM、同一固件、stdout.log 中探测尚未到 130 秒且没有“未观察到复位”的失败提示。完成这些实测后才从该 run.info 的 firmware_id 记录 `/data/sadboard/watchdog-proven`；记录文件是已完成验证的结果，不是验证的替代。主机工具的自动门禁使用已配置的 TFTP+NFS 模式，两种模式的运行 ID 不同，不能互抄证明。
+
+读 [watchdog_dev.c](../linux/linux-7.0/drivers/watchdog/watchdog_dev.c) 的 watchdog_ping、__watchdog_ping、watchdog_ping_work，以及 [rti_wdt.c](../linux/linux-7.0/drivers/watchdog/rti_wdt.c) 的 rti_wdt_ping。用户层 keepalive 与真正写硬件寄存器是两个时刻：__watchdog_ping 发现尚未到 last_hw_keepalive + min_hw_heartbeat_ms 时，会安排 hrtimer 并返回，随后由 worker 再喂狗。RTI 是窗口型 WDT，不允许过早喂狗；不能把配置 timeout=60 与“停止 PID 1 到首次 SPL”的时长直接等同。本轮分别观察到约 76/86 秒；排队喂狗与停止时刻需要结合源码、timeleft 原始序列和主机单调时钟分析，不能用会被 NTP 校准的墙上时间作超时证据。
+
+通过硬件 WDT 门禁后，`sadboard run kernel-lockup` 先制造 6 秒禁止抢占但仍开中断的忙循环，使 softlockup detector 报告；然后在全部 CPU 上关闭中断并忙循环，由独立硬件 WDT 复位。前者仍有定时中断，后者无法调度、无法依赖软件定时器恢复。RCU stall 是另外一类证据，未观察到就不能在报告里宣称出现。检查最后的独特 run 标记、soft lockup、ESM 重启和恢复日志；勿以 SSH 断线单独判定 watchdog 成功。
+
+
+本次配套模块的实际反汇编（偏移只适用于这份 ELF，重新构建请重新 objdump）：
+
+```asm
+0000000000000038 <halt_cpu>:
+  40: d50343df  msr daifset, #0x3
+  44: d503203f  yield
+  48: d503203f  yield
+  4c: 17fffffe  b 44 <halt_cpu+0xc>
+  ...
+ 618: d4210000  brk #0x800       // control_write 中 BUG() 的指令
+```
+
+DAIFSet 的这里两位屏蔽 IRQ/FIQ；循环中的 YIELD 是处理器提示，不是 Linux 的 sched_yield 系统调用，不会在禁止抢占/中断的环境中主动让出调度。BUG 对应 BRK #0x800，CPU 进入异常处理并结合内核 BUG 表报告位置，继而因 panic_on_oops 策略 panic；它与读写空地址产生的数据异常有不同的入口。实机已观察到 `watchdog: BUG: soft lockup - CPU#2 stuck for 4s!`，再观察到 all-CPU IRQ-off 标记；以各自的实际现场为准，不把编译清单当运行栈。
 
 ## 第 8 章：案例地图、生产背景与工程能力
 
 ### 8.1 范围、实现状态与学习顺序
 
 案例库设计共 **59 例**：七个基础方向各 **5 例**（35 例），性能、内存、网络三个进阶方向各 **8 例**（24 例）。同一工具可以在不同章节反复使用，根因与验收条件必须不同。
-保留原有 10 例，并新增 24 个基础场景；本阶段继续新增 20 个普通进阶场景，当前 **54 例有可运行代码**。剩余 4 个启动/内核与 1 个 CMA 场景继续实现。不要把设计数当作可运行程序数；本阶段固件的实测范围见验收档案。
+保留原有 10 例，并新增 24 个基础场景；本阶段继续新增 20 个普通进阶场景，当前 **59 例均有实现**（57 个设备入口、2 个主机串口控制的真实板端 RAM 启动实验）。不要把设计数当作可运行程序数；本阶段固件的实测范围见验收档案。
 
 建议每条路径先完成 01 基础例，再挑本类 02～05 比较不同根因；进入进阶后先完成 P01/M01/N01，再做条件允许的设计实验。每例提交一份独立报告，复用附录 A 的模板。全部案例按 AM625 实机方案实施；破坏内核和启动环境的入口必须先通过 WDT 与正常恢复镜像门禁，不能自行向生产分区写入异常固件。
 
@@ -5535,11 +5594,11 @@ sadboard verify memory-sockets
 
 ### A-M07：总空闲足够却申请不到连续 DMA 缓冲
 
-**状态：完成实验设计；尚未集成 sadboard 命令，未在 AM625 实测。以下是实现/练习任务书，不是执行记录。**
+**状态：已实现真实 AM625 CMA 碎片/连续分配对照。** 构建和实测范围见验收档案。
 
 **生产现场与现象。** 长时间运行后摄像或 DMA 缓冲申请失败，free 显示仍有可用 RAM。
 
-**受控复现设计。** 先读取现有 CMA/高阶分配统计做分析；真实注入仅限具备相应驱动、CMA 配置与回收能力的专用硬件或 VM。不得在当前管理 AM625 上任意耗尽 CMA 或加载未审计分配模块。
+**受控复现设计。** 通过本项目专用模块在 AM625 手动持有有界 DMA 缓冲，制造真实 CMA 交错空洞并释放恢复；默认不加载、不触发，接口只释放本例持有的对象。
 
 **原理与因果关系。** 连续物理页需求与普通虚拟连续 malloc 不同。碎片、不可迁移页、CMA 区域及设备地址限制会导致申请失败；compaction 也可能制造时延。
 
@@ -5552,6 +5611,14 @@ sadboard verify memory-sockets
 **量化验收与清理。** 硬件条件满足时按预定帧池规模多轮申请/释放并校验数据，无泄漏且尾延迟满足预算；当前仅设计，缺失条件明确标为未验证。
 
 **面试/评审追问。** 为什么增加 swap 不能保证连续 DMA 内存？IOMMU 与物理连续性、设备地址宽度有什么关系？
+
+#### A-M07：真实 CMA 连续内存实验操作
+
+正常确认启动后执行 `sadboard verify memory-cma`。案例要求单一实际 CMA 区域、4 KiB 页、足够空闲 RAM；不满足就失败，不能把普通 malloc ENOMEM 当通过。控制器使用 dummy platform device 的真实 dma_alloc_coherent API，持有最多 128 MiB 的 1 MiB 连续 DMA 块；校验 DMA 地址都在 CMA 物理范围内，拒绝 CMA 外的普通页分配回退。按物理地址排序后释放交错块，再向 CMA debugfs 请求 16 MiB。
+
+故障证据必须同时满足：总 CMA 空闲至少 4096 页，maxchunk 少于 4096 页，真实 alloc 写入返回 ENOMEM。随后释放本例仍持有的块，以完全相同的 16 MiB 请求成功作为参考，并释放本例刚申请的 debugfs 块。trace/JSON 保留实际计数：completed=1 表示本次申请实验已取证，checksum=4096 是请求页数，不是 DMA 数据哈希。内核内部可记录 EBUSY/-16，但 cma_debug 的 NULL 分配结果向 write 调用返回 ENOMEM/12，二者来自不同层。异常退出由 runner 释放自己的 DMA 块。没有数据写入分区，也没有模拟硬件 DMA 传输。
+
+阅读 `kernel/dma/direct.c`、`kernel/dma/contiguous.c`、`mm/cma.c`、`mm/cma_debug.c`，把 DMA 地址限制、CMA bitmap 空洞、迁移/压实和普通虚拟连续 malloc 区分开。用 `cat /proc/meminfo`、`buddyinfo`、`pagetypeinfo`、debugfs 的 count/used/maxchunk 与可用 cma tracepoint 建立证据链。修复不是盲目扩大 CMA；生产设计应在启动时预算并复用缓冲池、按驱动能力选连续 DMA 或 SG，并审查 pinned 页的释放时机。
 
 <a id="adv-m08"></a>
 
