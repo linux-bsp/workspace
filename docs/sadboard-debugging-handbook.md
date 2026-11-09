@@ -1,17 +1,20 @@
 # SadBoard 嵌入式 Linux 故障定位与分析教材
 
 本教材面向 AM6254 调试环境，按七个问题现场组织学习。每章集中讲解现象、先修概念、
-根因假设、工具参数、逐步取证、内核源码、参考修复、实测数据及分级练习。
+根因假设、工具参数、逐步取证、内核调用流程、汇编与反汇编、参考修复、实测数据及分级练习。
 先提出判断并保存证据，再读参考分析；`verify` 验证镜像提供的参考版，不替代独立定位。
 
 当前固件版本为 **v0.0.1**，不同内容以完整 SHA256 区分，日志通常显示前八位。
 七个用例已在 AM625 完成实机验收，随机多故障与通用自动评分尚未实现。
 完整固件 ID、阶段结果和附件位置集中记录在 [实机验收档案](am625-debug-validation.md)。
 本文中的拓展命令没有被自动视为已执行，具体实测范围以该档案为准。
+新增反汇编取自已验收固件 `668ad82f52bae589bcf1a74c08734e7b29c309ec1899d7e3169382a323dcecdf`
+的配套 ELF/vmlinux；静态指令与源码流程不会冒充新采集的动态内核栈。
 
 ## 目录
 
 - [实验准备与通用定位方法](#preparation)
+  - [ARM64 汇编基础](#arm64-basics)、[内核异常与系统调用入口](#exception-entry)、[反汇编实操](#disassembly-workflow)
 - [第 1 章：缺失记录导致应用崩溃](#case-crash)
 - [第 2 章：文件描述符泄漏与耗尽](#case-fd)
 - [第 3 章：内存泄漏与 cgroup OOM](#case-oom)
@@ -24,15 +27,15 @@
 - [附录 C：Bootlin 课程参考与署名](#bootlin)
 - [附录 D：历史板级排错用例——i.MX6ULL SPI DMA](#legacy-spi-dma)
 
-| 用例章节 | 练习任务 | 工具参数 | 源码精读 |
-| --- | --- | --- | --- |
-| [应用崩溃](#case-crash) | [分级练习](#case-crash-exercise) | [参数速查](#case-crash-tools) | [关键分支](#case-crash-kernel-reading) |
-| [FD 耗尽](#case-fd) | [分级练习](#case-fd-exercise) | [参数速查](#case-fd-tools) | [关键分支](#case-fd-kernel-reading) |
-| [内存与 OOM](#case-oom) | [分级练习](#case-oom-exercise) | [参数速查](#case-oom-tools) | [关键分支](#case-oom-kernel-reading) |
-| [CPU 热点](#case-cpu) | [分级练习](#case-cpu-exercise) | [参数速查](#case-cpu-tools) | [关键分支](#case-cpu-kernel-reading) |
-| [锁与调度](#case-lock) | [分级练习](#case-lock-exercise) | [参数速查](#case-lock-tools) | [关键分支](#case-lock-kernel-reading) |
-| [网络延迟与丢包](#case-network) | [分级练习](#case-network-exercise) | [章内步骤](#case-network) | [关键分支](#case-network-kernel-reading) |
-| [panic 与恢复](#case-panic) | [分级练习](#case-panic-exercise) | [章内步骤](#case-panic) | [关键分支](#case-panic-kernel-reading) |
+| 用例章节 | 练习任务 | 工具参数 | 详细内核流程 | 汇编导读 |
+| --- | --- | --- | --- | --- |
+| [应用崩溃](#case-crash) | [分级练习](#case-crash-exercise) | [参数速查](#case-crash-tools) | [调用与分支](#case-crash-kernel-flow) | [反汇编](#case-crash-assembly) |
+| [FD 耗尽](#case-fd) | [分级练习](#case-fd-exercise) | [参数速查](#case-fd-tools) | [调用与分支](#case-fd-kernel-flow) | [反汇编](#case-fd-assembly) |
+| [内存与 OOM](#case-oom) | [分级练习](#case-oom-exercise) | [参数速查](#case-oom-tools) | [调用与分支](#case-oom-kernel-flow) | [反汇编](#case-oom-assembly) |
+| [CPU 热点](#case-cpu) | [分级练习](#case-cpu-exercise) | [参数速查](#case-cpu-tools) | [调用与分支](#case-cpu-kernel-flow) | [反汇编](#case-cpu-assembly) |
+| [锁与调度](#case-lock) | [分级练习](#case-lock-exercise) | [参数速查](#case-lock-tools) | [调用与分支](#case-lock-kernel-flow) | [反汇编](#case-lock-assembly) |
+| [网络延迟与丢包](#case-network) | [分级练习](#case-network-exercise) | [章内步骤](#case-network) | [调用与分支](#case-network-kernel-flow) | [反汇编](#case-network-assembly) |
+| [panic 与恢复](#case-panic) | [分级练习](#case-panic-exercise) | [章内步骤](#case-panic) | [调用与分支](#case-panic-kernel-flow) | [反汇编](#case-panic-assembly) |
 
 <a id="preparation"></a>
 
@@ -419,6 +422,270 @@ unit 时 systemd-run 可以返回 0，但这并不代表业务完整执行；`ca
 `check` 通过表示保存的证据符合本案例契约；`verify` 对照的是随镜像提供的参考修复。
 一次计时和一个校验和不能证明任意业务代码完全正确，性能结论还要做重复测量。
 
+<a id="arm64-basics"></a>
+
+### 0.15 ARM64 汇编先修：寄存器、调用约定与指令
+
+本节针对 AM625 的 Cortex-A53、当前 AArch64 Linux 和 ELF64 实验程序。汇编是指令
+的文字形式，反汇编是把机器码重新解释为指令；两者都不等于恢复完整 C 源码。目标是能
+从一条指令回答“用了哪个地址、读写多少字节、为什么走这个分支”，再联系业务与内核。
+
+#### 0.15.1 先确认运行架构与二进制类型
+
+在本固件上，指针和 long 为 64 位，int 为 32 位；这描述当前 LP64 ABI，不适用于所有
+ARM 编译模式。A64 指令编码为 4 字节，数据对象却可以是一字节、四字节或八字节。
+本实验 ELF 是 little-endian AArch64，反汇编一行的地址、机器码、助记符、操作数需要
+分别阅读，不把机器码的十六进制显示直接当成文件中从左到右的字节顺序。
+
+| 对象 | 本教材的寄存器/工具语境 | 不可直接套用的地方 |
+| --- | --- | --- |
+| AM625 A53 Linux 与七个用户程序 | AArch64，x/w 寄存器，交叉 GNU 工具 | 先确认 ELF，而非只看板卡型号 |
+| AM625 R5 SPL | 另一颗核、另一套 ABI/构建 | 不能用 A53 的 x0 和栈布局解释 R5 现场 |
+| i.MX6ULL ARMv7 示例 | AArch32，r 寄存器；Thumb 还可能混合指令长度 | 不能机械按每条 4 字节倒推调用点 |
+| 构建服务器程序 | x86-64 主机程序 | 不使用 x86 的寄存器或 Intel 语法解释 ARM64 |
+
+先用交叉 readelf 确认 ELF Class、Data、Machine、Type；文件叫 `.bin`、`.itb` 或
+`Image.gz` 并不能保证它是 ELF。分析内核优先用配套 vmlinux，分析模块用配套未剥离
+的 `.ko`；不能直接把压缩内核或 FIT 容器交给 objdump 当作普通可执行程序。
+
+#### 0.15.2 看懂寄存器的角色
+
+| 名称 | 本节需要掌握的作用 | 现场解释时的边界 |
+| --- | --- | --- |
+| x0～x7 / w0～w7 | 常规整数/指针参数与返回值使用的寄存器组 | 复杂返回、浮点、结构体与可变参数另有规则 |
+| x8 | 常规 ABI 可用于间接结果位置；Linux 系统调用另用它传调用号 | C 函数 ABI 与系统调用 ABI 不同 |
+| x9～x17 | 临时用途；x16/x17 还常用于 PLT/调用跳板 | 调用之后不能假定原值保留 |
+| x18 | 平台相关用途 | 不擅自当作通用长期保存位置 |
+| x19～x28、x29 | 被调用者需要按 ABI 保持；x29 通常作 FP | 编译优化可改变具体使用方式 |
+| x30 / LR | 普通带链接调用的返回地址 | 嵌套 BL 会覆盖，必要时由函数保存 |
+| SP | 当前栈指针 | 常规接口及经 SP 的访存需满足 16 字节对齐 |
+| PC | 当前/保存的指令地址 | 不是可以当普通 x31 使用的寄存器 |
+| xzr / wzr | 零寄存器，读取为零、写入丢弃 | 编码位置与指令决定它表示 ZR 还是 SP |
+| NZCV | 比较/运算形成的条件标志 | 后续指令可能改写，判断时追最近的相关赋值 |
+
+Wn 是 Xn 的低 32 位视图，写 Wn 会把对应 Xn 的高 32 位清零。比如指针放在 x0，
+随后执行 `ldr w0,[x0,#4]`，会先用原 x0 计算地址，再把读取的 32 位值写回 w0/x0。
+所以该指令成功执行后，x0 已经不再保存原指针；本例发生故障时则不能假设载入已完成。
+调用约定依据 [AAPCS64 2025Q1](https://github.com/ARM-software/abi-aa/blob/2025Q1/aapcs64/aapcs64.rst)。
+
+“进入函数时 x0 是第一个参数”不等于“在函数任意位置 x0 都是该参数”。编译器可能把
+它复制、溢出到栈、用于返回值，或者被下一次调用破坏。要结合当前 PC 和之前的赋值，
+不要只按寄存器名字猜变量。这也是需要 DWARF、源码和反汇编共同解释现场的原因。
+
+#### 0.15.3 本教材常用指令速查
+
+| 例子 | 读法 | 关联到 C 或调试问题 |
+| --- | --- | --- |
+| `mov x29,sp` | 复制寄存器值 | 常见栈帧建立的一部分 |
+| `ldr w0,[x1,#4]` / `str w0,[x1,#4]` | 从 x1+4 读/写 4 字节 | 结构体 int 字段 |
+| `ldr x0,[sp,#40]` | 从栈中读 8 字节 | 本例保存的指针或 64 位值 |
+| `strb w2,[x1]` / `ldrb w2,[x1]` | 一字节存取 | OOM 案例的逐页写触 |
+| `stp x29,x30,[sp,#-48]!` | SP 先减 48，再保存两个 8 字节寄存器 | 前索引写回，不能漏看 `!` |
+| `ldp x29,x30,[sp],#48` | 先恢复两个寄存器，再将 SP 加 48 | 后索引，和上一条配对理解 |
+| `add x2,x0,w2,uxtw #3` | 将 w2 无符号扩展、左移 3 位，再加 x0 | 基址加下标乘 8 |
+| `cmp w2,w1` | 形成减法比较的条件标志，不保存普通结果 | 后续分支还要看有符号/无符号 |
+| `b.eq` / `b.ne` | 相等/不等跳转 | 对比与条件分支 |
+| `b.lo` / `b.hs`，亦可显示 `b.cc` / `b.cs` | 无符号低于/不低于 | unsigned 边界判断；与有符号 `b.lt/b.ge` 不同 |
+| `cbz x0,L` / `cbnz w0,L` | 值为零/非零时跳转 | 不要求前面另有 CMP |
+| `tbz w3,#21,L` | 指定位为零时跳转 | 内核 flags 的分支检查 |
+| `bl F` / `blr x16` | 直接/间接带链接调用 | 更新 LR，并不自动切换到内核态 |
+| `b L` / `br x16` | 直接/间接跳转，不保存新返回地址 | 尾调用或跳板可能没有独立栈帧 |
+| `ret` | 按返回寄存器回到调用者 | 普通函数返回，不是异常级返回 |
+| `adrp x0,P` + `add x0,x0,#off` | 以 PC 相对页基址组织地址 | 全局数据/字符串地址，不是解引用操作本身 |
+| `svc #0` / `eret` | 触发同步异常 / 按异常保存状态返回 | 系统调用与普通 BL/RET 的关键区别 |
+
+ADRP 的页粒度是指令定义中的 4 KiB，不应从它反推 Linux 当前页大小。反汇编可能使用
+等价别名，例如 CMP、MOV，或在注释中列出其他分支名；先理解条件再比较文本。
+本表用于阅读本工程产生的指令，不是完整指令集。可按具体助记符查
+[Arm 指令参考](https://documentation-service.arm.com/static/6245c734b059dc5ff9a8bdab)。
+
+#### 0.15.4 从真实函数看栈帧与返回地址
+
+下面是已验收固件 `v0.0.1 / 668ad82f` 的 crash-bug 反汇编摘录，不是手写伪代码：
+
+```asm
+a18: a9bd7bfd  stp x29, x30, [sp, #-48]!
+a1c: 910003fd  mov x29, sp
+a20: b9001fe0  str w0, [sp, #28]
+a28: 97ffffeb  bl  9d4 <lookup_record>
+a2c: f90017e0  str x0, [sp, #40]
+a50: a8c37bfd  ldp x29, x30, [sp], #48
+a54: d65f03c0  ret
+```
+
+进入前的 SP 记为 S：第一条将 SP 变成 S-48，保存旧 FP 和调用者返回地址；第二条
+建立本函数 FP。本构建随后把 key 放到新 SP+28，把查询返回的指针放到 SP+40。
+这只是该二进制的布局，不能把这些偏移套用到其他优化级别或其他函数。
+
+BL lookup_record 会把下一条指令的地址记入 LR。由于本函数后面还会调用 printf，
+自己的上层返回地址必须另行保存；恢复 x29/x30 和 SP 后，RET 才能回到调用者。
+叶子函数可能不建这种栈帧，内联函数可能没有独立指令入口，尾调用可能直接跳走。
+因此“每个 C 函数都恰好对应一帧、每帧都长这样”是错误模型。
+
+<a id="exception-entry"></a>
+
+### 0.16 从用户态到内核：调用、异常、中断与返回
+
+#### 0.16.1 四条路径要先分开
+
+| 事件 | 触发原因 | 能否仅从用户反汇编看见整个内核过程？ |
+| --- | --- | --- |
+| 普通函数调用 | BL/BLR 跳到应用或库函数 | 只涉及对应地址空间，不自动进入 EL1 |
+| 系统调用 | libc/应用准备参数并执行 SVC | 只能直接看见入口指令，内核路径需另查 |
+| 同步访存异常 | 当前指令的取指/数据访问失败 | 源码没有 SVC 也可以进入内核 |
+| 硬件 IRQ | PMU、定时器或设备发出中断 | 与当前业务主动调用没有一一对应关系 |
+
+在当前 A53 Linux 语境中，用户态通常在 EL0，内核通常在 EL1；启动日志的“从 EL2
+进入”描述早期进入条件，不表示后续每条内核指令都一直在 EL2。用户栈、内核任务栈、
+IRQ 使用的执行上下文也不同，不能把“切到内核态”简单等同于一次普通 C 调用。
+
+#### 0.16.2 系统调用 ABI 与入口保存
+
+AArch64 Linux 通过 x0～x5 传系统调用参数、w8/x8 指定调用号，SVC 触发进入；内核结果
+回到 x0。某些原始失败是负 errno，libc 通常把它转为返回 -1 并设置线程 errno。
+系统调用号应查本架构头文件，不使用 ARM32 或 x86 的编号表。
+[Linux syscall ABI](https://man7.org/linux/man-pages/man2/syscall.2.html) 给出各架构对照。
+
+以下是**源码组织流程**，各函数并非在所有配置下都保留同名栈帧：
+
+```text
+libc 包装 → SVC #0
+  arch/arm64/kernel/entry.S: vectors / kernel_ventry / entry_handler
+    分配并保存 struct pt_regs，包括原寄存器与异常返回状态
+  el0t_64_sync_handler：从 ESR_EL1 区分 SVC、Data Abort、取指异常等
+    SVC64 → el0_svc → do_el0_svc
+      el0_svc_common：保存原 x0/调用号，处理 tracing/seccomp 等入口工作
+      invoke_syscall → sys_call_table[调用号] → __arm64_sys_<名字>
+      把返回值写回 pt_regs
+    返回工作：可能处理信号、重新调度和其他待处理事项
+  ret_to_user / kernel_exit → ERET
+```
+
+[entry.S](../linux/linux-7.0/arch/arm64/kernel/entry.S) 中的 kernel_ventry 和 kernel_entry
+是汇编宏；[entry-common.c](../linux/linux-7.0/arch/arm64/kernel/entry-common.c) 实施分派，
+[syscall.c](../linux/linux-7.0/arch/arm64/kernel/syscall.c) 从 `regs->regs[8]` 取调用号。
+ELR_EL1 保存异常返回地址，SPSR_EL1 保存相关状态，pt_regs 是 Linux 在软件栈上组织的
+现场；不要把这些分别保存的值混为一个“返回地址寄存器”。
+
+有个容易误读的地方：进入 `__arm64_sys_openat` 这个 C 包装函数时，x0 是 pt_regs 指针，
+不再直接是用户传来的 dfd。包装代码从保存的 regs[0..] 拿回参数；内联又可能让中间
+包装消失。另一个例子是 entry.S 保存用户 SP 后，将 SP_EL0 用作当前 task 指针；
+所以在内核任意位置读到 SP_EL0，不能立即声称它仍是用户栈地址。
+
+#### 0.16.3 为什么 strace 没看见不等于没发生
+
+访存缺页不是一条显式系统调用；clock_gettime 等接口对受支持的时钟还可能使用 vDSO，
+不经过传统 syscall。不同 libc/时钟种类可能回退到系统调用，应以该次反汇编与跟踪为准。
+strace 擅长系统调用参数、返回值和信号，不会替你列出每次普通算术或每次缺页的完整栈。
+
+返回用户态之前还可能先处理信号或调度，因此 SVC 的经过时间可含睡眠和被调度出去的
+时段，不等于 CPU 持续执行内核那么久。PMU IRQ 则走 IRQ 入口和中断控制器分派，不能
+把它拼接成应用主动调用 `armv8pmu_handle_irq()` 的业务栈。
+
+#### 0.16.4 MMU、TLB 与页表：为什么不是每条 LDR 都调用内核
+
+CPU 通常先用 TLB 中的缓存翻译；需要时由硬件按页表走查并核对权限。Linux 负责建立、
+修改和维护这些映射，正常访存不要求为每条 LDR/STR 执行一个系统调用。缺页/权限
+异常才把某些无法直接完成的访问交回软件处理，这与每次都“进入内核查地址”不同。
+
+以 4 KiB 页、48 位虚拟地址的常见模型为例，页内偏移占 12 位，其余由多级索引组织；
+页表项除物理地址还带有效性、读写/执行等属性。TLB 可能缓存旧翻译，修改页表还需要
+对应同步和失效操作；仅改一个内存数值并不自动使所有 CPU 立刻使用新权限。
+
+不要把这个示意模型写成当前内核固定只有四级：本归档实际配置为
+`CONFIG_ARM64_4K_PAGES=y`、`CONFIG_ARM64_VA_BITS=52`、`CONFIG_PGTABLE_LEVELS=5`。
+这是构建能力，实际启用层级还取决于硬件与 `vabits_actual`；源码的
+`pgtable_l5_enabled()` 有相应判断。看到 52 位配置不能据此声称 A53 正在使用 52 位
+地址，Linux 的 PGD/P4D/PUD/PMD/PTE 逻辑层还可能折叠。见
+[memory.h](../linux/linux-7.0/arch/arm64/include/asm/memory.h) 与
+[pgtable.h](../linux/linux-7.0/arch/arm64/include/asm/pgtable.h)。
+
+同理，精确同步访存错误的保存 PC 用于定位并可能重试原指令；SVC 的异常返回位置通常
+在陷入指令之后，信号/系统调用重启又可能调整它。IRQ 则保存被打断位置。先识别异常
+类型，再解释 PC/ELR，不把所有异常都理解成同一种“函数返回下一行”。
+
+<a id="disassembly-workflow"></a>
+
+### 0.17 反汇编实操：文件、源码、指令与运行地址
+
+#### 0.17.1 使用配套文件与交叉工具
+
+在 workspace 根目录执行。分析历史固件时，把 debug_dir 改为当时归档的 images/debug，
+并先验证其完整固件 ID 与 SHA256 清单，不直接使用被新构建覆盖的目录。
+
+```sh
+tool_prefix="$PWD/output/am625-debug-systemd/host/bin/aarch64-buildroot-linux-gnu-"
+debug_dir="$PWD/output/am625-debug-systemd/images/debug"
+"${tool_prefix}readelf" -h -l -W "$debug_dir/labs/crash-bug"
+"${tool_prefix}readelf" -S -W "$debug_dir/labs/crash-bug"
+"${tool_prefix}nm" -n -S "$debug_dir/labs/crash-bug"
+"${tool_prefix}objdump" -d --disassemble=process_request "$debug_dir/labs/crash-bug"
+"${tool_prefix}objdump" -d --disassemble=process_request "$debug_dir/labs/crash-fixed"
+"${tool_prefix}objdump" -d --disassemble=lookup_linear "$debug_dir/labs/cpu-bug"
+"${tool_prefix}objdump" -d --disassemble=lookup_indexed "$debug_dir/labs/cpu-fixed"
+"${tool_prefix}objdump" -d --disassemble=sysrq_handle_crash "$debug_dir/vmlinux"
+```
+
+| 工具选项 | 要回答的问题 | 局限 |
+| --- | --- | --- |
+| readelf -h / -l | 什么架构、ELF 类型、如何装载？ | program header 不等于 C 函数列表 |
+| readelf -S / -n | 有哪些 section、调试/Build ID 信息？ | 不是所有构建都有相同 note |
+| nm -n -S | 符号值、类型与大小是什么？ | 内联/局部优化可能改变符号 |
+| objdump -d / --disassemble=符号 | 某段代码的实际指令是什么？ | 没有符号时要先定位正确范围 |
+| objdump -S -l | 尝试混合源码与源行 | 需匹配 DWARF 和可找到的源码 |
+| objdump -r / -R | 静态/动态重定位记录是什么？ | `.o`、共享库、最终 ELF 的记录不同 |
+| objdump -D | 强制解释更多 section | 容易把数据当作指令，不作默认入口 |
+
+参数依据 [GNU objdump 文档](https://www.sourceware.org/binutils/docs/binutils/objdump.html)，
+判断依据仍以本次交叉工具输出为准。`-S` 看不到源码不等于没有机器码；本项目 DWARF
+编译前缀是 `/usr/src/sadboard`，可以在 GDB 用 substitute-path 映射到配套源码。
+
+在线 GDB 或已加载 core 的 GDB 可先执行下面的只读命令：
+
+```gdb
+disassemble /r process_request
+info registers pc sp x29 x30 x0 x1
+x/8i $pc
+x/8gx $sp
+info line *$pc
+```
+
+`x/8i` 是解释八条指令，`x/8gx` 是按八字节单位查看八项内存。`si` 单步指令、`ni`
+尝试越过指令级调用，只用于仍在运行的在线 inferior；core 无法继续执行。不要将
+`set disassembly-flavor intel` 等 x86 语法设置套在 ARM64 上。
+
+#### 0.17.2 PIE 与 KASLR：地址究竟属于哪一层
+
+同一条故障指令在该固件 ELF 中的值是 `0xa34`，实机 core PC 是 `0xaaaaaaf89a34`。
+配套映射给出的加载偏移为 `0xaaaaaaf89000`，两者相加才是运行地址；不能把绝对 PC
+不加处理地交给普通 addr2line。GDB 配合 core、可执行文件、完整 sysroot 和映射资料
+通常能处理 PIE；第 1 章还保留了因为映射信息不足而失败的真实案例。
+
+内核 KASLR 也会改变绝对运行地址。panic 日志中 `function+offset/size` 可结合匹配的
+vmlinux 在函数内部定位；模块还需考虑 `.ko` 的重定位与运行 section 地址。Bootlin
+的 KGDB/lx-symbols 是另一个实验流程，不代表当前基线已经提供了在线内核调试。
+
+PC 是哪条指令异常，LR 是普通调用的返回位置，FAR/si_addr 是访问对象的地址，三者
+必须分别解释。A64 的调用返回地址常指向 BL 后一条，明确要看调用点时才考虑 LR-4；
+不要对真实故障 PC 也无条件减四。不同架构、异常上下文和尾调用需要分别判断。
+
+#### 0.17.3 优化、原子操作与内核补丁点
+
+C 源行不是指令时序规范。优化可能删除冗余代码、合并分支、改变循环，甚至把被调用函数
+内联；因此同一行可对应多条指令，一条指令也可能代表多个源表达式。局部变量可能只在
+部分地址范围可恢复，`optimized out` 与栈损坏不是同一件事。
+
+`ldr/add/str` 组成的 completed++ 不是一个不可分割的操作。并发正确性依赖锁和内存
+顺序，而非 volatile 或“只有三条指令”。阅读原子路径时可能遇到 LDAXR/STXR/STLR：
+它们参与独占访问或 acquire/release 语义；STXR 的状态返回需检查。具体 libc 可用
+不同 CPU 实现或运行时选择的辅助函数，不把一段示意原子序列冒充本板实测 mutex 实现。
+
+vmlinux 里还可能看到 NOP、PACIASP/AUTIASP、栈保护与函数插桩。当前构建启用了
+ARM64_PTR_AUTH_KERNEL 和 DYNAMIC_FTRACE，但 Cortex-A53 不提供相应 PAC 硬件能力；
+兼容的 HINT 编码与运行时能力检查不能被误读为“板上已启用所有新指令特性”。ftrace、
+alternatives 等还可能修改运行代码，磁盘 ELF 是构建基线，不总等于每个时刻的内存指令。
+机制见 [内核指针认证文档](../linux/linux-7.0/Documentation/arch/arm64/pointer-authentication.rst)。
+
 <a id="case-crash"></a>
 
 ## 第 1 章：缺失记录导致应用崩溃
@@ -798,6 +1065,153 @@ BusyBox ash 的 core 上限单位为 512 字节，上述上限为 32 MiB。该�
 过滤器定义见内核源码的
 [proc 文档](../linux/linux-7.0/Documentation/filesystems/proc.rst)，
 实际初版现场和对照输出保存在 `output/validation/stage1-debug/`。
+
+<a id="case-crash-kernel-flow"></a>
+
+### 1.16 详细内核流程：错误指令怎样变成 SIGSEGV 和 core
+
+这里把入口、内存判定、信号和转储拆成四段。以下是固定 Linux 提交的**源码推导**，
+不是额外抓到的一条完整实机内核栈；第 1.12 节的用户 core 则是真实采集结果。
+
+#### 1.16.1 MMU 报错之前与之后
+
+用户态 LDR 先计算虚拟地址，CPU 的地址转换单元尝试通过 TLB/页表获得允许的映射。
+本例基址为零、偏移为四，访问 0x4；通常不存在可读 VMA，硬件产生 EL0 Data Abort。
+这不是调用了某个 `segfault()` 函数，也不要求应用显式执行 SVC。
+
+```text
+故障 LDR
+  → EL0 同步异常入口，软件保存 pt_regs
+  → el0t_64_sync_handler：ESR_ELx_EC_DABT_LOW
+  → el0_da：读取 FAR_EL1
+  → do_mem_abort：根据 fault_info 分派具体错误
+  → 对用户地址的 translation fault，可经 do_translation_fault → do_page_fault
+```
+
+ESR 说明异常类别及访问状态，FAR 保存与访存错误有关的地址，ELR/保存的 PC 用于定位
+指令。此处没有新的现场 ESR 数值，不能根据用户 core 编造一份硬件 ESR。GDB 中已经
+验证的 si_addr=0x4 是 Linux 导出的用户信号证据，和原始硬件寄存器不是同一接口。
+
+#### 1.16.2 do_page_fault 为什么不会为 NULL 自动分配页
+
+| 阶段 | 关键对象或判断 | 本例与正常缺页的区别 |
+| --- | --- | --- |
+| 取得上下文 | current->mm、user_mode、fault handler 状态 | 不是所有内核上下文都允许进入可睡眠缺页处理 |
+| 确定权限 | 读/写/取指和 VMA flags | 同一个地址读与写可能走不同判断 |
+| 快路径 | lock_vma_under_rcu | 需要有效 VMA，不存在则进入后备路径 |
+| 后备查找 | lock_mm_and_find_vma | 找不到可接受区域，形成 SEGV_MAPERR |
+| 合法映射 | handle_mm_fault | 可能分配页、处理 COW、等待或重试，而不是直接发信号 |
+| 错误分支 | bad_area 与 arm64_force_sig_fault | 还区分 ACCERR、SIGBUS、OOM 等情况 |
+
+关键点是**先判断地址是否属于允许访问的区域，再考虑能否补页**。若内核为任何出错
+地址都分配页，NULL、越权写入等错误将破坏进程隔离。有效 VMA 的首次匿名写触则是
+正常慢路径，处理成功后恢复并重新执行原指令，与本例的非法地址分支不同。
+
+```mermaid
+flowchart TD
+  A[EL0 访存异常] --> B[查 VMA 与访问权限]
+  B -->|没有有效区域| C[SEGV_MAPERR]
+  B -->|权限不允许| D[SEGV_ACCERR]
+  B -->|允许访问| E[handle_mm_fault]
+  E -->|补页或 COW 成功| F[恢复用户指令]
+  E -->|需要重试| B
+  E -->|OOM 或其他错误| G[对应错误处置]
+  C --> H[排队 SIGSEGV]
+  D --> H
+```
+
+#### 1.16.3 信号是后续处置，不是把所有工作塞进异常入口
+
+arm64_force_sig_fault 构造信号信息并使其待处理。返回用户态的工作路径会检查这些
+状态，经 ARM64 的信号恢复逻辑及 `get_signal()` 取出信号。若程序没有安装适用的
+用户处理函数，则按默认致命行为进行 core 和线程组退出；若存在处理函数，则还需要
+建立用户信号帧，不能把所有 SIGSEGV 都描述为立即执行同一终止流程。
+
+当前内核的普通 ELF 转储关键调用为：
+
+```text
+get_signal
+  → vfs_coredump
+    → do_coredump：解析 core_pattern 与输出类型、建立输出
+      → coredump_write：获取 VMA 快照并调用 binfmt->core_dump
+        → elf_core_dump：生成 ELF header、notes 与选定 PT_LOAD 数据
+  → do_group_exit：完成致命信号的线程组退出
+```
+
+组内线程协调、dumpable/权限检查、core 大小限制、coredump_filter、普通文件/管道输出
+都是这条路径的条件。SIGKILL 不生成同样的 core；core 写入失败也不代表原先没有异常。
+参考 [signal.c](../linux/linux-7.0/kernel/signal.c)、
+[coredump.c](../linux/linux-7.0/fs/coredump.c)、
+[binfmt_elf.c](../linux/linux-7.0/fs/binfmt_elf.c)。
+
+#### 1.16.4 ESR 解码入门：错误类别与页表阶段
+
+仅在确实保存了相应寄存器的现场中解码 ESR；用户 core 的 si_code 不是 ESR。
+固定内核 [esr.h](../linux/linux-7.0/arch/arm64/include/asm/esr.h) 给出了字段宏：
+EC 位于高部位的 [31:26]，DABT_LOW 的类别值为 0x24，DABT_CUR 为 0x25；
+对于数据异常还要继续解释 ISS 中的读写与 Fault Status Code，而不是只看最高字节。
+
+下面的数值是**人为构造的教学输入，不是本例实机寄存器**，可在主机 Python 里计算：
+
+```python
+esr = 0x92000004  # 教学构造值
+ec = (esr >> 26) & 0x3f
+il = (esr >> 25) & 1
+write = (esr >> 6) & 1
+fsc = esr & 0x3f
+print(hex(ec), il, write, hex(fsc))
+```
+
+输出为 `0x24 1 0 0x4`：在这项假设中，是来自较低异常级的数据访问异常、对应指令
+长度标记为 32 位、读访问、translation fault 的相应阶段。结合该表的 FSC 定义，
+0x4 表示 level 0 translation fault；这不等于已经证明是 NULL，仍需 FAR、PC、
+映射与业务对象共同判断。其他 EC 下，ISS 字段的含义可能不同，不套用这套读取规则。
+
+指令异常、权限、对齐、外部 abort、硬件错误还各有分支，某些场合 FAR 也不保证有效。
+完整分析应依次确定 EC、字段适用条件、FSC/读写、地址有效性、错误指令，最后才归因。
+不为了让一张示意图完整，就给没有记录寄存器的现场补造一个数值。
+
+#### 1.16.5 源码阅读练习
+
+在 fault.c 标出正常补页、无 VMA、权限、OOM 四个出口；再在 signal.c 找到默认致命
+处置。解释以下反例：写只读映射与 NULL 读为何可能都是 SIGSEGV，却不能用同一业务
+修复？合法首次写触为何没有退出？为什么空 core 不能成为“没有缺页异常”的证据？
+
+<a id="case-crash-assembly"></a>
+
+### 1.17 汇编实战：从指令恢复字段访问与修复分支
+
+配套 ELF 中 process_request 起点为 0xa18，故障处 0xa34，差值为 0x1c，即 28 字节。
+这正是实机 GDB 的 `<process_request+28>`，不要把十进制 28 看成十六进制 0x28。
+
+```asm
+/* 故障版，摘自 668ad82f 的配套 ELF */
+a28: 97ffffeb  bl  9d4 <lookup_record>
+a2c: f90017e0  str x0, [sp, #40]
+a30: f94017e0  ldr x0, [sp, #40]
+a34: b9400400  ldr w0, [x0, #4]
+a38: 2a0003e2  mov w2, w0
+```
+
+查找返回指针经 x0 保存到栈，再取出后读偏移四的 int。故障时 x0=0，地址为 0x4。
+若成功读取，随后的 w2 会承载 printf 的一个整数参数；可见同一个 x0 在不同位置角色
+不同，不能到函数末尾仍把它叫 record 指针。
+
+```asm
+/* 参考版，同样是真实反汇编，省略错误打印的中间指令 */
+a30: f94017e0  ldr x0, [sp, #40]
+a34: f100001f  cmp x0, #0x0
+a38: 54000161  b.ne a64 <process_request+0x4c>
+a5c: 52800040  mov w0, #0x2
+a60: 14000009  b   a84 <process_request+0x6c>
+a64: f94017e0  ldr x0, [sp, #40]
+a68: b9400400  ldr w0, [x0, #4]
+```
+
+有对象才跳到正常访问分支；无对象先打印错误、返回 2、跳到统一收尾，不执行解引用。
+“加了 NULL 检查”在机器码层面表现为改变可到达路径，而不只是源文件多了一行。
+练习：用 objdump 找到错误路径的 fprintf 调用和统一恢复栈位置，再用 GDB 对照两种
+输入；不要在旧 core 上尝试单步执行修复版。
 
 <a id="case-fd"></a>
 
@@ -1205,6 +1619,105 @@ filp_close 与文件引用释放。最后读 [file_table.c](../linux/linux-7.0/f
 引用生命周期分别画出来，就能解释为什么相同路径重复 open 也会耗尽描述符。
 细节及真实 syscall 证据见 [FD 章节](#case-fd)。
 
+<a id="case-fd-kernel-flow"></a>
+
+### 2.14 详细内核流程：从 open64 到 FD 发布，再到关闭
+
+#### 2.14.1 三套调用约定不能混用
+
+本构建的应用反汇编调用 `open64@plt`，而实机 strace 显示 openat。这并不矛盾：
+C 源接口、libc 导出符号、实际系统调用是三个层次。PLT 可能经动态链接跳板到 libc，
+只有其内部的 SVC 才进入内核，不能把 `bl open64@plt` 本身称为内核异常入口。
+
+```text
+C: open("/dev/null", O_RDONLY|O_CLOEXEC)
+  → 应用 BL open64@plt → libc 系统调用包装
+  → SVC，保存 pt_regs，按调用号分派
+  → __arm64_sys_openat(pt_regs *)
+    宏生成的参数提取/类型转换层（可能内联）
+  → do_sys_open → do_sys_openat2
+  → build_open_flags → FD_ADD
+```
+
+在应用的 C 调用入口，x0 是路径，x1/w1 是 flags；在 openat 系统调用入口，x0 是
+目录描述符，x1 是路径，x2 是 flags；在 `__arm64_sys_openat` 的 C 包装入口，x0
+又变成保存现场的 pt_regs 指针。脱离当前边界套用参数含义，很容易看错一个指针。
+宏定义见 [syscall_wrapper.h](../linux/linux-7.0/arch/arm64/include/asm/syscall_wrapper.h)。
+
+#### 2.14.2 先预留槽，再建立打开对象
+
+| 步骤 | 当前内核入口 | 关键状态与失败 |
+| --- | --- | --- |
+| 检查参数 | build_open_flags | flags、mode 等不合法可在此拒绝 |
+| 预留 FD | get_unused_fd_flags → __get_unused_fd_flags → alloc_fd | current->files、位图与 rlimit；无槽返回 EMFILE |
+| 打开对象 | do_file_open | 文件名解析、VFS/权限、具体文件类型的打开操作 |
+| 发布引用 | fd_publish → fd_install | 将已获得的 struct file 安装到预留槽 |
+| 出错清理 | FD_PREPARE 对应清理规则 | 归还未发布槽和未移交的引用 |
+
+这是一个有资源所有权转移的事务，不是将一个整数加一就结束。`alloc_fd` 的 end 来自
+进程 NOFILE，候选编号达到 end 就失败；因此 EMFILE 可能在真正打开该路径之前产生。
+同样路径若只是已经打开多次，并不会自动复用旧 FD 或替你执行 close。
+
+FD_ADD 和清理 guard 位于 [file.h](../linux/linux-7.0/include/linux/file.h)，
+打开入口位于 [open.c](../linux/linux-7.0/fs/open.c)，槽分配/发布位于
+[file.c](../linux/linux-7.0/fs/file.c)。这里省略了路径解析内部的多层 VFS、LSM 与设备
+回调；不同文件类型不应伪造成相同完整栈。
+
+#### 2.14.3 errno 从哪里来，描述符什么时候能重用
+
+内核原始 `-EMFILE` 在 64 位返回寄存器中可表示为 `0xffffffffffffffe8`。libc 按错误
+约定将返回值变为 -1、errno 变为正 24；本教学程序随后主动返回 24。系统调用结果、
+libc errno 和进程退出码是三次不同的转换，不能把十六进制负值当成巨大成功 FD。
+
+关闭路径关键步骤为：
+
+```text
+close 的系统调用
+  → close_fd
+    → 在 file_lock 保护下 file_close_fd_locked
+      从 fdtable 清除 struct file 指针，释放 FD 编号
+    → filp_close → 文件引用释放
+      → 最后引用时进入 __fput 或延后清理
+```
+
+释放 FD 表项之后，该编号可能被另一线程重新分配；底层 file 的最后引用与设备资源
+释放却未必同步完成。线程往往共享 files_struct，多个 FD 还可指向同一个打开对象。
+因此只保存一个旧整数、事后盲目重试关闭，可能误关新对象。业务需要明确所有权及移交
+边界；本例单线程通过每次请求配对 open/close 验证基本规则。
+
+<a id="case-fd-assembly"></a>
+
+### 2.15 汇编实战：打开符号、返回值与 pt_regs 包装
+
+真实应用中，故障版在 0x1128 调用 `open64@plt`；参考版在 0x1168 调用同类入口，
+并在 0x11bc 调用 close。两版地址不同，先按符号和路径比较，而不是逐地址对齐。
+
+```asm
+/* 参考版：下面两行来自 main，省略中间业务与计数 */
+1168: 97fffe82  bl b70 <open64@plt>
+11bc: 97fffe51  bl b00 <close@plt>
+```
+
+这只能证明该路径有相应调用指令，不能静态保证每个请求都走到 close；还要看分支、
+错误出口和实机 trace。本轮已经独立记录了 128 次 open 与 128 次 close，形成动态对照。
+
+再看同固件 vmlinux 的 `__arm64_sys_openat` 真实片段：
+
+```asm
+/* 省略函数序言和 flags 整理，地址是 ELF 链接地址 */
+ffff8000803ec130: f9400c04  ldr x4, [x0, #24]
+ffff8000803ec134: a9408c01  ldp x1, x3, [x0, #8]
+ffff8000803ec13c: b9400005  ldr w5, [x0]
+ffff8000803ec174: 97fffeed  bl  ffff8000803ebd28 <do_sys_openat2>
+ffff8000803ec178: 93407c00  sxtw x0, w0
+```
+
+这里开始的 x0 指向 pt_regs，按八字节布局提取已保存的寄存器。最后 SXTW 把 32 位
+结果按符号扩展成 64 位，以保留负错误。注意 do_sys_open 在该构建中没有单独出现在
+这个片段的调用链上：包装可被内联，源码流程中的一个名字不保证存在一条 BL。
+练习：对照参数宏，解释被读出的四个参数分别在哪里；再检查 strace 中 EMFILE 前的
+最后一次成功 FD。不要把 pt_regs 指针当成字符串给 GDB 强行打印。
+
 <a id="case-oom"></a>
 
 ## 第 3 章：内存泄漏与 cgroup OOM
@@ -1502,6 +2015,99 @@ indirectly lost 是依赖已丢对象的分配，possibly lost 常涉及内部�
 配合 [oom_kill.c](../linux/linux-7.0/mm/oom_kill.c) 读 victim 选择、组终止与后续回收。
 把 `.limits`、oom/max/oom_kill、进程及时间连起来；新 check 要求组 oom 事件和 kill
 事件共同存在。即使它通过，泄漏来源仍需分配栈和所有权分析来解释。
+
+<a id="case-oom-kernel-flow"></a>
+
+### 3.15 详细内核流程：写触、分配、计费、回收和终止
+
+#### 3.15.1 malloc 成功不是所有物理页已经到位
+
+malloc 可能重用分配器已有块，也可能通过 brk/mmap 建立或扩展映射；其选择取决于
+libc、大小和状态，不把本例所有申请都写死成一种系统调用。返回虚拟地址之后，本例
+每隔 4096 字节进行一字节写触，让当前 4 KiB 页配置下的页面实际参与驻留和计费。
+
+```text
+用户 STRB 写尚未驻留的合法匿名区域
+  → EL0 Data Abort → do_page_fault（此时 VMA 存在且允许写）
+  → handle_mm_fault → __handle_mm_fault → handle_pte_fault
+  → 对缺失匿名 PTE，经 do_pte_missing → do_anonymous_page
+  → alloc_anon_folio
+      基础页后备分支：folio_prealloc，分配 folio 并 mem_cgroup_charge
+      大 folio/THP 等配置可走其他分支，不能假设永远一个基础页
+  → 建立 PTE、更新反向映射/LRU 等状态 → 恢复并重试原写指令
+```
+
+这是与崩溃案例相同异常入口的**合法地址分支**，不是另一种 SIGSEGV。匿名读缺页还可能
+先映射共享零页，写时再分配或 COW；本负载采用写触，不能用“读过同样范围”代替验证。
+源码见 [memory.c](../linux/linux-7.0/mm/memory.c)。
+
+#### 3.15.2 计费为何会进入慢路径
+
+mem_cgroup_charge 的实际处理可进入：
+
+```text
+__mem_cgroup_charge
+  → get_mem_cgroup_from_mm：关联到该 mm 的计费域
+  → charge_memcg → try_charge → try_charge_memcg
+    尝试使用本地 stock 或 page_counter 预算
+    失败后调整批量、发出 max 事件、尝试组内回收、清空 stock、重试
+    依据 GFP、余量、重试次数决定是否进入 mem_cgroup_oom
+```
+
+stock 是降低频繁全局计数操作的批量优化，意味着一次写一页不等于计数文件恰好逐页
+同步增长。计费对象还包括其他合规资源，memory.current/peak 也不是 malloc 参数总和。
+看到计数略有差异，先检查口径、批量和共享资源，而不是立即认为工具坏了。
+
+| 条件或出口 | 为什么存在 | 取证时怎样区分 |
+| --- | --- | --- |
+| 回收后有足够 margin | 可继续执行，不必杀进程 | max 增长可以没有 oom_kill |
+| 分配不允许阻塞或带特殊 GFP | 不能在任意上下文无限回收 | 可能返回 ENOMEM，并非必杀 |
+| 已有其他任务正在释放内存 | 避免重复终止和无意义竞争 | OOM 函数成功返回不等于新杀一个 PID |
+| 普通组预算持续不足 | 进入 memcg OOM 处置 | 结合组名、oom、kill、限制和日志 |
+| 系统范围不足 | 全局 OOM 的另一种约束 | 不把进程所属组误当作触发预算的组 |
+
+#### 3.15.3 从组 OOM 到 SIGKILL 与回收
+
+```text
+mem_cgroup_oom
+  → 记录 MEMCG_OOM，检查分配阶数和适用条件
+  → mem_cgroup_out_of_memory：在 OOM 锁内重新检查余量
+  → out_of_memory：按约束判断已有退出任务或选择 victim
+  → oom_kill_process → __oom_kill_process：对受害者发 SIGKILL
+  → memory.oom.group 策略可进一步处理组内任务
+  → 受害任务在信号/退出路径释放 mm；OOM reaper 可协助解除相关映射
+```
+
+SIGKILL 不能由业务捕获来 free，因而最后清理依靠内核。此后其他分配者可能重试成功，
+不应把“发送信号”当成“所有页已在此时释放”。group kill 的计数也不能直接解释成不同
+受害进程数量。看 [memcontrol.c](../linux/linux-7.0/mm/memcontrol.c) 与
+[oom_kill.c](../linux/linux-7.0/mm/oom_kill.c) 时，分别标出计费失败、victim 选择、
+发信号、异步回收四段，不把它们画成一个不可分割动作。
+
+<a id="case-oom-assembly"></a>
+
+### 3.16 汇编实战：一字节写入怎样触发整页成本
+
+真实 memory-bug 的 main 中可看到字节存取和页步长。以下保持原指令，只省略中间行：
+
+```asm
+e44: 39400000  ldrb w0, [x0]
+e60: 11400400  add  w0, w0, #0x1, lsl #12
+e70: 6b00003f  cmp  w1, w0
+e74: 54fffd29  b.ls e18 <main+0x108>
+```
+
+写入端另有 STRB；LDRB 读回业务字节并累加校验。ADD 中 `#1,lsl #12` 是加 4096，
+不是把整个结果再乘 4096。每次只存一字节，却可能首次触发一个页面的分配/计费；CPU
+指令的访存宽度和虚拟内存管理的页粒度是两层不同概念。
+
+从故障指令本身不能看见完整 OOM 调用链。通过合法 VMA、组限制、内核事件和进程退出，
+才能解释它是正常缺页慢路径最终遇到资源限制；同一条 STRB 若地址已经越界，则可能走
+第 1 章的非法访问路径。汇编相似不代表根因相同。
+
+参考版在业务块处理后有 free 调用。静态看到一条 BL free 仍不足以证明长期有界，
+须结合所有分支、完整 64 次处理和峰值对照。练习：找出 malloc、STRB、页步长、
+checksum 累加、free 五类指令，分别说明谁负责用户分配器、谁可能引发内核缺页。
 
 <a id="case-cpu"></a>
 
@@ -1802,6 +2408,104 @@ perf_event_overflow、perf_output_sample，以及 [ARM PMU](../linux/linux-7.0/d
 采样频率、过滤范围、是否含内核、栈展开方式、缓冲大小、调试符号都会影响可见性。
 没有样本不等于没有执行，unknown 不等于未知 bug，极短程序也不适合拿少量样本做精细比例。
 使用程序自带计时和完整工作量作交叉证据；新 check 打印的一次比值仍需重复测量。
+
+<a id="case-cpu-kernel-flow"></a>
+
+### 4.17 详细内核流程：事件安装、计数器中断与样本写出
+
+CPU 案例的根因仍在用户算法。内核流程解释的是“perf 怎样观察它”，不能用一串 PMU
+函数名替代对 lookup_linear 的工作量分析。
+
+#### 4.17.1 配置阶段：不是先中断再临时创建事件
+
+```text
+perf 用户程序准备 perf_event_attr
+  → perf_event_open 系统调用
+  → 校验权限、事件类型、目标任务/CPU 和分组要求
+  → perf_event_alloc / perf_init_event 等创建事件、选择并初始化 PMU
+  → 关联任务或 CPU 的 perf context，安装并按策略调度事件
+  → 事件启用后设置硬件计数器、采样周期或软件计时机制
+```
+
+事件的统计范围、exclude_user/exclude_kernel、任务/CPU 绑定以及可用计数器数量都会
+影响结果。任务迁移、上下文切换和 multiplex 时，计数器还要随上下文管理；不能认为
+一个 FD 永远占据同一个 CPU 的某个硬件槽。事件创建失败与采样无符号是两类问题。
+
+在 [events/core.c](../linux/linux-7.0/kernel/events/core.c) 从
+`SYSCALL_DEFINE5(perf_event_open)` 追到分配、上下文安装，再看相应 PMU event_init。
+函数指针、静态包装和调度分支可能使实机栈不同于这张关键路径图。
+
+#### 4.17.2 采样阶段：一次中断如何形成一条样本
+
+下面表示硬件 PMU 事件的典型分工；task-clock 的软件计时路线不应照抄它。
+
+```text
+CPU 正在执行用户 lookup_linear
+  ──硬件计数器达到采样条件，异步产生 IRQ──>
+  异常入口保存被打断现场 → 中断控制器分派
+  → armpmu_dispatch_irq → CPU PMU 的 armv8pmu_handle_irq
+    读取/清除溢出状态，更新累计计数、重设周期
+    → perf_event_overflow → __perf_event_overflow
+      → 对普通输出处理器，形成 header/sample 并写 perf ring buffer
+      → perf_output_sample 等按 sample_type 输出 IP/TID/时间/调用链
+  perf 用户进程从 mmap 缓冲读取、写入 perf.data
+```
+
+被采样 IP 指向业务程序，不意味着业务程序 BL 到 IRQ 函数。中断到来可能在用户态，
+也可能在内核态；ARM64 对这两种来源有不同入口。PMU 驱动见
+[arm_pmu.c](../linux/linux-7.0/drivers/perf/arm_pmu.c) 和
+[arm_pmuv3.c](../linux/linux-7.0/drivers/perf/arm_pmuv3.c)。
+本轮提取了驱动静态反汇编，并未声称重新采集过一次真实 IRQ 的完整动态栈。
+
+#### 4.17.3 为什么宽栈不等于精确的耗时或访存次数
+
+请求 99 Hz 不保证每秒恰好 99 个完整样本。限流、调度、缓冲容量、事件轮换和运行
+时间都会影响样本；记录出现 lost/throttle 时要保留这些信息。某条指令被采样很多次
+说明它在所选事件/窗口中权重大，不直接说明一次执行有多慢、总共执行多少次。
+
+调用链还依赖 FP 或 DWARF 可展开状态。缺符号、栈采集截断、内联和尾调用都影响可见性；
+应将 perf 样本、独立程序计时、指令结构与业务次数连起来。软件计时事件、缓存事件和
+cycles 观察的权重不同，不拿一张图的百分比直接解释另一种事件。
+
+<a id="case-cpu-assembly"></a>
+
+### 4.18 汇编实战：看见线性扫描与直接索引的差别
+
+以下来自同固件两份配套 ELF 的真实输出。参数在函数入口分别为 x0=table、w1=items、
+w2=key；这来自函数签名与 ABI，再由具体指令确认。
+
+```asm
+/* lookup_linear：省略退出分支，保留循环主干 */
+da4: 8b214c01  add x1, x0, w1, uxtw #3
+dac: 91002000  add x0, x0, #0x8
+db0: eb01001f  cmp x0, x1
+db4: 540000c0  b.eq dcc <lookup_linear+0x2c>
+db8: b9400003  ldr w3, [x0]
+dbc: 6b02007f  cmp w3, w2
+dc0: 54ffff61  b.ne dac <lookup_linear+0xc>
+dc4: b9400400  ldr w0, [x0, #4]
+```
+
+每项由 key/value 两个 32 位字段组成，步长为 8；末尾地址为基址加 items×8。比较失败
+便回到加步长的位置，再读下一项。这里的后向分支是循环证据，需要与入口先跳到 db8
+和 items=0 的拒绝/处理分支一起看，不能把摘录的第一行误认为每轮都执行。
+
+```asm
+/* lookup_indexed：本函数没有查表循环 */
+da0: 6b01005f  cmp w2, w1
+da4: 54000082  b.cs db4 <lookup_indexed+0x14>
+da8: 8b224c02  add x2, x0, w2, uxtw #3
+dac: b9400440  ldr w0, [x2, #4]
+db0: d65f03c0  ret
+```
+
+B.CS/B.HS 是无符号不低于，表示 key>=items 时进入返回零分支；否则一次地址计算
+直接取 value。这与 unsigned key 的范围契约对应，不能改用有符号比较随意解释。
+真实成本仍受缓存、分支预测和频率影响，但“每次按表长扫描”和“一次索引访问”的
+结构差异已经可见。不能只数函数的静态指令行数就估计其总执行时间。
+
+练习：将 N 与 Q 分别改变，先预测哪条回边的动态执行次数会变化；再对比 perf 和
+checksum。若将来 key 不再等于下标，这段指令虽然仍短，却可能给出错误业务结果。
 
 <a id="case-lock"></a>
 
@@ -2113,6 +2817,111 @@ EWOULDBLOCK；应用/libc 重新检查，而不是无条件睡眠。
 锁案例的根因在应用持锁范围。修复应维持临界区数据契约；futex 是协助证明等待机制
 的下一层，不是看到它出现就修改调度器。
 
+<a id="case-lock-kernel-flow"></a>
+
+### 5.17 详细内核流程：睡眠、futex 等待、唤醒与切换
+
+#### 5.17.1 两个线程进入内核的理由不同
+
+锁持有者通过 libc 的睡眠包装进入 clock_nanosleep/nanosleep 相关路径；竞争者在
+libc 快路径无法得到 mutex 后可能进入 futex。一次快路径加锁甚至不需要系统调用，
+所以“没看到 futex”不能证明没有加锁，也不能证明没有数据竞争。
+
+```text
+持有者的定时等待：
+  sleep 包装 → clock_nanosleep 的时钟实现
+  → hrtimer_nanosleep → do_nanosleep
+    设置睡眠状态、启动 hrtimer → schedule
+  （另一个中断/定时器上下文）hrtimer_wakeup → wake_up_process
+  （之后被调度）原等待函数继续返回用户态
+
+竞争者的普通 futex 等待：
+  futex 系统调用 → do_futex → futex_wait → __futex_wait
+  → futex_wait_setup：取得 key/桶，受保护地核对用户值、设置状态并入队
+  → futex_do_wait：尚未被移除/超时时才 schedule
+```
+
+等待与定时器回调不处于一条连续调用栈。睡眠线程不会在原函数里忙等每一毫秒；
+别的任务可在它让出的 CPU 上运行，但用户 mutex 的所有权不会因此自动释放。
+
+#### 5.17.2 防止丢失唤醒需要状态、队列和内存顺序共同成立
+
+| 时序点 | 当前源码中的动作 | 为什么不能省略 |
+| --- | --- | --- |
+| 入睡前核对 | futex_wait_setup 在桶保护下读取用户值 | 已变化则返回 EWOULDBLOCK，避免按旧条件睡 |
+| 宣布等待 | 设置任务状态并放入 futex 队列 | 唤醒方需要能找到并正确改变它的状态 |
+| 交出保护 | futex_queue 完成入队并释放桶锁 | 不能持有这把桶锁让任务长期睡眠 |
+| 真正等待 | futex_do_wait 再检查队列和定时状态 | 入睡前已经被唤醒时可跳过 schedule |
+| 唤醒选择 | futex_wake 找到匹配 key 与等待项 | 普通 futex 不自动理解全部业务 mutex 语义 |
+| 排队执行 | futex_wake_mark、wake_up_q、try_to_wake_up 等协作 | 变为可运行不代表立即获得 CPU 或用户锁 |
+
+内存屏障与锁保护防止双方各自看到过期状态而错过唤醒，既不是“多加一次 sleep”，
+也不只是维护一个等待链表。源码见 [waitwake.c](../linux/linux-7.0/kernel/futex/waitwake.c)
+及 [futex.h](../linux/linux-7.0/kernel/futex/futex.h)。PI futex、requeue、超时和信号
+另有分支，本章不能作为所有 futex 操作的完整状态机。
+
+#### 5.17.3 调度究竟切换了什么
+
+对普通阻塞路径，可以沿 `schedule → __schedule → pick_next_task → context_switch`
+理解选择下一任务，再读 ARM64 的 switch_to/`__switch_to` 与 `cpu_switch_to`。
+调度类、抢占模式和特殊路径会影响细节，不把这条缩略路线当成所有切换的唯一栈。
+
+`cpu_switch_to` 在两份 task 的 CPU context 间保存/恢复被调用者保存寄存器、内核 SP、
+LR 等。恢复下一任务的栈和返回位置后，CPU 可以继续它以前暂停的位置；不是把下一
+任务从 main 重头运行。用户全寄存器现场则由异常入口/返回等机制管理，与这组内核
+上下文不是同一份保存区。
+
+```mermaid
+sequenceDiagram
+  participant A as 持锁线程A
+  participant K as 内核/调度器
+  participant B as 竞争线程B
+  A->>K: 定时睡眠，仍持用户锁
+  B->>K: futex 核对条件后入队
+  K-->>A: 定时到期，先变为可运行
+  A->>K: 被调度后返回，业务解锁/必要时唤醒
+  K-->>B: 变为可运行
+  B->>B: 被调度后重新竞争 mutex
+```
+
+图只表达依赖关系，不表示中断、状态转换和真正运行都发生在同一瞬间。完整调度源码
+位于 [sched/core.c](../linux/linux-7.0/kernel/sched/core.c)，底层保存与恢复位于
+[entry.S](../linux/linux-7.0/arch/arm64/kernel/entry.S)。
+
+<a id="case-lock-assembly"></a>
+
+### 5.18 汇编实战：从 BL 顺序判断锁保护范围
+
+真实 worker 的关键调用如下，省略 checked、地址形成和循环控制。这里的上下顺序是
+直线段中的实际指令顺序，不是将两个不相关线程的栈拼接在一起。
+
+```asm
+/* 故障版：同一次迭代 */
+ f98: 97fffee6  bl b30 <pthread_mutex_lock@plt>
+ fac: 97ffffa7  bl e48 <lab_sleep_us>
+ fb8: b9400000  ldr w0, [x0]
+ fbc: 11000401  add w1, w0, #0x1
+ fc8: b9000001  str w1, [x0]
+ fd4: 97fffedb  bl b40 <pthread_mutex_unlock@plt>
+
+/* 参考版：先独立等待，再进入同样的计数临界区 */
+ f9c: 97ffffab  bl e48 <lab_sleep_us>
+ fa8: 97fffee2  bl b30 <pthread_mutex_lock@plt>
+ fb8: b9400000  ldr w0, [x0]
+ fbc: 11000401  add w1, w0, #0x1
+ fc8: b9000001  str w1, [x0]
+ fd4: 97fffedb  bl b40 <pthread_mutex_unlock@plt>
+```
+
+completed++ 确实展开成读、加、写，不是一个普通不可打断的“C 语句”。两版都让它位于
+加解锁之间；区别在等待是否也占用用户锁。只删掉 lock/unlock 可能减少 BL 数量，却
+丢失正确同步；这说明反汇编用于理解语义，不能单纯把指令变少当作优化。
+
+继续深入 libc 时，先确认该镜像实际的 mutex 类型、原子实现及 CPU 能力。看到某条
+独占/原子指令不代表整个用户锁只需这一条；竞争状态、内存顺序和唤醒协议仍然必要。
+练习：为图中的睡眠、就绪、真正运行分别选择 strace 或 sched 证据，解释为什么不能
+拿 GDB 停住所有线程时测得的墙钟时间作为正常调度性能。
+
 <a id="case-network"></a>
 
 ## 第 6 章：网络延迟、丢包与吞吐
@@ -2409,6 +3218,102 @@ sum_received，说明自己引用哪个速率口径，不能只截其中最大�
 随对应 namespace 引用保留。systemd 的 cgroup 回收进程，不能替代删除这些网络对象。
 这也是网络案例同时检查 unit、namespace、pcap 与 host eth0 的原因。
 
+<a id="case-network-kernel-flow"></a>
+
+### 6.16 详细内核流程：用户发送、出口队列、veth 与对端接收
+
+网络路径需要分成多个阶段：写入 socket、进入协议发送队列、qdisc 排队、驱动发送、
+对端协议处理和应用读取。它们可能发生在不同任务或 softirq 上下文，不是一条从应用
+一路调用到对端应用再原路返回的同步 C 栈。
+
+#### 6.16.1 从用户字节到 skb
+
+```text
+应用 send/write/sendmsg 等接口（实际入口由本次调用决定）
+  → socket 文件/系统调用适配 → sock_sendmsg
+  → inet_sendmsg → tcp_sendmsg → tcp_sendmsg_locked
+    处理连接状态、发送缓冲、用户数据复制或引用、组装 skb
+  → 满足发送条件时，经 TCP 输出/拥塞控制路径
+  → tcp_write_xmit / tcp_transmit_skb 等 → IP 输出
+  → __dev_queue_xmit
+```
+
+这里的 skb 是内核网络包相关的数据结构，可能包含分片引用与分段信息，不要求每次
+用户 write 恰好对应一个 skb，更不要求等于一个线上以太网帧。TCP 可以合并、拆分、
+重传，GSO/GRO 也改变观测形态。send 成功首先说明相应数据被本地接口接受，不能直接
+推出远端应用已经读取全部业务字节。
+
+源码入口：[net/socket.c](../linux/linux-7.0/net/socket.c)、
+[af_inet.c](../linux/linux-7.0/net/ipv4/af_inet.c)、
+[tcp.c](../linux/linux-7.0/net/ipv4/tcp.c)、
+[tcp_output.c](../linux/linux-7.0/net/ipv4/tcp_output.c)。发送缓冲不足等条件可能让
+调用者等待，因而慢 send 也不一定是物理链路速率不足。
+
+#### 6.16.2 netem 不会让发送线程持有整个链路忙等
+
+| 阶段 | 关键动作 | 与本案例的关系 |
+| --- | --- | --- |
+| 选择发送路径 | __dev_queue_xmit 根据设备、队列与 qdisc 状态分派 | 部分路径可直接发送，不能假设每次必排队 |
+| 注入模型 | netem_enqueue 根据延迟/丢包参数处理 skb | loss 可在此让包被丢弃 |
+| 等待发送时刻 | 记录可出队时刻，netem_dequeue 检查条件 | 未到期时先不返回可发送 skb |
+| 安排后续运行 | qdisc watchdog 组织到期调度 | 不是用 nanosleep 挂住每个应用请求 |
+| 真正下发 | 出队后通过通用发送与 netdev 操作 | 才来到 veth_xmit 等设备路径 |
+
+当前 netem_dequeue 可调用 `qdisc_watchdog_schedule_ns`，其封装最终进入
+`qdisc_watchdog_schedule_range_ns`。这些是网络调度设施，和复位整机的硬件 watchdog
+不是同一功能，不能仅因名字相同就联系到设备重启。
+
+对本实验的常规发送路径，出口抓包 tap 可在 `dev_queue_xmit_nit` 看到，这个调用位于
+接近驱动发送的 xmit 路径。因而包已经在此前的队列中花掉的时间，不必出现在“本地
+抓到请求与回复”的差里；ping 从发起操作计时的 RTT 则包含该等待。定位时要查具体
+抓包点，不用一对 pcap 时间戳直接替代应用 RTT。
+
+读 [dev.c](../linux/linux-7.0/net/core/dev.c) 与
+[sch_netem.c](../linux/linux-7.0/net/sched/sch_netem.c)，把 enqueue、到期检查、
+watchdog、dequeue 和设备 xmit 分开，解释“配置了 100 ms”怎样对应到实际观测。
+
+#### 6.16.3 veth 到接收协议与应用
+
+```text
+veth_xmit → 找 peer → veth_forward_skb
+  → 根据 NAPI/GRO 等状态选择接收组织方式
+  → 通用接收/IP 分派（可能后续在 softirq/NAPI 上下文）
+  → 对 IPv4 TCP，可经 tcp_v4_rcv → tcp_v4_do_rcv → tcp_rcv_established
+    更新序列/ACK、重传和接收队列，按条件唤醒等待者
+  → 对端应用随后 recv/read，消费已排队的数据
+```
+
+接收侧并非每包都保证经过同一组可见函数，ICMP 请求也不走 TCP 已建立连接处理。
+veth 的 use_napi 分支取决于实际接口特性；不要把它的行为直接外推到 AM625 CPSW
+物理 DMA/NAPI/IRQ 路径。源码在 [veth.c](../linux/linux-7.0/drivers/net/veth.c)、
+[tcp_ipv4.c](../linux/linux-7.0/net/ipv4/tcp_ipv4.c) 和
+[tcp_input.c](../linux/linux-7.0/net/ipv4/tcp_input.c)。
+
+TCP 协议收到 ACK、socket 数据可读、应用实际读取完成是不同事件。把 iperf 收发
+字节、ss、qdisc 和 pcap 放在这些位置理解，才能解释“本地发送很快，远端完成却慢”。
+
+<a id="case-network-assembly"></a>
+
+### 6.17 汇编学习：函数指针、队列回调与异步时间
+
+内核中的 netdev_ops、Qdisc_ops 和协议回调大量使用函数指针。反汇编可能显示 BLR
+调用寄存器中的地址，或由编译优化变成某个直接 BL；grep 不到一个直接 `bl netem_enqueue`
+不能据此断言它没有运行。静态调用关系、配置选择和动态事件必须分开取证。
+
+同固件 vmlinux 的 netem_dequeue 中，存在这条真实调用：
+
+```asm
+ffff800080c5a674: 97ffecfd  bl ffff800080c55a68 <qdisc_watchdog_schedule_range_ns>
+```
+
+源码中较小封装可以内联，因此机器码的函数名可能比源码调用的外层名字更深。只看这
+一行也不能证明某个包等待了 100 ms：还需证明本次走到此分支、参数取自哪次配置，
+并把时间点和 RTT/抓包相联系。本教材没有把静态反汇编冒充新的动态网络栈采样。
+
+练习：主机反汇编 veth_xmit 与 netem_dequeue，对照源码找回调、时间比较和错误分支；
+再说明如果只得到一段 tcp_v4_rcv 的栈，为什么还不知道包此前排在哪个出口队列。
+扩展跟踪先限定本实验 namespace/流量与有限窗口，不在管理 eth0 注入新故障。
+
 <a id="case-panic"></a>
 
 ## 第 7 章：内核 panic、启动日志与恢复
@@ -2686,6 +3591,98 @@ uptime 和服务端接收时间协助排序。报告中区分设备时间、接�
 只看 vpanic 不能确定根因；只看 reset 标签不能证明发生 panic；只看 SSH 恢复不能
 证明启动日志已上传。用失败 boot、恢复 boot、startup 缓冲 ID、原始栈和内容 ID 关联。
 最终因果解释必须与实际证据一致，而不是因为有恢复动作就宣称所有故障类型都已覆盖。
+
+<a id="case-panic-kernel-flow"></a>
+
+### 7.15 详细内核流程：显式 panic、日志 dump 与重新启动
+
+#### 7.15.1 本例的最初入口仍是一个普通写系统调用
+
+```text
+教学脚本写 /proc/sysrq-trigger
+  → write 系统调用与 VFS 写入分派
+  → proc_reg_write → write_sysrq_trigger
+  → __handle_sysrq：查找操作、校验适用策略并调用 handler
+  → sysrq_handle_crash：释放此前 RCU 读侧保护后调用 panic
+```
+
+因此该例的早期入口是“普通进程发起 write”，真正的终止决策发生在 handler 内。
+它不先制造一次用户 NULL 访问，也不先制造一次内核 Data Abort；不能给这个实验补造
+ESR/FAR 异常。用户崩溃、PID 1 退出、内核 BUG/Oops 和主动 SysRq 都可能最终出现
+panic，但最前面的入口与错误状态不同。
+
+#### 7.15.2 vpanic 的目标是终止与留证，不是恢复业务现场
+
+| 段落 | 当前实现的职责 | 分析注意点 |
+| --- | --- | --- |
+| 接管与诊断 | 处理本 CPU 状态、panic CPU 协调、打印原因/栈等 | 重入、多 CPU、已有 Oops 会影响输出 |
+| 可选捕获 | 按策略尝试已加载的 crash kernel/KGDB 等 | 配置与准备都要实际存在，不能因为有函数就称已部署 |
+| 其他 CPU | 协调停止/通知 | 停住仍可能持锁，普通运行假设不再成立 |
+| 通知与 dump | panic notifier、sys_info、kmsg_dump_desc | 并非在任意损坏情况下都能完整执行 |
+| 结束动作 | 输出刷新、panic_timeout、emergency_restart 等 | 重启硬件、watchdog 及平台策略还会影响结果 |
+
+本内核根据 crash_kexec_post_notifiers 决定捕获内核尝试在 notifier/dump 之前还是之后。
+所以“总会先写好 pstore 再进入捕获内核”不是通用保证。本案例没有启用一套已验证的
+kdump 流程，实际证据来自串口、ramoops、启动接力缓冲及后续正常启动的归档。
+源码见 [panic.c](../linux/linux-7.0/kernel/panic.c)。
+
+#### 7.15.3 printk ring、pstore 与文件归档是三层不同的保存
+
+```text
+panic 文本进入 printk 日志
+  → kmsg_dump_desc(KMSG_DUMP_PANIC, ...)
+  → 已注册的 pstore dumper：pstore_dump
+    从日志缓冲按容量、过滤及压缩策略组织记录
+  → 后端 ramoops_pstore_write
+    → 写入设备树保留的 persistent RAM 区域
+
+下一次正常启动：
+  ramoops/pstore 读取旧记录 → 用户态 logctld 复制、同步、归档和上传
+  → 服务端内容确认后再按各层协议清理或回收
+```
+
+printk 环形缓冲不是普通磁盘文件，ramoops 也不是把整个内核内存转储到 rootfs。
+pstore 的容量、max_reason、压缩与平台保留行为会影响可得到多少文本；启动接力缓冲
+则另外保存 SPL/U-Boot/启动 kernel，不能用 pstore 代替所有前 Linux 阶段日志。
+源码参考 [pstore/platform.c](../linux/linux-7.0/fs/pstore/platform.c)、
+[pstore/ram.c](../linux/linux-7.0/fs/pstore/ram.c)。
+
+#### 7.15.4 从失败原因往前追，而不是只背最后的栈
+
+如果首次有效错误是 `/init: ... libcrypto.so ... not found`，其后发生 PID 1 退出
+panic，优先检查 initramfs 的动态依赖与打包；如果栈来自非法访存，先检查第一条
+错误指令和对象生存期；本例则由明确的 SysRq 操作导致。共同出现 vpanic 不表示三者
+应修改同一个位置。保留第一处错误、阶段身份与重启证据，比只截最后几行更有用。
+
+<a id="case-panic-assembly"></a>
+
+### 7.16 内核反汇编实战：从函数内偏移找到真正调用点
+
+以下来自 `668ad82f` 配套 vmlinux，是**静态反汇编**；绝对链接地址不被当成新一次
+启动的 KASLR 地址。sysrq_handle_crash 从 0xffff8000808af298 开始：
+
+```asm
+ffff8000808af2a0: d503233f  paciasp
+ffff8000808af2a4: a9bf7bfd  stp x29, x30, [sp, #-16]!
+ffff8000808af2a8: 910003fd  mov x29, sp
+ffff8000808af2ac: 97e1efa3  bl ffff80008012b138 <__rcu_read_unlock>
+ffff8000808af2b0: b0004ce0  adrp x0, ffff80008124c000
+ffff8000808af2b4: 9138a000  add  x0, x0, #0xe28
+ffff8000808af2b8: 97dd991c  bl ffff800080015728 <panic>
+```
+
+ADRP+ADD 形成 panic 格式字符串地址 0xffff80008124ce28。主机 GDB 对这份 vmlinux
+实际执行 `x/s 0xffff80008124ce28`，读到 `"sysrq triggered crash\n"`；
+`info line *sysrq_handle_crash+0x20` 定位到 drivers/tty/sysrq.c:154。
+函数内 0x20 恰好是 BL panic 的位置，连接了符号、指令、参数与源码行为。
+
+这个函数没有普通“恢复栈再 RET”的收尾，因为 panic 不返回；不能因缺少常规尾声就
+断言反汇编截断或栈被破坏。PACIASP 与开头预留 NOP 的解释见 0.17，不能由静态编码
+断言 A53 已实际启用 PAC。
+
+练习：以配套 vmlinux 反汇编 panic/vpanic，找 dump、可选捕获、超时和重启分支。
+先查条件，再画路径；不要为了学习指令重复在设备上触发 panic。现有失败/恢复原始
+日志可以继续用于这项离线练习，core、vmlinux 和 vmcore 的可见范围也应分别说明。
 
 <a id="report"></a>
 

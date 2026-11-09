@@ -131,7 +131,7 @@ QEMU 计划用于验证分析流程、逻辑故障和场景复现。依赖真实
 
 ## 文档
 
-- [嵌入式 Linux 故障定位与分析教材](docs/sadboard-debugging-handbook.md)：统一学习入口，按七个用例组织；准备步骤、工具、源码笔记和练习集中在同一文档，Bootlin 资料与报告模板放在附录。
+- [嵌入式 Linux 故障定位与分析教材](docs/sadboard-debugging-handbook.md)：按七个用例组织，包含内核调用流程、关键分支、ARM64 汇编、真实反汇编对照、工具参数与练习；Bootlin 资料和报告模板放在附录。
 - [AM625 实机验收档案](docs/am625-debug-validation.md)：各阶段固件 ID、真实执行结果及附件位置。
 - [Workspace 目录与 AM62x SDK](docs/workspace-toolchain.md)：独立 SDK、共享下载缓存与工具链管理。
 - [AM625 TFTP 服务](docs/am62x/tftp-server.md)、[电源接线与联调](docs/am62x/power-control.md)：当前开发环境的板级操作参考。
