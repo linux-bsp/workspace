@@ -222,6 +222,57 @@ pcap 2135240 字节、430 包，包含 ICMP/TCP。取消与 namespace 清理、�
 反例和实测样例；学习路线与练习册同步整理为七个章节。
 
 
+## 阶段 7：独立 TFTP/NFS 开关与网络调试（2026-11-09）
+
+普通 AM625 的 U-Boot defconfig 关闭 `CONFIG_AM62X_BOOT_TFTP_KERNEL` 和
+`CONFIG_AM62X_BOOT_NFS_ROOT`；SadBoard 片段默认同时启用。主机实际执行四组
+Kconfig 配置及默认环境生成，得到 mmc、tftp-mmc、mmc-nfs、tftp-nfs 四种组合。
+新 U-Boot 完整构建通过；运行实际迁移 C 函数的主机测试确认旧环境迁移、配置组合
+变更、HWID/MAC/IP/自定义路径保留及同组合人工覆盖保持。网络相关主机回归 4 项、
+原案例回归 18 项通过，调试 ELF/源码清单校验通过。
+
+本次发布保持 `v0.0.1`：
+
+- OTA 内容 ID：`725d715950319e9525990b97d235a711f2c727f1036708569b093ebaa914c998`。
+- 发布 126，设备上报 success；本地 SD 根继续使用 initramfs、dm-verity 和原 A/B 布局。
+- 网络参考构建 ID：`366c904b3c1b100fc1ccd0dbbdc1798a5d443fb822962d5b1c76ebbbc8fc18af`。
+  它记录构建时内核、DTB、rootfs 的内容，区别于 OTA ITB 的身份；不证明可写 NFS 树未被修改。
+- 主机 NFS 导出 `/srv/nfs/sadboard-am625`，只向 `192.168.10.211` 开放；
+  TFTP 根为 `/srv/tftp/am625`，部署未压缩 Image 和独立 DTB，产物 manifest 校验通过。
+
+**构建与刷写范围：新 U-Boot 二进制尚未刷入实机。** 生产配置仍禁止远程启动链更新，
+本轮未解除。实机从新构建的 `u-boot-initial-env` 导出受控启动变量，经串口 TFTP 导入
+现有 U-Boot，保留它的环境 schema 8，随后保存网络开关。新 schema 9 的 C 迁移逻辑
+完成主机测试，没有冒充已在设备执行。备份启动区并读回比较，六个 SPL/U-Boot
+分区字节均未改变；仅按操作保存环境变量，没有刷工厂镜像或格式化介质。
+
+| 实机组合 | 实际验证 |
+| --- | --- |
+| 0 / 0 | 使用新环境脚本回到 SD FIT、initramfs、dm-verity、deployment 0；725d7159 已确认，零失败服务 |
+| 1 / 0 | TFTP 加载 Image/DTB，直接挂载 SD SquashFS；调试启动就绪、SSH 和持久日志通过 |
+| 0 / 1 | 校验并加载 SD FIT，`bootm FIT -` 跳过 initramfs；内核实际挂载 NFS，root 可读写 |
+| 1 / 1 | TFTP Image/DTB＋NFS root；反复重启保持开关，SD data ext4 可读写，零失败服务 |
+
+网络模式中 `fwctld`、生产健康观察和生产版本输出按条件跳过，SadBoard 独立确认
+本次调试启动并封存日志，不把外部镜像写成 SD deployment 成功。实测 `/data` 持久，
+NFS 写入从主机可见并清理；crash/FD/OOM 故障及 CPU/锁案例、网络参考流程和各参考
+修复的现场检查通过。运行记录为 network-debug/SBNET1；前后 SD 元数据、管理 IP/MAC
+和路由保持一致，案例结束没有残留 namespace，晚期 panic 请求被拒绝。
+
+TFTP/NFS 模式额外完成一次主动 SysRq panic 和恢复：
+
+- 失败 Linux boot：`da1da413-e0f9-411a-916a-639466b059c7`；恢复 boot：
+  `641bbaff-0583-4e2e-9826-203e8c620de5`。
+- `sadboard check` 确认前次启动、实际 panic 原因、相同参考构建和恢复健康通过。
+- pstore/原始串口包含 SysRq panic；恢复附件 SHA256 为
+  `1cb7257870dfa5c3602835c045771468ea76cebd06a5f0c972af428cfeacd297`。
+- SOL 同时确认失败和恢复启动归档，两个归档均包含 r5-spl、a53-spl、uboot、kernel；
+  缓冲区收到持久归档确认后正常清理。本次没有故意损坏 SD 分区或测试断电。
+
+工件在 `output/validation/stage7-netboot/`，包含构建、四组 CONFIG、原始串口、源码快照、
+发布审计、各模式验证、未改写启动区哈希、案例检查和 panic/SOL 附件。
+操作方法统一见[教材网络启动章节](sadboard-debugging-handbook.md#netboot)。
+
 <a id="bootlin-build-history"></a>
 
 ## 早期 Bootlin/NFS 构建验证档案（2026-10-30～31）

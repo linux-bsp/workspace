@@ -10,6 +10,8 @@ SadBoard 是一个面向嵌入式 Linux 的故障定位与分析练习项目。�
 
 已完成 AM6254 systemd 调试基线和七个手动案例的实机验证：GDB/core、描述符泄漏、受限 OOM、CPU 热点、锁等待、隔离网络、启动 panic 与恢复取证。支持 SSH、匹配符号、完整现场记录及参考修复。随机题库和通用自动评分尚未实现。全部学习内容统一在 [嵌入式 Linux 故障定位与分析教材](docs/sadboard-debugging-handbook.md)，按用例分章，包含基础原理、工具参数、源码路径、分级练习和参考修复。固件身份与已执行的验证见 [实机验证记录](docs/am625-debug-validation.md)。
 
+SadBoard 默认使用 **TFTP 加载内核/DTB、NFS 挂载根文件系统**，普通 AM625 BSP 保持 SD A/B 启动。两个独立的 U-Boot 配置项 `CONFIG_AM62X_BOOT_TFTP_KERNEL`、`CONFIG_AM62X_BOOT_NFS_ROOT` 支持四种组合；配置、主机部署和运行时切换见[网络调试启动](docs/sadboard-debugging-handbook.md#netboot)。实验数据仍保存在 SD 的 `/data`。
+
 ## Workspace 分支与 Buildroot 扩展层
 
 SadBoard 在 [linux-bsp/workspace](https://github.com/linux-bsp/workspace) 的 `SadBoard` 分支中开发，复用已有的 Buildroot、Linux、U-Boot 和 BSP 子模块。原先独立的 BadBoard 仓库不再作为本工作区的开发入口。
