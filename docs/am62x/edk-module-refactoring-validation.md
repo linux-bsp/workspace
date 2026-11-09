@@ -405,6 +405,35 @@ OTA 成功记录、串口验收及提交记录。
 
 证据：`output/ota-validation/0.0.1-sol-record-list/`。dmserver 已重载；本轮未更新 SPL/U-Boot。
 
+## 最后一次异常启动与复位证据（2026-11-09）
+
+- 需求限定为保留最后一次异常与恢复启动，沿用两组 DDR 缓冲。三次试启动失败后，
+  两组保存最后一次失败和随后回滚启动；不扩大保留内存，也不删除服务器历史。
+- OTA 事故附件新增 failure_observation、reset_label、reset_evidence 和 reset_capture。
+  panic/oops 从异常 kernel 原始字节观察；导致该启动结束的复位标签取自下一次
+  恢复启动 U-Boot，避免误用异常启动自身的标签。缺失、重复或无法识别的标签保留
+  UNKNOWN；ESM 不推断为 watchdog，RST 不推断为 panic。原始字节和归档协议不变。
+- Web 异常详情分别显示日志故障标记与复位标签，保留查看、下载与 SOL 跳转。
+  从独立事故副本读取证据，删除普通 SOL 归档、重启服务器后仍能查看。
+- 核对 11 月 4 日 AM625 三次 panic 后回滚的真实归档：最后一次异常 capture
+  dab591db-9258-4a34-8d2f-ff37d3ee3fcc，23921 字节，与原始实机工件完全一致；
+  SHA256 为 14793d4928b6953e995fd102ee54ff8bd970c205b1c0c62684258c75f8ccd026。
+  检出 kernel panic，恢复 capture 96c60157-9a6e-4080-830c-388fccb27832 的
+  U-Boot 标签为 RST。Chromium 验证显示、原文查看与 SOL 跳转，无 JavaScript 错误。
+- 实际 R5 生产代码的主机 ABI 测试覆盖四次连续启动后只保留第三/第四次的四阶段
+  记录，5 项通过。SDK 20 项、管理/构建 52 项通过；新增事故用例校正清单顺序后
+  单独复测通过。FIT 4 项、实际 ARM64 initramfs 加载及真实 OTA 包上传下载通过。
+- 发布 v0.0.1，内容 ID
+  dd8e22eefa192a906a71d64efef4aa1ba1745eb1e2286dee5e1bb3029d00add7，
+  审计编号 113，设备上报 success；启动 ID 318ff91d-2a7f-4628-b2b4-5a2f59364946。
+  零失败服务、六个管理服务、双 rootfs 槽及当前 kernel/rootfs 全量校验、持久日志、
+  启动归档确认和 UTC+8 校时通过。源码快照与提交门禁一致。
+
+证据：`output/ota-validation/0.0.1-last-failed-startup/`。本轮正常 OTA 验证并只读
+复核已有实机故障归档，未再次注入三次 panic，也未更新 SPL/U-Boot。DDR 不保留的
+复位、掉电和采集启动前的故障仍不保证保存，详见
+[双缓冲设计](../../edk/docs/device-manager/startup-buffers.md)。
+
 ## 完成状态
 
 | 阶段 | 固件 tag | 内容 ID 前缀 | 实机结果 |
@@ -428,6 +457,7 @@ OTA 成功记录、串口验收及提交记录。
 | master 与统一版本源 | v0.0.1 | c889c4c4 | success |
 | dmcli / dmserver 与 OTA 子命令 | v0.0.1 | 378dea5a | success |
 | 日志列表与统一中文导航 | v0.0.1 | 2f2f0883 | success |
+| 最后一次异常日志与复位证据 | v0.0.1 | dd8e22ee | success |
 
 每阶段均先构建、发布并完成实机健康确认，再提交与推送子仓库，最后更新
 workspace gitlink。最新使用方法见 [EDK README](../../edk/README.md)。
