@@ -2,10 +2,11 @@
 
 ## Project Structure & Module Organization
 
-SadBoard develops on the `SadBoard` branch of `linux-bsp/workspace`, using existing BSP submodules. AM6254 debugging configuration, a systemd preparation service, a capability check and the first manual crash scenario exist. Random scenario orchestration and general automatic grading are not implemented. Record image build and board validation status separately.
+SadBoard develops on the `SadBoard` branch of `linux-bsp/workspace`, using existing BSP submodules. AM6254 provides a systemd debug profile, SSH and manual crash, cgroup OOM, CPU hotspot and mutex-wait scenarios. Random scenario orchestration and general automatic grading are not implemented. Record image build and board validation status separately.
 
 - `README.md`: project scope, status, and documentation index.
 - `docs/am625-quickstart.md`: board startup and first experiment walkthrough.
+- `docs/cases/` and `docs/debug-tools.md`: detailed case mechanisms, pinned kernel source paths, investigation steps and tool parameters. Distinguish source-derived paths from captured stacks.
 - `docs/bootlin-linux-debugging-guide.md`: Chinese Bootlin study guide.
 - `docs/workspace-guide.md`: inherited workspace operations; check historical platform examples before use.
 - `buildroot/`, `linux/`, `uboot/`: build system and versioned source submodules.

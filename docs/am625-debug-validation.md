@@ -46,3 +46,35 @@
 工件：`output/validation/stage1-debug-elfcore/`；初版和对照实验保存在
 `output/validation/stage1-debug/`。匹配符号自动导出并校验；只更新 kernel/rootfs，
 未烧写工厂镜像或更新实机 SPL/U-Boot。案例手动运行，未在启动时注入故障。
+
+
+## 阶段 2：内存与性能（2026-11-09）
+
+- 最终固件 `v0.0.1 / 59d8d1a5db4746a5943a086fee524ffa4edb2ace612e7ff37105b19735c2d8ea`，发布 118，OTA success；
+  boot ID `81bc87c9-a77e-4e66-bd48-3e1279ec42b0`。SSH 指纹仍与阶段 1 相同。
+- 零失败服务，关键服务健康；双 rootfs 检查、实际 kernel/rootfs 完整 SHA256、
+  持久日志与跨启动记录、UTC+8 校时通过。
+- 独立 32 MiB cgroup 复现 OOM：退出 137，oom_kill>0，组结束后已删除。
+  故障峰值 33554432 字节，修复峰值 1310720 字节；参考版完成相同 64 次处理和 checksum=532480。
+- Valgrind 小输入显示 4194304 字节/4 块 definitely lost，修复后全部释放、零错误。
+- CPU 案例三次对照的 CPU 时间中位数：4.189 秒 → 0.009385 秒；
+  两版 checksum 均为 3074743472，查询数均为 500000，不能外推为所有工作负载的提升比例。
+- 锁案例墙钟中位数：2.004 秒 → 1.002 秒；两版均 completed=40、低 CPU 占比。
+  strace 捕获 FUTEX_WAIT 和 clock_nanosleep；GDB 同时观察到 worker 的睡眠与锁等待。
+- perf 获得 lookup_linear 调用链并在主机生成 cpu.svg；实际采样和 SVG 保存在工件目录。
+  参考版 CLI 重复验收后健康检查仍通过。
+- 主机 8 项案例回归、实际 FIT 完整性/恢复 4 项通过；镜像符号清单覆盖全部 8 个 ELF。
+
+本阶段发现并修正/记录：
+
+1. 实机 data 文件系统约 230 MiB，调试包与两份历史 OTA 缓存使启动时空间低于
+   32 MiB 阈值，日志退回 volatile。SadBoard 改为保留当前完成包，旧缓存由现有
+   fwctld 清理；重新发布后实测 persistent。没有更改分区或格式化。
+2. 此内核的组 OOM 对同一 PID 可使 oom_kill=2；验收改为正增量并结合日志，
+   不把计数写死为 1，不将 137 单独解释为 OOM。
+3. perf 默认内联展开尝试调用不存在的目标 addr2line，script 失败；本案例禁用
+   编译内联，report/script 使用 --no-inline 后正确提取调用链。此项也进入教学文档。
+
+发布 116、117 是上述问题的中间验证，未据此提交“阶段通过”。最终工件：
+`output/validation/stage2-memory-performance-final/`，包含 release-audit、board-validation、
+performance-validation、原始串口、Valgrind、strace、GDB 及火焰图。固件版本仍为 0.0.1。

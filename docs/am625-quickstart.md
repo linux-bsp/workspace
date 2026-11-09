@@ -152,3 +152,13 @@ sadboard verify crash
 验证相同输入。复位应用现场不需要重启；完成取证后手动删除自己创建的现场目录。
 
 每次更新保留匹配的符号与完整固件 ID。详细配置见 [环境指南](am625-bootlin-debug-environment.md)。
+
+## 继续学习内存与性能
+
+`sadboard list` 列出手动案例；`sadboard run oom|cpu|lock` 分别复现内存耗尽、CPU
+热点和持锁等待，`sadboard verify <案例>` 运行参考对照。实际命令中只填写一个案例名。
+完整问题说明、异常机制、内核源码路径及分步诊断见 [案例学习手册](cases/README.md)，
+参数含义见 [工具手册](debug-tools.md)。
+
+调试镜像的固件较大，OTA 缓存只保留当前完成包；data 空间不足时，应先归档现场，
+不要通过取消日志空间阈值或格式化存储来继续实验。
