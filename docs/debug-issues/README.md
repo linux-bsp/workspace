@@ -4,4 +4,5 @@
 
 ## 问题列表
 
+- [PIE 程序在线调试正常、离线 core 回溯异常](core-pie-relocation.md)
 - [i.MX6ULL ECSPI3 获取 TX DMA 通道失败](spi-imx-sdma.md)

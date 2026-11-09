@@ -8,11 +8,11 @@ SadBoard 是一个面向嵌入式 Linux 的故障定位与分析练习项目。�
 
 ## 当前状态
 
-项目处于规划阶段，当前仓库包含项目说明、学习资料，以及 `sadboard-external` 中的 AM6254 调试环境配置与检查脚本。已完成 AM6254 调试内核和根文件系统的主机构建，上板验证尚未进行；详情见环境指南。SadBoard 故障题库、自动验收和场景管理命令行尚未实现。下文的场景与运行流程属于规划。
+已完成 AM6254 systemd 调试基线和首个 GDB/core 案例的实机验证，包括 OTA、SSH、匹配符号、崩溃取证与参考修复。当前正在推进内存与性能案例；随机题库和通用自动评分尚未实现。具体进度见 [开发计划](docs/sadboard-development.md) 和 [实机验证记录](docs/am625-debug-validation.md)。
 
 ## Workspace 分支与 Buildroot 扩展层
 
-SadBoard 在 [linux-bsp/workspace](https://github.com/linux-bsp/workspace) 的 `SadBoard` 分支中开发，复用已有的 Buildroot、Linux、U-Boot 和 BSP 子模块。分支起点为已同步到 GitHub 的 workspace 提交 `359f39d`。原先独立的 BadBoard 仓库不再作为本工作区的开发入口。
+SadBoard 在 [linux-bsp/workspace](https://github.com/linux-bsp/workspace) 的 `SadBoard` 分支中开发，复用已有的 Buildroot、Linux、U-Boot 和 BSP 子模块。原先独立的 BadBoard 仓库不再作为本工作区的开发入口。
 
 - `bsp-base-external/`：板级支持、启动配置、镜像布局和基础软件包，external 名称保持 `LINUX_BSP`。
 - `sadboard-external/`：独立的实验层子模块，external 名称为 `SADBOARD`，后续添加故障程序、调试配置和实验 overlay。
@@ -34,9 +34,9 @@ BR2_EXTERNAL="../bsp-base-external ../sadboard-external" \
 
 不指定 `O=` 时，产物位于 `buildroot/output/images/`。Buildroot 会记住本输出目录使用的两个 external；后续 `make all` 无需再次指定。默认独立构建工具链，配置输入保存在 Git 中，输出目录由构建生成。
 
-在新克隆的工作区中，先运行 `git submodule update --init --recursive`。当前 `libbmc` 仍使用内网 remote，需要相应访问权限。`make list-defconfigs` 可以查看本实验入口。可选工具链、独立输出目录和详细构建步骤见 [环境指南](docs/am625-bootlin-debug-environment.md)。
+在新克隆的工作区中，先运行 `git submodule update --init --recursive`。`libbmc` 使用 `git@github.com:wanguo99/libbmc.git` 的 `master` 分支。`make list-defconfigs` 可以查看本实验入口。可选工具链、独立输出目录和详细构建步骤见 [环境指南](docs/am625-bootlin-debug-environment.md)。
 
-`sadboard-external` 包含 AM6254 配置生成脚本、Buildroot/内核配置片段和目标端环境检查脚本，跟踪远端 `main` 分支。workspace 固定所有子模块的具体提交；复现实验时使用固定提交。`git submodule update --remote` 会尝试更新到跟踪分支的新提交。
+`sadboard-external` 包含 AM6254 配置生成脚本、Buildroot/内核配置片段、手动实验程序和目标端环境检查脚本，跟踪远端 `main` 分支。workspace 固定所有子模块的具体提交；复现实验时使用固定提交。`git submodule update --remote` 会尝试更新到跟踪分支的新提交。
 
 开发时应先提交并推送子模块改动，再在 workspace 提交更新后的子模块指针。构建输出统一放在 `output/`，不提交生成文件。
 
@@ -112,7 +112,7 @@ SadBoard 希望提供一组可重复练习的现场，帮助学习者回答：
 
 ## 首批候选场景
 
-以下场景尚未实现，初期优先选择容易复现、证据清晰的案例。
+首个应用崩溃案例已完成实机闭环，其余按开发计划逐项推进。表中方向不代表全部已实现。
 
 | 可见现象 | 候选根因 | 预期练习 |
 | --- | --- | --- |

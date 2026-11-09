@@ -2,7 +2,7 @@
 
 ## Project Structure & Module Organization
 
-SadBoard develops on the `SadBoard` branch of `linux-bsp/workspace`, using existing BSP submodules. AM6254 debugging configuration and a capability-check script exist; scenario orchestration and automatic grading are not implemented. Record image build and board validation status separately.
+SadBoard develops on the `SadBoard` branch of `linux-bsp/workspace`, using existing BSP submodules. AM6254 debugging configuration, a systemd preparation service, a capability check and the first manual crash scenario exist. Random scenario orchestration and general automatic grading are not implemented. Record image build and board validation status separately.
 
 - `README.md`: project scope, status, and documentation index.
 - `docs/am625-quickstart.md`: board startup and first experiment walkthrough.
@@ -26,7 +26,7 @@ BR2_EXTERNAL="../bsp-base-external ../sadboard-external" \
   make sadboard_am625_debug_defconfig && make all
 ```
 
-Without `O=`, artifacts go to `buildroot/output/`; existing guides also use workspace `output/am625-debug/`. Keep output trees separate when changing toolchains. The Python helper remains optional for local toolchains and diagnostic variants. After changing baseline fragments, regenerate the checked-in defconfig with `--export-defconfig` in a fresh output directory and verify configuration equivalence. See `docs/am625-bootlin-debug-environment.md`. No SadBoard test runner exists; Bootlin commands are external lab instructions.
+Without `O=`, artifacts go to `buildroot/output/`; existing guides also use workspace `output/am625-debug/`. Keep output trees separate when changing toolchains. The Python helper remains optional for local toolchains and diagnostic variants. After changing baseline fragments, regenerate the checked-in defconfig with `--export-defconfig` in a fresh output directory and verify configuration equivalence. See `docs/am625-bootlin-debug-environment.md`. Run `python3 sadboard-external/tests/test-labs.py` for scenario regressions. `sadboard list`, `sadboard run crash` and `sadboard verify crash` are target commands; verification checks the reference repair, not an arbitrary learner patch. Bootlin commands remain external lab instructions.
 
 Use `git diff --check`, `git diff --cached --check`, and `git status --short`. Review untracked files separately.
 
@@ -45,3 +45,7 @@ Use focused `docs:`, `chore:`, `feat:`, or `fix:` commits. PRs should explain th
 ## Sources & Attribution
 
 Preserve Bootlin source links and CC BY-SA 3.0 attribution. Separate project proposals from official course content. SadBoard's code license remains undecided; existing submodule licenses still apply.
+
+## Experiment Release Workflow
+
+Keep firmware at v0.0.1 and distinguish builds with full content IDs. Preserve matched vmlinux, source, configuration and symbols under images/debug/. Debug programs retain symbols; generic target binaries are stripped to fit the unchanged A/B slots. No scenario starts at boot. Verify the image and publish kernel/rootfs only, wait for the AM625 to report OTA success and pass scenario validation, then commit and push the scenario submodule before the SadBoard workspace branch. Never flash the generated factory image over the current device or change its partition layout as part of a debugging exercise.

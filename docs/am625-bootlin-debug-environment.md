@@ -1,6 +1,8 @@
 # AM6254 Bootlin 调试实验环境
 
-使用当前主机已构建的镜像开始实验，请先阅读 [快速上手](am625-quickstart.md)。本文侧重环境配置、构建方式和验证记录。
+当前 systemd/OTA 调试环境请先阅读 [快速上手](am625-quickstart.md) 与 [实际验证记录](am625-debug-validation.md)。
+
+下文保留 2026-10-30 初版 NFS 环境的构建与课程实验记录；其中旧目录、工具链路径、SysV 启动脚本和禁用产品后处理的策略不代表当前标准 defconfig。当前标准配置生成 OTA 固件、rootfs.tar 以及 images/debug/；通用目标文件剥离符号，实验程序保留符号，主机保存匹配 vmlinux/sysroot。原始课程资料及署名继续适用。
 
 ## 目标与边界
 
