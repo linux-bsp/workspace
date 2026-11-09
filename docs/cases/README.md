@@ -11,6 +11,7 @@
 | [持锁等待](lock.md) | 线程栈、strace、调度 trace | 用户态互斥锁、futex、睡眠与唤醒 |
 
 [工具手册](../debug-tools.md) 解释通用参数、符号准备与常见误判；各案例给出具体分析流程。
+[场景管理](../scenario-lifecycle.md) 说明统一现场、参数、status/check/reset 和监督边界。
 网络和 kernel panic 案例尚在开发计划内，完成后补入本手册。
 
 ## 源码与证据约定

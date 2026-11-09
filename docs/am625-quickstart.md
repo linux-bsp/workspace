@@ -160,5 +160,9 @@ sadboard verify crash
 完整问题说明、异常机制、内核源码路径及分步诊断见 [案例学习手册](cases/README.md)，
 参数含义见 [工具手册](debug-tools.md)。
 
+每次运行会记录完整固件 ID、boot ID、参数、输出和退出状态。
+用 `sadboard status <现场目录>` 查看，`sadboard check <现场目录>` 检查证据，
+`sadboard reset <现场目录>` 停止本次实验并保留文件，详见 [场景管理](scenario-lifecycle.md)。
+
 调试镜像的固件较大，OTA 缓存只保留当前完成包；data 空间不足时，应先归档现场，
 不要通过取消日志空间阈值或格式化存储来继续实验。

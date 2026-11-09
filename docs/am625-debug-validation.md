@@ -78,3 +78,21 @@
 发布 116、117 是上述问题的中间验证，未据此提交“阶段通过”。最终工件：
 `output/validation/stage2-memory-performance-final/`，包含 release-audit、board-validation、
 performance-validation、原始串口、Valgrind、strace、GDB 及火焰图。固件版本仍为 0.0.1。
+
+
+## 阶段 3：统一现场与生命周期（2026-11-09）
+
+- 固件 `v0.0.1 / 9baf48a7511a5ec72bb08663d07210ee41e0dfa499dd4c8a347428c19e957959`，发布 120，OTA success；
+  boot ID `7c4347bf-4e83-472f-9d0d-6e7cbc56b50c`，SSH、持久日志、双槽及完整载荷校验、校时和服务健康通过。
+- 四类案例的 run/verify 均实测；默认和自定义参数、完整固件 ID、boot ID、UTC+8
+  时间、命令和结果落盘正常。crash 返回 139 且 core 可见，OOM 返回 137 且 events 有证据。
+- CPU 零记录输入返回 64，check 拒绝；缺少 result 的现场拒绝通过；外部目录 reset 被拒绝。
+- 正在运行的 lock 和 OOM 均能 reset，取消标记为 1，场景返回 130，check 拒绝通过，
+  监督原始返回码另存。结束后没有遗留 OOM 组，零失败服务，健康检查通过。
+- 10 项原生回归包含“负载直接返回 0 但没有业务输出”反例，参考检查正确拒绝。
+- 预检发现 systemd-run 对信号退出可返回 1，正常停止 unit 可返回 0；通过负载层保留
+  信号对应退出值、取消状态独立记录并统一返回 130，避免将监督命令状态误作业务成功。
+- 发布 119 完成初轮验证，取消状态的返回码完善后重新发布 120，再完成全套实机验收。
+
+工件：`output/validation/stage3-lifecycle-final/`，包含 source snapshot、发布审计、
+board-validation、lifecycle-validation 和逐项日志。初轮保留在 `stage3-lifecycle/`。
