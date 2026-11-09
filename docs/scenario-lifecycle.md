@@ -12,8 +12,10 @@ sadboard run crash
 sadboard run cpu 4096 500000 42
 sadboard run lock 20 50000
 sadboard run oom
+sadboard run fd
 sadboard verify crash
 sadboard verify oom
+sadboard verify fd 128 20
 sadboard verify cpu 4096 500000 42
 sadboard verify lock 20 50000
 ```
@@ -28,6 +30,7 @@ crash 可选非负记录编号，默认 42；OOM 使用固定预算，不接受�
 | crash | KEY 为 0..2147483647，1 是存在的记录，其他编号触发故障版缺失路径 |
 | cpu | ITEMS=1..16384、QUERIES=1..2000000、SEED=0..4294967295，且 ITEMS×QUERIES≤4000000000 |
 | lock | ITERATIONS=1..200、DELAY_US=1..100000，且两线程累计等待预算≤10000000 微秒 |
+| fd | REQUESTS=1..4096、DELAY_MS=0..50，乘积≤10000 ms；进程 NOFILE 固定为 64 |
 | oom | 统一入口固定 64 次、每次 1 MiB、间隔 50 ms，32 MiB 组限制 |
 
 入口要求本次启动已通过健康确认、没有待启动固件、data 健康且至少有 64 MiB 可用空间。
@@ -72,6 +75,7 @@ sadboard reset /data/sadboard/RUN
 | --- | --- |
 | crash | 缺失记录退出 139，core 是本架构 ELF64 ET_CORE，段边界完整且有 CORE/NT_PRSTATUS；正常输入及参考修复输出符合契约 |
 | oom | 退出 137，实际限制为 32 MiB、禁用 swap、组终止，oom 和 oom_kill 均为正；参考版完成 64 次、checksum=532480、没有被 OOM 杀死 |
+| fd | 实际限制、初始占用、请求/完成数、峰值/最终占用与退出相符；小输入仍检查泄漏，参考版回到初始占用 |
 | cpu | 两版参数与记录一致，根据查询序列独立重算 checksum，检查非零墙钟时间 |
 | lock | 每线程次数一致、完成总量为两倍次数，墙钟时间符合该版最低等待预算 |
 | network | pcap 结构及实验端点的 ICMP/TCP，延迟与 qdisc 一致；verify 还核对基线、100% 丢包和恢复 |

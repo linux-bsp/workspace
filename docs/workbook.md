@@ -44,7 +44,34 @@
 符号尝试解释旧 core 时，应如何识别不可信结论？不要为“看起来有函数名”就接受它。
 参考：[应用崩溃](cases/crash.md)、[内核阅读笔记](kernel-reading-notes.md#缺页异常不等于非法访问)。
 
-## 2. 服务运行一段时间后被杀死
+## 2. 运行一段时间后无法再打开资源
+
+**入口**：`sadboard run fd`，对照 `sadboard run fd 4 0`，再运行 `sadboard verify fd`。
+
+**任务**：区分 FD 耗尽、全局文件对象不足、内存不足和路径错误。解释为什么同一个
+/dev/null 路径会占用多个槽，为什么小输入没有报错却仍存在泄漏。
+
+**必须提交**：实际 NOFILE、baseline、完成/请求数、两次 FD 快照、openat/close
+配对、EMFILE 返回和参考修复的完整 128 次处理。说明全局限制和其他服务未被更改。
+
+<details><summary>L1 提示：先确认谁返回了错误</summary>
+
+本例退出 24 是程序主动返回 EMFILE，不是信号。看 strace 的系统调用返回值；
+limits 是该进程的约束，父 shell 的 ulimit 不会因子进程降限制而自动改变。
+
+</details>
+<details><summary>L2 提示：把对象生命期画出来</summary>
+
+分别画局部整数 fd、fdtable 槽、struct file 和底层路径。C 变量被覆盖不等于内核
+引用被关闭；CLOEXEC 也不等于请求结束自动 close。查错误和提前返回路径的所有权。
+
+</details>
+
+**L3 对照**：增加一个继承 FD，解释为什么不能把失败请求数写死为 61；解释 dup、
+fork、exec 对引用的不同作用，以及 TIME_WAIT 为什么不等于进程仍持有 socket FD。
+参考：[描述符章节](cases/fd-exhaustion.md)。
+
+## 3. 服务运行一段时间后被杀死
 
 **现场入口**：`sadboard run oom`，读取现场 `memory-bug.*`；然后 `sadboard verify oom`。
 
@@ -71,7 +98,7 @@
 不立即回落不能单独证明泄漏？为什么 Valgrind 不应直接放进这个 32 MiB 组？
 参考：[OOM 案例](cases/oom.md)。
 
-## 3. 结果正确，但完成很慢
+## 4. 结果正确，但完成很慢
 
 **现场入口**：`sadboard verify cpu 4096 500000 42`；保留两份 JSON。
 
@@ -99,7 +126,7 @@ CPU 样本宽栈表示累计采样权重；横轴不是执行顺序。
 新 checker 会按记录输入重算业务结果；它仍不代替算法适用条件的分析。
 参考：[CPU 案例](cases/cpu.md)。
 
-## 4. CPU 很闲，双线程却没有加速
+## 5. CPU 很闲，双线程却没有加速
 
 **现场入口**：`sadboard verify lock 20 50000`，另用 strace/GDB 获取独立观测。
 
@@ -126,7 +153,7 @@ switch-in 是两个时刻，两者差值与持锁时间不是同一概念。
 不再进行等待，还能接受它更快吗？checker 会拒绝少工作和跳过最低等待预算的结果。
 参考：[锁等待案例](cases/lock.md)。
 
-## 5. 接口正常但请求延迟高
+## 6. 接口正常但请求延迟高
 
 **现场入口**：`sadboard run network` 或 `sadboard verify network`。
 
@@ -154,7 +181,7 @@ pcap 文件头非空也可能没有任何业务包，checker 会检查包记录�
 各需要哪些额外证据；指出本机 veth 的结果不能证明物理 PHY 极限吞吐。
 参考：[网络案例](cases/network.md)。
 
-## 6. 启动异常，重启后如何证明发生过什么
+## 7. 启动异常，重启后如何证明发生过什么
 
 **入口和窗口**：严格按 [panic 案例](cases/kernel-panic.md) 操作，先确认固件正常，
 额外重启后在未封存窗口手动触发；不放进自动批量练习。

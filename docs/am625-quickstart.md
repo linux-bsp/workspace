@@ -155,6 +155,9 @@ sadboard verify crash
 
 ## 继续学习内存与性能
 
+描述符案例可先运行 `sadboard run fd`，再用 `sadboard verify fd` 对照；详见
+[FD 泄漏与耗尽](cases/fd-exhaustion.md)，练习 EMFILE、进程限制和 open/close 生命周期。
+
 `sadboard list` 列出手动案例；`sadboard run oom|cpu|lock` 分别复现内存耗尽、CPU
 热点和持锁等待，`sadboard verify <案例>` 运行参考对照。实际命令中只填写一个案例名。
 完整问题说明、异常机制、内核源码路径及分步诊断见 [案例学习手册](cases/README.md)，

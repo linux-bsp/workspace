@@ -184,3 +184,39 @@ UTC+8 校时及关键服务检查通过。
 工件位于 `output/validation/stage5-evidence/`，包含发布审计、原始串口、板端验收、
 生命周期、网络与负例验证 JSON、源码快照及提交门禁。教材新增基础篇、学习路线、
 L1～L3 任务书、内核关键分支笔记及实验报告模板；扩展练习与实测结果分别标注。
+
+## 描述符案例与教材深化（2026-11-09）
+
+固件 `v0.0.1`，完整内容 ID：
+`668ad82f52bae589bcf1a74c08734e7b29c309ec1899d7e3169382a323dcecdf`。
+发布 125，设备已上报 success，Linux boot ID 为
+`af921040-2640-472b-a533-af8091ca092d`。关键服务、实际 kernel/rootfs 内容、两份
+rootfs 校验、持久日志与 UTC+8 时间检查通过。主机 18 项案例回归、导出符号验证及
+4 项 FIT 完整性检查通过。
+
+新增 `sadboard run/verify fd [REQUESTS DELAY_MS]`，默认 128/20，只降低负载自己的
+NOFILE 为 64，不修改全局限制。实测 baseline=3，故障版完成 61 次、最终占用 64、
+返回 EMFILE=24；参考版完成 128 次，峰值 4、最终占用 3。小输入 4/0 时故障版
+退出 0 但最终占用 7，参考版回到初始值。两次在线 /dev/null 引用快照为 3→24，
+用于证明趋势，不将其直接等同新增泄漏量。
+
+真实 ARM64 strace：故障版成功 open 61 次、业务开始后显式 close 为零，随后
+openat 返回 EMFILE；参考版 open/close 均为 128 次且无 EMFILE。完成量损坏、
+超预算和继承 NOFILE 不足被拒绝；取消记录为 130 且不通过 check；父 shell 上限、
+全局 file-max 和管理 eth0 保持不变，实验后健康检查正常。
+
+新固件上重复原有 crash/OOM/CPU/lock 的故障与参考版、取消、元数据和证据边界回归。
+另对新 ARM64 core 用配套 ELF/sysroot 实际运行 GDB，得到 record=NULL、key=42，
+`ldr w0,[x0,#4]`、x0=0、si_addr=0x4，栈和源行正确，已将解读加入教材。
+CPU 单次默认对照两版 checksum=3074743472，CPU 时间约 4.193 秒与 0.00887 秒；
+锁案例两版完成 40 次，墙钟约 2.004 秒与 1.002 秒。单次数据仅用于解释，不冒充
+多次测量的普适性能结论。
+
+网络基线/延迟/恢复 RTT 为 0.283/100.337/0.249 ms，两版均传输 1048576 字节，
+pcap 2135240 字节、430 包，包含 ICMP/TCP。取消与 namespace 清理、管理网口不变、
+晚期 panic 拒绝检查通过。本轮未重新注入 panic，沿用先前独立的暖重启与 SOL 证据。
+
+工件位于 `output/validation/stage6-descriptors/`：source snapshot、release audit、
+原始串口、board/lifecycle/network/fd/GDB 验证 JSON、strace 与 core 原件。
+新增 FD 教材章节，并扩充六个已有案例的先修概念、计算模型、逐步取证、返回值判读、
+反例和实测样例；学习路线与练习册同步整理为七个章节。

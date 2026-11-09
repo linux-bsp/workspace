@@ -12,6 +12,7 @@
 | 案例 | 重点能力 | 原理与源码 |
 | --- | --- | --- |
 | [应用崩溃](crash.md) | GDB、core、寄存器、反汇编 | ARM64 缺页异常、SIGSEGV、ELF core |
+| [描述符泄漏与耗尽](fd-exhaustion.md) | strace、/proc/PID/fd、资源上限 | FD 表、打开文件对象、EMFILE、close/fput |
 | [内存泄漏与 cgroup OOM](oom.md) | 内存趋势、cgroup、Valgrind | 按需分配、memcg 计费、回收与杀进程 |
 | [CPU 查找热点](cpu.md) | perf stat/record、火焰图 | 算法复杂度、PMU、中断采样与调用链 |
 | [持锁等待](lock.md) | 线程栈、strace、调度 trace | 用户态互斥锁、futex、睡眠与唤醒 |
@@ -20,7 +21,7 @@
 
 [工具手册](../debug-tools.md) 解释通用参数、符号准备与常见误判；各案例给出具体分析流程。
 [场景管理](../scenario-lifecycle.md) 说明统一现场、参数、status/check/reset 和监督边界。
-上述六个案例均已完成 AM625 实机验收；具体固件 ID、采样数据和启动日志结果见实机记录。
+上述七个案例均已完成 AM625 实机验收；具体固件 ID、采样数据和启动日志结果见实机记录。
 
 ## 源码与证据约定
 

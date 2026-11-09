@@ -2,7 +2,7 @@
 
 ## Project Structure & Module Organization
 
-SadBoard develops on the `SadBoard` branch of `linux-bsp/workspace`, using existing BSP submodules. AM6254 provides a systemd debug profile, SSH and six manual scenarios: crash, cgroup OOM, CPU hotspot, mutex wait, isolated networking and startup panic recovery. Random scenario orchestration and general automatic grading are not implemented. Record image build and board validation status separately.
+SadBoard develops on the `SadBoard` branch of `linux-bsp/workspace`, using existing BSP submodules. AM6254 provides a systemd debug profile, SSH and seven manual scenarios: crash, FD exhaustion, cgroup OOM, CPU hotspot, mutex wait, isolated networking and startup panic recovery. Random scenario orchestration and general automatic grading are not implemented. Record image build and board validation status separately.
 
 - `README.md`: project scope, status, and documentation index.
 - `docs/am625-quickstart.md`: board startup and first experiment walkthrough.

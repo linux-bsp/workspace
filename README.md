@@ -8,7 +8,7 @@ SadBoard 是一个面向嵌入式 Linux 的故障定位与分析练习项目。�
 
 ## 当前状态
 
-已完成 AM6254 systemd 调试基线和六个手动案例的实机验证：GDB/core、受限 OOM、CPU 热点、锁等待、隔离网络、启动 panic 与恢复取证。支持 SSH、匹配符号、完整现场记录及参考修复。随机题库和通用自动评分尚未实现。学习入口为 [案例学习手册](docs/cases/README.md) 和 [调试工具参数手册](docs/debug-tools.md)，入口与结果管理见 [场景生命周期](docs/scenario-lifecycle.md)。具体进度见 [开发计划](docs/sadboard-development.md) 和 [实机验证记录](docs/am625-debug-validation.md)。
+已完成 AM6254 systemd 调试基线和七个手动案例的实机验证：GDB/core、描述符泄漏、受限 OOM、CPU 热点、锁等待、隔离网络、启动 panic 与恢复取证。支持 SSH、匹配符号、完整现场记录及参考修复。随机题库和通用自动评分尚未实现。学习入口为 [案例学习手册](docs/cases/README.md) 和 [调试工具参数手册](docs/debug-tools.md)，入口与结果管理见 [场景生命周期](docs/scenario-lifecycle.md)。具体进度见 [开发计划](docs/sadboard-development.md) 和 [实机验证记录](docs/am625-debug-validation.md)。
 
 ## Workspace 分支与 Buildroot 扩展层
 

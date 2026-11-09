@@ -21,6 +21,22 @@
 记录，内核无法为它建立合法 VMA。用 GDB 的地址、指令和变量证明是哪一类。
 SIGSEGV 还需区分 MAPERR/ACCERR，不能把所有访存异常都归为 NULL。
 
+## FD 表、打开对象与资源所有权
+
+从 [open.c](../linux/linux-7.0/fs/open.c) 的 do_sys_openat2 进入
+[file.h](../linux/linux-7.0/include/linux/file.h) 的 FD_ADD。当前内核使用组合清理宏：
+先取 FD 槽，成功后才求值文件打开表达式，再发布引用；打开失败则由清理规则归还资源。
+宏名不一定成为栈帧，不能照搬旧内核中显式展开的源码来伪造当前调用栈。
+
+读 [file.c](../linux/linux-7.0/fs/file.c) 的 alloc_fd：候选编号达到 end 时返回 EMFILE，
+end 来自该进程的 RLIMIT_NOFILE。再读 close_fd 如何在锁保护下摘除表项，转入
+filp_close 与文件引用释放。最后读 [file_table.c](../linux/linux-7.0/fs/file_table.c)
+的 alloc_empty_file、fput、__fput，区分系统对象预算、FD 槽位、最后引用和延后清理。
+
+本例只降低子进程的预算；进程退出回收不等于业务正确释放。将局部变量覆盖与 fdtable
+引用生命周期分别画出来，就能解释为什么相同路径重复 open 也会耗尽描述符。
+细节及真实 syscall 证据见 [FD 章节](cases/fd-exhaustion.md)。
+
 ## memcg 是先回收重试，再决定失败
 
 读 [memcontrol.c](../linux/linux-7.0/mm/memcontrol.c) 的 `try_charge_memcg`：
