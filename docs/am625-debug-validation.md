@@ -398,6 +398,14 @@ NFS 参考构建为 `a3a9a46b13d41e1975a9c29cfe8a5b4896335d8273a10ebdda8e0a9c384
 
 工件 `output/validation/stage12-final/` 保存 source snapshot、发布/验收 JSON、匹配符号、原始串口、pstore、SOL 四阶段日志及 RAM 正反工件。先前候选保留在 `stage12-kernel-board/` 与 `stage12-kernel-fixed/`：先后修正 CMA 传参、过早判 SSH 为健康、立即 Oops 的 live 日志缺尾判断；一次网络启动 ARP 超时由 UART 重试恢复，随后将破坏性恢复测试改为本地 SD，并为主机控制器增加最多两次正常网络启动重试。当前 USB UART 不透传 BREAK，RAM 参考 init 使用独立超时恢复子进程。
 
+## 阶段 13：抓包就绪检查消除无效告警（2026-11-10）
+
+最新固件 **v0.0.1 / 2e57ef243300cdbe07216336d4487054b7ed486b99ba073a9b48b1df63f70ff7**，已 OTA 并回报 success。异步启动 tcpdump 前先创建错误日志文件，避免父进程就绪检查抢在子进程重定向前读取不存在的文件。
+
+SD 与配套 TFTP/NFS 模式分别实测 PMTU、RPS、网络优先级，每例各 3 次，共 18 次。结果契约、非空 pcap、管理 IP/路由与 namespace 清理通过；未再出现该 grep 告警，设备零失败服务，WDT active/60。内核、故障模块及 19 个实验 ELF 的 SHA256 与阶段 12 完全一致，完整 59 例基线沿用阶段 12，针对改动复验对应采集路径。
+
+证据位于 `output/validation/stage13-capture-readiness/`，包括实际 ELF SHA256 对照、发布/验收与匹配调试产物；旧 NFS 现场继续完整保留。设备最终保持网络调试启动 1/1。
+
 <a id="bootlin-build-history"></a>
 
 ## 早期 Bootlin/NFS 构建验证档案（2026-10-30～31）
