@@ -110,6 +110,9 @@ def validate(notes):
                 errors.append(f"{name}: missing case property")
             else:
                 cases.append(match[1])
+                folder = Path(name).parent.name
+                if not re.fullmatch(re.escape(match[1]) + r"-\S.*", folder):
+                    errors.append(f"{name}: case directory must use <case-id>-<specific-problem>")
     expected = {
         *[f"B-{family}{n:02d}" for family in ("CR", "FD", "MM", "CPU", "SYNC", "NET", "BOOT") for n in range(1, 6)],
         *[f"A-{family}{n:02d}" for family in ("P", "M", "N") for n in range(1, 9)],
