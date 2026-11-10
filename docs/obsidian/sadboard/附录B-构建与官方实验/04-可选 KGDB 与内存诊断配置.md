@@ -14,16 +14,22 @@ chapter: "附录B-构建与官方实验"
 
 为诊断变体使用新的输出目录，不覆盖已验证的常规镜像：
 
+主机端：为 KGDB 使用新的输出目录加载配置，保留现有正常调试基线。
+
 ```sh
 make -C buildroot O="$PWD/output/am625-kgdb" \
   BR2_EXTERNAL="$PWD/bsp-base-external $PWD/sadboard-external" sadboard_am625_debug_defconfig
 ```
+
+主机端：在该配置中选择基础调试与 KGDB 片段，修改后再由原生 Kconfig 归一化。
 
 ```sh
 buildroot/utils/config --file output/am625-kgdb/.config \
   --set-str BR2_LINUX_KERNEL_CONFIG_FRAGMENT_FILES \
   '$(BR2_EXTERNAL_SADBOARD_PATH)/kernel/debug.config $(BR2_EXTERNAL_SADBOARD_PATH)/kernel/kgdb.config'
 ```
+
+主机端：更新依赖配置并编译 KGDB 镜像，成功后再进行对应上板验证。
 
 ```sh
 make -C output/am625-kgdb olddefconfig all

@@ -31,6 +31,8 @@ SadBoard 的持久配置是
 `BR2_TARGET_UBOOT_CONFIG_FRAGMENT_FILES` 合入 BSP U-Boot defconfig。普通 BSP 的
 `am62x_alientek_a53_defconfig` 两项均关闭，不合入该调试片段。修改片段后执行：
 
+主机端：重新配置并构建 U-Boot 及镜像，核对编译结果；此命令不会烧写板上引导程序。
+
 ```sh
 make -C output/am625-debug-systemd uboot-reconfigure all
 ```
@@ -44,9 +46,13 @@ make -C output/am625-debug-systemd uboot-reconfigure all
 本开发主机 IP 为 `192.168.10.246`，板卡 IP 为 `192.168.10.211`。先安装 NFS 服务；
 TFTP 服务根目录必须与实际 tftpd 配置一致，本机已经是 `/srv/tftp/am625`：
 
+主机端：安装 NFS 服务软件，确认安装完成后再部署根文件系统。
+
 ```sh
 sudo apt install nfs-kernel-server
 ```
+
+主机端：校验 manifest 并部署 TFTP/NFS 产物；目标 NFS 目录须为空，部署失败时先修正原因。
 
 ```sh
 sudo sadboard-external/scripts/deploy-netboot.sh \
@@ -56,6 +62,8 @@ sudo sadboard-external/scripts/deploy-netboot.sh \
 部署脚本校验 manifest 后，把 `rootfs.tar` 解压到 `/srv/nfs/sadboard-am625`，保留
 root 属主/权限和符号链接；复制 Image/DTB 到 TFTP 根目录；在
 `/etc/exports.d/sadboard.exports` 仅向指定板卡开放该根目录：
+
+主机配置示例：此 exports 条目只把 NFS 根目录开放给指定板卡 IP，路径与部署参数保持一致。
 
 ```text
 /srv/nfs/sadboard-am625 192.168.10.211(rw,sync,no_root_squash,no_subtree_check)
@@ -74,53 +82,34 @@ Buildroot 的 `target/`，其中的属主和设备文件尚未经过 fakeroot �
 编译选项分别映射到 `tftp_kernel=0/1`、`nfs_root=0/1`。串口中断自动启动后可直接调整，
 例如：
 
+U-Boot：先查看保存的启动开关、地址和 NFS 路径，记录切换前的配置。
+
 ```sh
 printenv fw_boot_profile tftp_kernel nfs_root ipaddr serverip nfsroot
 ```
 
+U-Boot：批量设置网络地址、TFTP 文件、NFS 路径和两个启动开关；这些修改先保存在内存中。
+
 ```sh
 setenv ipaddr 192.168.10.211
-```
-
-```sh
 setenv serverip 192.168.10.246
-```
-
-```sh
 setenv gatewayip 192.168.10.1
-```
-
-```sh
 setenv netmask 255.255.255.0
-```
-
-```sh
 setenv tftp_kernel_file Image
-```
-
-```sh
 setenv tftp_fdt_file k3-am625-alientek.dtb
-```
-
-```sh
 setenv nfsroot /srv/nfs/sadboard-am625
-```
-
-```sh
 setenv nfsopts vers=3,tcp
-```
-
-```sh
 setenv tftp_kernel 1
-```
-
-```sh
 setenv nfs_root 1
 ```
+
+U-Boot：核对上方配置后写入持久环境，确认保存成功再启动；仅临时测试时跳过本步。
 
 ```sh
 saveenv
 ```
+
+U-Boot：执行当前启动方案，分别观察 TFTP 传输、内核启动和根文件系统挂载结果。
 
 ```sh
 run fw_boot
@@ -129,17 +118,20 @@ run fw_boot
 `nfs_root` 是开关，`nfsroot` 是主机导出路径。只改这两个开关即可选择表中的四种组合。
 临时切换可以省略 `saveenv`。恢复 SD 完整校验启动：
 
-```sh
-setenv tftp_kernel 0
-```
+U-Boot：同时关闭 TFTP 内核与 NFS 根开关，选择完整的本地 SD 校验启动。
 
 ```sh
+setenv tftp_kernel 0
 setenv nfs_root 0
 ```
+
+U-Boot：保存关闭网络启动后的配置，确认写入成功；仅本次使用 SD 时可跳过保存。
 
 ```sh
 saveenv
 ```
+
+U-Boot：按本地 SD 方案启动，核对 FIT/rootfs 校验及实际使用的槽位。
 
 ```sh
 run fw_boot
@@ -164,25 +156,37 @@ SD `/data` 仍用于设备日志、SSH 主机密钥和启动确认。NFS 根下�
 `fwctl status` 查询的仍是 SD 元数据，不代表正在运行的网络镜像；`fwctl ota-status`
 要求生产 `fw.deployment`，网络启动下可能报无法识别，不能拿它判断网络镜像就绪状态。
 
+设备端：查看实际内核命令行，确认 root、nfsroot 与 sadboard.netboot 标记符合本次启动方案。
+
 ```sh
 cat /proc/cmdline
 ```
+
+设备端：查看已挂载文件系统，核对根目录来自 NFS 还是本地设备。
 
 ```sh
 cat /proc/mounts
 ```
 
+设备端：检查启动就绪标记；网络调试应读到 netboot，本地模式使用 deployment 标记。
+
 ```sh
 cat /run/fwctl-boot-confirmed
 ```
+
+设备端：读取真实启动模式和构建记录，区分网络参考构建与 SD 元数据。
 
 ```sh
 /usr/libexec/sadboard/boot-context
 ```
 
+设备端：检查 systemd 失败服务，确认没有失败项后再运行手动案例。
+
 ```sh
 systemctl --failed --no-pager
 ```
+
+设备端：运行“缺失记录未判空导致空指针崩溃”故障现场，记录输出中的实际结果目录与异常证据。
 
 ```sh
 sadboard run crash

@@ -16,17 +16,25 @@ NFS 供独立调试环境使用，下面是部署模板，并非已在当前 sys
 要先确认服务器 NFS 服务、板卡地址、实际 U-Boot 能力和可恢复管理链路。使用空的专用
 目录解包，不覆盖服务器其他根目录：
 
+主机端：创建计划使用的 NFS 根目录，先确认不是设备正在使用的导出位置。
+
 ```sh
 sudo mkdir -p /srv/nfs/sadboard-am625
 ```
+
+主机端：保留数字属主和权限解压最终 rootfs.tar，完成后核对目录与符号链接。
 
 ```sh
 sudo tar --numeric-owner -xpf output/am625-debug-systemd/images/rootfs.tar -C /srv/nfs/sadboard-am625
 ```
 
+主机端：设置本组临时 NFS 导出的目标板卡 IP，按实际地址修改。
+
 ```sh
 BOARD_IP=192.168.10.211
 ```
+
+主机端：只向该板卡开放本组 NFS 目录，确认 exportfs 成功后再测试网络启动。
 
 ```sh
 sudo exportfs -o rw,sync,no_subtree_check,no_root_squash "$BOARD_IP:/srv/nfs/sadboard-am625"
@@ -34,6 +42,8 @@ sudo exportfs -o rw,sync,no_subtree_check,no_root_squash "$BOARD_IP:/srv/nfs/sad
 
 临时导出不代表已配置永久服务。按实际设备替换 BOARD_IP 与服务器地址，保留板上
 正确的串口、加载地址和设备树设置。根文件系统启动参数模板为：
+
+启动参数模板：替换板卡 IP、服务器 IP、网关、掩码和导出路径，用于现有 bootargs 配置。
 
 ```text
 root=/dev/nfs rw ip=<板IP>::<网关>:<掩码>:sadboard:eth0:off nfsroot=<主机IP>:<导出目录>,vers=3,tcp

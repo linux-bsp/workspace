@@ -13,6 +13,8 @@ B-BOOT02/03 在真实 AM625 执行。主机的 `scripts/sadboard-board.py` 仅�
 
 先将本次正常固件经 SD A/B OTA 升级并确认，再部署配套 TFTP/NFS，保留 `tftp_kernel=1`、`nfs_root=1`。串口工具需要独占串口，关闭其他串口终端/采集程序；日志由工具自己保存。示例在 workspace 根执行，`--output` 必须是新目录：
 
+主机端：在真实 AM625 上运行 RAM 缺库故障、超时保护与参考启动对照；先替换验收路径并确认串口可用。
+
 ```sh
 python3 sadboard-external/scripts/sadboard-board.py boot-initlib \
   --images output/am625-debug-systemd/images --serial /dev/ttyACM2 \

@@ -25,14 +25,20 @@ chapter: "附录B-构建与官方实验"
 加载标准 defconfig 后使用原生菜单修改；保存共享配置时使用默认内部工具链配置，避免把本机 SDK
 绝对路径、个人下载目录或临时诊断选项写入仓库：
 
+主机端：用 Buildroot 原生菜单调整独立配置，保存后再导出共享 defconfig。
+
 ```sh
 make -C output/am625-native-debug menuconfig
 ```
+
+主机端：导出当前最小 defconfig，确认配置来源不包含不该共享的本机路径。
 
 ```sh
 make -C output/am625-native-debug savedefconfig \
   DEFCONFIG="$PWD/sadboard-external/configs/sadboard_am625_debug_defconfig"
 ```
+
+主机端：审阅刚导出的 defconfig 差异，确认只有计划内的配置修改。
 
 ```sh
 git -C sadboard-external diff -- configs/sadboard_am625_debug_defconfig

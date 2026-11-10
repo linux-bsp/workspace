@@ -14,17 +14,25 @@ chapter: "00-实验准备与通用方法"
 
 复制入口打印的实际目录替换下面的 RUN：
 
+设备端：将本次 NFS/SD 模式的实际结果根目录保存为当前终端变量，供后续命令复用。
+
 ```sh
 SADBOARD_RESULTS=$(sadboard results)
 ```
+
+设备端：替换实际现场目录，查看该次任务的运行状态和记录。
 
 ```sh
 sadboard status ${SADBOARD_RESULTS}/RUN
 ```
 
+设备端：把路径占位符替换为本次实际现场目录，复核该次运行的证据完整性与验收约束。
+
 ```sh
 sadboard check ${SADBOARD_RESULTS}/RUN
 ```
+
+设备端：只复位自己这次现场及其受管资源，完成后再检查是否清理干净。
 
 ```sh
 sadboard reset ${SADBOARD_RESULTS}/RUN
