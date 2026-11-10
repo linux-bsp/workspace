@@ -1,5 +1,3 @@
-# logctl
-
 [[首页]] · [[工具索引]] · [[案例索引]]
 
 ## 解决的问题
@@ -55,8 +53,8 @@ logctl verify-boot
 
 | 案例 | 本工具的观测目标 |
 | --- | --- |
-| [[07-内核启动与恢复/B-BOOT01-内核panic触发后的启动日志取证与恢复/案例详解#定位方法\|B-BOOT01：内核panic启动日志与恢复]] | 关联失败与恢复启动的日志、原因及上报确认 |
-| [[07-内核启动与恢复/B-BOOT02-initramfs动态加载器缺库导致PID1退出/案例详解#定位方法\|B-BOOT02：initramfs 动态加载器缺库导致 PID 1 退出]] | 关联失败与恢复启动的日志、原因及上报确认 |
-| [[07-内核启动与恢复/B-BOOT03-根设备或文件系统参数错误导致VFS启动失败/案例详解#定位方法\|B-BOOT03：根设备或文件系统参数错误导致 VFS 启动失败]] | 关联失败与恢复启动的日志、原因及上报确认 |
-| [[07-内核启动与恢复/B-BOOT04-内核Oops与panic策略的区别/案例详解#定位方法\|B-BOOT04：内核 Oops 与 panic 策略的区别]] | 关联失败与恢复启动的日志、原因及上报确认 |
-| [[07-内核启动与恢复/B-BOOT05-soft-lockup、RCU-stall与硬件watchdog复位归因/案例详解#定位方法\|B-BOOT05：soft lockup、RCU stall 与硬件 watchdog 复位归因]] | 关联失败与恢复启动的日志、原因及上报确认 |
+| [[07-内核启动与恢复/B-BOOT01-内核panic触发后的启动日志取证与恢复/B-BOOT01：内核panic启动日志与恢复#定位方法\|B-BOOT01：内核panic启动日志与恢复]] | 关联失败与恢复启动的日志、原因及上报确认 |
+| [[07-内核启动与恢复/B-BOOT02-initramfs动态加载器缺库导致PID1退出/B-BOOT02：initramfs 动态加载器缺库导致 PID 1 退出#定位方法\|B-BOOT02：initramfs 动态加载器缺库导致 PID 1 退出]] | 关联失败与恢复启动的日志、原因及上报确认 |
+| [[07-内核启动与恢复/B-BOOT03-根设备或文件系统参数错误导致VFS启动失败/B-BOOT03：根设备或文件系统参数错误导致 VFS 启动失败#定位方法\|B-BOOT03：根设备或文件系统参数错误导致 VFS 启动失败]] | 关联失败与恢复启动的日志、原因及上报确认 |
+| [[07-内核启动与恢复/B-BOOT04-内核Oops与panic策略的区别/B-BOOT04：内核 Oops 与 panic 策略的区别#定位方法\|B-BOOT04：内核 Oops 与 panic 策略的区别]] | 关联失败与恢复启动的日志、原因及上报确认 |
+| [[07-内核启动与恢复/B-BOOT05-soft-lockup、RCU-stall与硬件watchdog复位归因/B-BOOT05：soft lockup、RCU stall 与硬件 watchdog 复位归因#定位方法\|B-BOOT05：soft lockup、RCU stall 与硬件 watchdog 复位归因]] | 关联失败与恢复启动的日志、原因及上报确认 |

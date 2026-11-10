@@ -1,0 +1,175 @@
+[[首页]] · [[案例索引]] · [[工具索引]] · [[08-性能与调度优化/00-章节导航|章节导航]]
+
+先按现象提出假设并完成练习，再核对定位、内核机制和参考修复。`verify` 验证镜像提供的参考实现。
+
+[[08-性能与调度优化/A-P01-遥测周期相位持续漂移，CPU却很低/A-P01：遥测周期相位持续漂移，CPU 却很低#现象与原理|现象与原理]] · [[08-性能与调度优化/A-P01-遥测周期相位持续漂移，CPU却很低/A-P01：遥测周期相位持续漂移，CPU 却很低#练习任务|练习任务]] · [[08-性能与调度优化/A-P01-遥测周期相位持续漂移，CPU却很低/A-P01：遥测周期相位持续漂移，CPU 却很低#使用工具|使用工具]] · [[08-性能与调度优化/A-P01-遥测周期相位持续漂移，CPU却很低/A-P01：遥测周期相位持续漂移，CPU 却很低#定位方法|定位方法]] · [[08-性能与调度优化/A-P01-遥测周期相位持续漂移，CPU却很低/A-P01：遥测周期相位持续漂移，CPU 却很低#内核流程与汇编|内核流程与汇编]] · [[08-性能与调度优化/A-P01-遥测周期相位持续漂移，CPU却很低/A-P01：遥测周期相位持续漂移，CPU 却很低#修复与验收|修复与验收]]
+
+## 现象与原理
+
+**生产现场与现象。** 桥接设备每 10 ms 汇总一次遥测，单次回调约 2 ms。平均 CPU 很低，但与平台时间槽的偏移不断增长；把线程优先级调高仍不能消除增长。
+
+**原理与因果关系。** sleep(period) 再处理 work 会使下一周期变成 period+work+调度及观测开销。第 n 次相位误差含前面各轮耗时；绝对定时把计划时刻固定为 start+n*period，避免将回调时间累加进周期。它不能消除调度延迟，也不保证过载时仍按时完成。
+
+[ROS2 实时背景说明](https://design.ros2.org/articles/realtime_background.html) 可用于理解
+有界执行、内存和等待的设计背景；本例使用自编 Linux 周期负载，未部署 ROS2，
+计时机制以配套 Linux 源码和本次实测为准。
+
+## 练习任务
+
+**受控复现设计。** 运行 deadline，分别对比相对睡眠和绝对周期。每轮保存计划释放、实际唤醒、处理结束三个单调时间戳。故障/参考版完成相同任务和 checksum。
+
+**面试/评审追问。** 平均 CPU 低为什么仍错过截止时间？release latency、响应时间、执行时间如何分别定义？为什么 CLOCK_REALTIME 校时会影响错误的周期实现？
+
+## 使用工具
+
+通用原理、参数和使用边界见工具手册；具体命令与证据判断见本例定位方法。
+
+[[工具手册/sadboard|sadboard]] · [[工具手册/strace|strace]] · [[工具手册/perf|perf]] · [[工具手册/火焰图|火焰图]] · [[工具手册/trace-cmd|trace-cmd]]
+
+## 定位方法
+
+**定位流程与工具。** 先计算相位误差随序号的斜率，再用 strace -ttt -T -e clock_nanosleep 查看 ABS/REL。用 trace-cmd 的 sched_wakeup/sched_switch 区分定时到期和获得 CPU；输出 CSV 本身也有观测开销。
+
+### A-P01 操作、参数与数据解释
+
+源码：[deadline.c](https://github.com/linux-bsp/sadboard-external/blob/93c81e82acfdf5d54155d1b9bb750e78645d384f/package/sadboard-labs/src/deadline.c)。本例模拟的是“每次处理需要固定墙钟时间”的回调，`work` 内部用睡眠表示有界等待，不声称模拟了等量 CPU 运算。
+
+设备端：运行“遥测周期相位持续漂移，CPU却很低”故障现场，记录输出中的实际结果目录与异常证据。
+
+```sh
+sadboard run deadline 200 10000 2000
+```
+
+设备端：执行“遥测周期相位持续漂移，CPU却很低”的参考修复验收，核对终端结论及保存的结果契约。
+
+```sh
+sadboard verify deadline 200 10000 2000
+```
+
+使用上一步打印的真实结果目录：
+
+设备端：把路径占位符替换为本次实际现场目录，复核该次运行的证据完整性与验收约束。
+
+```sh
+sadboard check /srv/sadboard/deadline-实际时间戳-实际后缀
+```
+
+三个参数依次是周期数、目标周期微秒、每次处理微秒；默认值同示例。约束见 0.8 参数表，非法/过量输入返回 64。`run` 只复现相对定时，`verify` 在一个取证目录先跑故障版再跑参考版。不要把示意目录原样复制执行。
+
+| 文件/指标 | 应如何理解 |
+| --- | --- |
+| `deadline-{bug,fixed}.csv` | 每行 `index,release_ns,wake_ns,finish_ns`；都是单调时钟纳秒，不是 UTC 时间戳 |
+| `release_ns` | 共同规则 `start+(index+1)*period` 计算的目标时刻 |
+| `wake-release` | 释放相位误差；本实现不在目标之前唤醒 |
+| `finish-wake` | 处理墙钟时间，含模拟等待，不是线程独占 CPU 时间 |
+| `p50_ns/p99_ns/max_ns` | 对全部释放误差排序，以 nearest-rank 统计；不是“每秒请求延迟” |
+| `drift_ns` | 最后一次释放误差，通常与 max 接近，但定义不能混用 |
+| `cpu_ns/wall_ns` | CPU 时间和总墙钟时间，二者差异可揭示等待 |
+| `completed/checksum` | 两版都必须完成同样任务；不能以漏做任务换取漂亮的延迟 |
+
+普通用户可在 host 上直接读 NFS CSV。下面在 host 复算，不要求板端有 Python，`RUN` 换成真实目录：
+
+主机 Python 示例：替换实际 CSV 目录，重新计算两版的周期数、p99 与最终唤醒误差。
+
+```python
+import csv, math
+from pathlib import Path
+run = Path('/srv/nfs/sadboard-am625/srv/sadboard/实际目录')
+for variant in ('bug', 'fixed'):
+    rows = list(csv.DictReader((run / f'deadline-{variant}.csv').open()))
+    late = [int(r['wake_ns']) - int(r['release_ns']) for r in rows]
+    ordered = sorted(late)
+    print(variant, 'cycles=', len(late), 'p99_ms=',
+          ordered[math.ceil(len(late)*.99)-1]/1e6, 'last_ms=', late[-1]/1e6)
+```
+
+故障版第 2 次目标仍是 `start+2*period`，实际却约为 `start+2*period+work`；n 轮后误差近似 `(n-1)*work`，再叠加调度与观测开销。参考版每轮等待明确的绝对时刻，不把上一轮耗时加进下一轮计划。若真实处理时间超过周期，必须另设计 overrun 策略，本例参数故意使 `2*work≤period`。
+
+参数查阅：[[工具手册/perf|本方向基础工具参数与边界]]。
+
+## 内核流程与汇编
+
+**内核源码阅读。** [posix-timers.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/kernel/time/posix-timers.c)：clock_nanosleep 系统调用、TIMER_ABSTIME 处理；[hrtimer.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/kernel/time/hrtimer.c)：hrtimer_nanosleep、do_nanosleep、定时唤醒。从用户接口找到入口，检查配置/标志/失败分支，再画出本题的路径；这些链接不是实机完整调用栈。
+
+### A-P01 深入到内核与汇编
+
+源码推导路径：
+
+源码流程示意：沿绝对时钟睡眠、hrtimer 到期和调度返回分析周期漂移。
+
+```text
+用户 clock_nanosleep(CLOCK_MONOTONIC, flags, ...)
+  → ARM64 svc → clock_nanosleep 系统调用
+  → clockid 对应的 clock_nsleep
+  → common_nsleep → hrtimer_nanosleep
+  → do_nanosleep：启动 sleeper 定时器并调度出去
+  → 到期唤醒 → 线程变 runnable → 调度运行 → 返回用户态
+```
+
+阅读 `posix-timers.c` 的 `common_nsleep` 和 `hrtimer.c` 的 `hrtimer_nanosleep/do_nanosleep`，比较 TIMER_ABSTIME 与相对模式选择的定时器模式。查找返回 EINTR 的分支：相对睡眠被信号打断需要处理剩余时间；本参考绝对版用同一目标重新调用，避免把“剩余时间”错当新绝对时间。
+
+设备上单独取证，勿把受 strace 干扰的数据当无干扰基准
+
+设备端：将本次 NFS/SD 模式的实际结果根目录保存为当前终端变量，供后续命令复用。
+
+```sh
+R=$(sadboard results)
+```
+
+设备端：创建本次 deadline 手工取证目录；确认成功后再写入跟踪文件。
+
+```sh
+mkdir -p "$R/manual-deadline"
+```
+
+设备端：对小规模参考负载跟踪 clock_nanosleep，保留时间和 CSV；本组数据用于调用关系分析。
+
+```sh
+strace -ttt -T -e clock_nanosleep -o "$R/manual-deadline/fixed.strace" \
+  /usr/libexec/sadboard/deadline-fixed 20 10000 2000 "$R/manual-deadline/fixed.csv"
+```
+
+设备端：开放本次手工取证目录的主机读取权限，完成后到 NFS 导出路径查看产物。
+
+```sh
+sadboard share "$R/manual-deadline"
+```
+
+调度跟踪是可选的第二组观测，先确认事件存在
+
+设备端：列出可用跟踪事件，确认所需调度事件存在后再选择额外观测。
+
+```sh
+trace-cmd list -e
+```
+
+`-ttt` 打印追踪时刻，`-T` 打印调用经历时间，`-e clock_nanosleep` 只观察这一类调用。发生长尾后才选择 `sched:sched_wakeup/sched:sched_switch` 记录调度，跟踪窗口限制在自己的短实验内。
+在匹配的交叉 objdump/GDB 中反汇编 `main` 和 `sleep_until`：ARM64 的 x0/w0、x1/w1、x2、x3 对应前几个参数；固定版应能找到传入 TIMER_ABSTIME 的调用，故障版走相对睡眠封装。GDB 的 `disassemble /m`、`info registers x0 x1 x2 x3` 要在调用前断点使用，不能把 PLT 包装地址当作内核入口。`bl clock_nanosleep@plt` 的出现只证明静态调用，不证明实际被调度的时刻。
+
+下面截自本阶段 `v0.0.1 / 2e7850c3` 的真实 `deadline-fixed` ELF（静态反汇编，地址为 PIE 内部偏移）：
+
+参考版 ELF 反汇编摘录：核对 TIMER_ABSTIME 参数与被 EINTR 打断后的同一目标重试。
+
+```asm
+1010: mov w1, #0x1           // flags = TIMER_ABSTIME
+1014: add x2, sp, #0x10      // 指向栈上的绝对 timespec
+1018: mov w0, w1            // 此平台 CLOCK_MONOTONIC 也恰好为 1
+101c: mov x3, #0x0          // 不传相对剩余时间指针
+1020: bl  clock_nanosleep@plt
+1024: cmp w0, #0x4          // clock_nanosleep 返回错误号，4 为 EINTR
+1028: b.eq 1010             // 用同一个绝对目标重试
+```
+
+数字相同不意味着 clock ID 与 flags 是同一概念；这只是编译器复用寄存器。调用后的 x0～x3 可被覆盖，源码变量和寄存器不能永久一一对应。其余函数的完整输出保存在阶段附件，勿把这里的 PIE 偏移当作 ASLR 后的运行地址。
+
+## 修复与验收
+
+**修复与工程取舍。** 采用 CLOCK_MONOTONIC 绝对周期；生产设计还需明确错过周期时跳过、补跑或降级策略。不能对卫星桥接任务无限补跑旧遥测，也不能把 NTP 调时引入周期计算。
+
+**量化验收与清理。** completed/checksum 完全一致；逐行复算 P50/P99/max 和末次相位误差。故障版呈累计漂移，参考版不再因固定回调时间累计漂移；调度指标需实测多次，不能用一次结果承诺硬实时。
+
+**本阶段实测。** 见[验收档案中的进阶场景阶段](https://github.com/linux-bsp/workspace/blob/cb2b20ab8d17e68f4782dd96efe5a1253b64f035/docs/am625-debug-validation.md#production-cases)。原始 CSV/JSON 与追踪附件随阶段归档；不把示例公式当作实测数值。
+
+[[附录A-实验报告/00-章节导航|实验报告与复盘]] · [[00-实验准备与通用方法/01-构建与启动部署#固定源码与实机证据|匹配源码、固件与实测证据]]
+
+[[08-性能与调度优化/A-P02-高优先级控制线程被低优先级锁持有者拖住/A-P02：高优先级控制线程被低优先级锁持有者拖住|下一例 A-P02]]

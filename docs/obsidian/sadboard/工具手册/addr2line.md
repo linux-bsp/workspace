@@ -1,5 +1,3 @@
-# addr2line
-
 [[首页]] · [[工具索引]] · [[案例索引]]
 
 ## 解决的问题
@@ -37,10 +35,10 @@ output/am625-debug-systemd/host/bin/aarch64-buildroot-linux-gnu-addr2line -e out
 
 | 案例 | 本工具的观测目标 |
 | --- | --- |
-| [[01-应用崩溃/B-CR01-缺失记录未判空导致空指针崩溃/案例详解#定位方法\|B-CR01：缺失记录导致应用崩溃]] | 用匹配 ELF 解释已换算的函数/源码地址 |
-| [[04-CPU性能与火焰图/B-CPU01-重复线性查找导致CPU热点/案例详解#定位方法\|B-CPU01：CPU热点与火焰图]] | 用匹配 ELF 解释已换算的函数/源码地址 |
-| [[07-内核启动与恢复/B-BOOT01-内核panic触发后的启动日志取证与恢复/案例详解#定位方法\|B-BOOT01：内核panic启动日志与恢复]] | 用匹配 ELF 解释已换算的函数/源码地址 |
-| [[07-内核启动与恢复/B-BOOT02-initramfs动态加载器缺库导致PID1退出/案例详解#定位方法\|B-BOOT02：initramfs 动态加载器缺库导致 PID 1 退出]] | 用匹配 ELF 解释已换算的函数/源码地址 |
-| [[07-内核启动与恢复/B-BOOT03-根设备或文件系统参数错误导致VFS启动失败/案例详解#定位方法\|B-BOOT03：根设备或文件系统参数错误导致 VFS 启动失败]] | 用匹配 ELF 解释已换算的函数/源码地址 |
-| [[07-内核启动与恢复/B-BOOT04-内核Oops与panic策略的区别/案例详解#定位方法\|B-BOOT04：内核 Oops 与 panic 策略的区别]] | 用匹配 ELF 解释已换算的函数/源码地址 |
-| [[07-内核启动与恢复/B-BOOT05-soft-lockup、RCU-stall与硬件watchdog复位归因/案例详解#定位方法\|B-BOOT05：soft lockup、RCU stall 与硬件 watchdog 复位归因]] | 用匹配 ELF 解释已换算的函数/源码地址 |
+| [[01-应用崩溃/B-CR01-缺失记录未判空导致空指针崩溃/B-CR01：缺失记录导致应用崩溃#定位方法\|B-CR01：缺失记录导致应用崩溃]] | 用匹配 ELF 解释已换算的函数/源码地址 |
+| [[04-CPU性能与火焰图/B-CPU01-重复线性查找导致CPU热点/B-CPU01：CPU热点与火焰图#定位方法\|B-CPU01：CPU热点与火焰图]] | 用匹配 ELF 解释已换算的函数/源码地址 |
+| [[07-内核启动与恢复/B-BOOT01-内核panic触发后的启动日志取证与恢复/B-BOOT01：内核panic启动日志与恢复#定位方法\|B-BOOT01：内核panic启动日志与恢复]] | 用匹配 ELF 解释已换算的函数/源码地址 |
+| [[07-内核启动与恢复/B-BOOT02-initramfs动态加载器缺库导致PID1退出/B-BOOT02：initramfs 动态加载器缺库导致 PID 1 退出#定位方法\|B-BOOT02：initramfs 动态加载器缺库导致 PID 1 退出]] | 用匹配 ELF 解释已换算的函数/源码地址 |
+| [[07-内核启动与恢复/B-BOOT03-根设备或文件系统参数错误导致VFS启动失败/B-BOOT03：根设备或文件系统参数错误导致 VFS 启动失败#定位方法\|B-BOOT03：根设备或文件系统参数错误导致 VFS 启动失败]] | 用匹配 ELF 解释已换算的函数/源码地址 |
+| [[07-内核启动与恢复/B-BOOT04-内核Oops与panic策略的区别/B-BOOT04：内核 Oops 与 panic 策略的区别#定位方法\|B-BOOT04：内核 Oops 与 panic 策略的区别]] | 用匹配 ELF 解释已换算的函数/源码地址 |
+| [[07-内核启动与恢复/B-BOOT05-soft-lockup、RCU-stall与硬件watchdog复位归因/B-BOOT05：soft lockup、RCU stall 与硬件 watchdog 复位归因#定位方法\|B-BOOT05：soft lockup、RCU stall 与硬件 watchdog 复位归因]] | 用匹配 ELF 解释已换算的函数/源码地址 |

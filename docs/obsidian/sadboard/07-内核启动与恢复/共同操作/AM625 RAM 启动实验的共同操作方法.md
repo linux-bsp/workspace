@@ -1,6 +1,5 @@
 [[首页]] · [[07-内核启动与恢复/00-章节导航|章节导航]] · [[案例索引]] · [[工具索引]]
 
-# AM625 RAM 启动实验的共同操作方法
 
 B-BOOT02/03 在真实 AM625 执行。主机的 `scripts/sadboard-board.py` 仅控制串口、TFTP 和验收；设备上的 PID 1、动态加载器、内核挂载过程都是真实代码，没有使用 QEMU 或 PID namespace 替代整机故障。构建自动生成 `images/sadboard/`，正常 OTA 的 FIT/rootfs 不含这些故障副本。
 

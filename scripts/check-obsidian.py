@@ -11,6 +11,7 @@ ROOT = Path(__file__).resolve().parents[1]
 VAULT = ROOT / "docs/obsidian/sadboard"
 WIKI = re.compile(r"\[\[([^\]\n]+)\]\]")
 LINK = re.compile(r"\[([^\]\n]+)\]\(([^)\n]+)\)")
+CASE_FOLDER = re.compile(r"([AB]-[A-Z]+\d{2})-\S.*")
 REPOS = {
     "linux-bsp/linux-7.0": ROOT / "linux/linux-7.0",
     "linux-bsp/sadboard-external": ROOT / "sadboard-external",
@@ -74,8 +75,8 @@ def validate(notes):
     for name, text in notes.items():
         if text.startswith("---\n"):
             errors.append(f"{name}: keep note properties out of the handbook")
-        if sum(level == 1 for level, _ in note_headings[name]) != 1:
-            errors.append(f"{name}: expected exactly one note title")
+        if any(level == 1 for level, _ in note_headings[name]):
+            errors.append(f"{name}: use the filename as the title; body headings start at ##")
 
         def check_line(line):
             nonlocal link_count
@@ -105,15 +106,19 @@ def validate(notes):
 
         outside_code(text, check_line)
     cases = []
-    for name, text in notes.items():
-        if name.endswith("/案例详解"):
-            folder = Path(name).parent.name
-            match = re.fullmatch(r"([AB]-[A-Z]+\d{2})-\S.*", folder)
-            if not match:
-                errors.append(f"{name}: case directory must use <case-id>-<specific-problem>")
-            else:
-                cases.append(match[1])
-    case_notes = {name for name in notes if name.endswith("/案例详解")}
+    case_notes = set()
+    for name in notes:
+        path = Path(name)
+        match = CASE_FOLDER.fullmatch(path.parent.name)
+        if match:
+            case_id = match[1]
+            cases.append(case_id)
+            case_notes.add(name)
+            title = re.fullmatch(r"([AB]-[A-Z]+\d{2})：\S.*", path.name)
+            if not title or title[1] != case_id:
+                errors.append(f"{name}: case filename must use {case_id}：<actual-title>.md")
+        elif re.match(r"[AB]-[A-Z]+\d{2}：", path.name):
+            errors.append(f"{name}: case directory must use <case-id>-<specific-problem>")
     tool_notes = {name for name in notes if name.startswith("工具手册/")}
     for name in case_notes:
         for tool in graph[name] & tool_notes:

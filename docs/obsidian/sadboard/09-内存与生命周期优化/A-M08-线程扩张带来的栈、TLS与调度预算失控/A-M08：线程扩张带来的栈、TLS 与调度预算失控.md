@@ -1,0 +1,67 @@
+[[首页]] · [[案例索引]] · [[工具索引]] · [[09-内存与生命周期优化/00-章节导航|章节导航]]
+
+先按现象提出假设并完成练习，再核对定位、内核机制和参考修复。`verify` 验证镜像提供的参考实现。
+
+[[09-内存与生命周期优化/A-M08-线程扩张带来的栈、TLS与调度预算失控/A-M08：线程扩张带来的栈、TLS 与调度预算失控#现象与原理|现象与原理]] · [[09-内存与生命周期优化/A-M08-线程扩张带来的栈、TLS与调度预算失控/A-M08：线程扩张带来的栈、TLS 与调度预算失控#练习任务|练习任务]] · [[09-内存与生命周期优化/A-M08-线程扩张带来的栈、TLS与调度预算失控/A-M08：线程扩张带来的栈、TLS 与调度预算失控#使用工具|使用工具]] · [[09-内存与生命周期优化/A-M08-线程扩张带来的栈、TLS与调度预算失控/A-M08：线程扩张带来的栈、TLS 与调度预算失控#定位方法|定位方法]] · [[09-内存与生命周期优化/A-M08-线程扩张带来的栈、TLS与调度预算失控/A-M08：线程扩张带来的栈、TLS 与调度预算失控#内核流程与汇编|内核流程与汇编]] · [[09-内存与生命周期优化/A-M08-线程扩张带来的栈、TLS与调度预算失控/A-M08：线程扩张带来的栈、TLS 与调度预算失控#修复与验收|修复与验收]]
+
+## 现象与原理
+
+**生产现场与现象。** 每连接一线程的网关在连接增长时 RSS/VIRT 与延迟迅速增加，单请求逻辑没有泄漏。
+
+**原理与因果关系。** 每线程都需要栈映射、guard、TLS、内核任务和调度对象。虚拟预留与实际驻留不同；缩栈过头又会制造栈溢出，线程池则需要有界排队和取消。
+
+## 练习任务
+
+设备端：运行“线程扩张带来的栈、TLS与调度预算失控”故障现场，记录输出中的实际结果目录与异常证据。
+
+```sh
+sadboard run memory-threads
+```
+
+设备端：执行“线程扩张带来的栈、TLS与调度预算失控”的参考修复验收，核对终端结论及保存的结果契约。
+
+```sh
+sadboard verify memory-threads
+```
+
+把下方路径替换为完成后打印的实际目录：
+
+设备端：把路径占位符替换为本次实际现场目录，复核该次运行的证据完整性与验收约束。
+
+```sh
+sadboard check /srv/sadboard/实际目录
+```
+
+本例为固定有界负载，无额外参数。源码 [suite-advanced-memory.c](https://github.com/linux-bsp/sadboard-external/blob/93c81e82acfdf5d54155d1b9bb750e78645d384f/package/sadboard-labs/src/suite-advanced-memory.c)；相同 12 个任务，对比 12 个线程与 4 worker；线程栈 512 KiB，实际触碰栈/TLS。observed 从 /proc/self/task 读取活跃 worker 12→4，VmSize/RSS 另记；任务 checksum=66。此例的 transient unit TasksMax=24，其余仍为 16。
+
+`memory-threads-{bug,fixed}.out/.trace` 分别保存摘要与原始事件，字段 observed/auxiliary 的含义以上述本例定义为准。摘要、trace 和完成数必须相符。与正常业务输出不同的故障结果会由本例契约明确识别；不能拿最外层退出0证明没有异常。性能题同时保留 cpu_ns/wall_ns，至少三次再评价时序，不只看资源上界或一次漂亮数字。
+
+**实际复现负载。** 相同 12 个任务，对比 12 个线程与 4 worker；线程栈 512 KiB，实际触碰栈/TLS。observed 从 /proc/self/task 读取活跃 worker 12→4，VmSize/RSS 另记；任务 checksum=66。此例的 transient unit TasksMax=24，其余仍为 16。
+
+**面试/评审追问。** 为何 PTHREAD_STACK_MIN 不是合理业务栈预算？线程池如何避免把线程资源问题转成队列内存问题？
+
+## 使用工具
+
+通用原理、参数和使用边界见工具手册；具体命令与证据判断见本例定位方法。
+
+[[工具手册/sadboard|sadboard]] · [[工具手册/Valgrind|Valgrind]] · [[工具手册/perf|perf]] · [[工具手册/procfs|procfs]] · [[工具手册/cgroup-v2|cgroup-v2]] · [[工具手册/ps|ps]]
+
+## 定位方法
+
+**定位流程与工具。** 统计 /proc/PID/task、maps、smaps_rollup、进程 limits 和 cgroup pids.current；perf 看 context-switches。用 -fstack-usage 与最深业务路径估计栈需求。
+
+参数查阅：[[工具手册/Valgrind|本方向基础工具参数与边界]]。
+
+## 内核流程与汇编
+
+**内核源码阅读。** [fork.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/kernel/fork.c)：copy_process、线程创建；[mmap.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/mm/mmap.c)：映射与栈区域；[core.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/kernel/sched/core.c)：任务切换。从用户接口找到入口，检查配置/标志/失败分支，再画出本题的路径；这些链接不是实机完整调用栈。
+
+## 修复与验收
+
+**修复与工程取舍。** 固定并发 worker、明确栈预算和队列上界，连接状态用事件驱动管理；保留 guard，线程创建失败不能静默丢请求。
+
+**量化验收与清理。** 同样请求数与校验，线程峰值受限、内存进入平台期、无任务丢失，所有线程可以退出并 join。
+
+[[附录A-实验报告/00-章节导航|实验报告与复盘]] · [[00-实验准备与通用方法/01-构建与启动部署#固定源码与实机证据|匹配源码、固件与实测证据]]
+
+[[09-内存与生命周期优化/A-M07-总空闲足够却申请不到连续DMA缓冲/A-M07：总空闲足够却申请不到连续 DMA 缓冲|上一例 A-M07]]

@@ -1,0 +1,67 @@
+[[首页]] · [[案例索引]] · [[工具索引]] · [[09-内存与生命周期优化/00-章节导航|章节导航]]
+
+先按现象提出假设并完成练习，再核对定位、内核机制和参考修复。`verify` 验证镜像提供的参考实现。
+
+[[09-内存与生命周期优化/A-M04-memory.high回收抖动先于memory.max-OOM/A-M04：memory.high 回收抖动先于 memory.max OOM#现象与原理|现象与原理]] · [[09-内存与生命周期优化/A-M04-memory.high回收抖动先于memory.max-OOM/A-M04：memory.high 回收抖动先于 memory.max OOM#练习任务|练习任务]] · [[09-内存与生命周期优化/A-M04-memory.high回收抖动先于memory.max-OOM/A-M04：memory.high 回收抖动先于 memory.max OOM#使用工具|使用工具]] · [[09-内存与生命周期优化/A-M04-memory.high回收抖动先于memory.max-OOM/A-M04：memory.high 回收抖动先于 memory.max OOM#定位方法|定位方法]] · [[09-内存与生命周期优化/A-M04-memory.high回收抖动先于memory.max-OOM/A-M04：memory.high 回收抖动先于 memory.max OOM#内核流程与汇编|内核流程与汇编]] · [[09-内存与生命周期优化/A-M04-memory.high回收抖动先于memory.max-OOM/A-M04：memory.high 回收抖动先于 memory.max OOM#修复与验收|修复与验收]]
+
+## 现象与原理
+
+**生产现场与现象。** 服务未被杀死却逐渐失去响应，CPU/内存压力上升；只监控 oom_kill 看不出问题。
+
+**原理与因果关系。** memory.high 超限可让任务进入回收与节流，memory.max 是不同的硬限制。回收、refault、swap 能让服务长时间停在性能退化阶段，而不是立即 OOM。
+
+## 练习任务
+
+设备端：运行“memory.high回收抖动先于memory.max-OOM”故障现场，记录输出中的实际结果目录与异常证据。
+
+```sh
+sadboard run memory-high
+```
+
+设备端：执行“memory.high回收抖动先于memory.max-OOM”的参考修复验收，核对终端结论及保存的结果契约。
+
+```sh
+sadboard verify memory-high
+```
+
+把下方路径替换为完成后打印的实际目录：
+
+设备端：把路径占位符替换为本次实际现场目录，复核该次运行的证据完整性与验收约束。
+
+```sh
+sadboard check /srv/sadboard/实际目录
+```
+
+本例为固定有界负载，无额外参数。源码 [suite-advanced-memory.c](https://github.com/linux-bsp/sadboard-external/blob/93c81e82acfdf5d54155d1b9bb750e78645d384f/package/sadboard-labs/src/suite-advanced-memory.c)；真实私有 cgroup 的 memory.high=8 MiB、max=32 MiB。相同 4096 个工作项，故障保留 16 MiB 工作集，参考复用 4 MiB；准备后再降低 high 并触发一页真实分配。observed 是 high 事件，auxiliary 是 oom_kill（必须为 0），保留 current/peak 与耗时。
+
+`memory-high-{bug,fixed}.out/.trace` 分别保存摘要与原始事件，字段 observed/auxiliary 的含义以上述本例定义为准。摘要、trace 和完成数必须相符。与正常业务输出不同的故障结果会由本例契约明确识别；不能拿最外层退出0证明没有异常。性能题同时保留 cpu_ns/wall_ns，至少三次再评价时序，不只看资源上界或一次漂亮数字。
+
+**实际复现负载。** 真实私有 cgroup 的 memory.high=8 MiB、max=32 MiB。相同 4096 个工作项，故障保留 16 MiB 工作集，参考复用 4 MiB；准备后再降低 high 并触发一页真实分配。observed 是 high 事件，auxiliary 是 oom_kill（必须为 0），保留 current/peak 与耗时。
+
+**面试/评审追问。** 为什么进程没被 kill 却已经不健康？PSI some/full 能回答什么，不能回答什么？
+
+## 使用工具
+
+通用原理、参数和使用边界见工具手册；具体命令与证据判断见本例定位方法。
+
+[[工具手册/sadboard|sadboard]] · [[工具手册/Valgrind|Valgrind]] · [[工具手册/procfs|procfs]] · [[工具手册/cgroup-v2|cgroup-v2]]
+
+## 定位方法
+
+**定位流程与工具。** 对齐 memory.current、events high/max/oom、memory.stat 的 anon/file 与 PSI，保存 wall/CPU、请求时延。只看 VmRSS 看不到全部被该组计费的内存。
+
+参数查阅：[[工具手册/Valgrind|本方向基础工具参数与边界]]。
+
+## 内核流程与汇编
+
+**内核源码阅读。** [memcontrol.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/mm/memcontrol.c)：__mem_cgroup_handle_over_high、try_charge_memcg；[vmscan.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/mm/vmscan.c)：回收扫描；[cgroup-v2.rst](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/Documentation/admin-guide/cgroup-v2.rst)：memory.events、memory.pressure。从用户接口找到入口，检查配置/标志/失败分支，再画出本题的路径；这些链接不是实机完整调用栈。
+
+## 修复与验收
+
+**修复与工程取舍。** 限制工作集与缓存，加背压和预警；按最坏业务需求设置服务预算。提高 max 前先判断 high 触发的回收，避免把性能问题改为整机故障。
+
+**量化验收与清理。** 同样工作量，明确 high 事件与卡顿关系；参考版保持容量边界且不 OOM，停止 unit 后实验 cgroup 自动回收。
+
+[[附录A-实验报告/00-章节导航|实验报告与复盘]] · [[00-实验准备与通用方法/01-构建与启动部署#固定源码与实机证据|匹配源码、固件与实测证据]]
+
+[[09-内存与生命周期优化/A-M03-数据流水线多次复制和缓冲池生命周期错误/A-M03：数据流水线多次复制和缓冲池生命周期错误|上一例 A-M03]] · [[09-内存与生命周期优化/A-M05-共享帧池跨进程引用未完成导致长期占用/A-M05：共享帧池跨进程引用未完成导致长期占用|下一例 A-M05]]
