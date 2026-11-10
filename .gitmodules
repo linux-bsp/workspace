@@ -26,3 +26,7 @@
 	path = sadboard-external
 	url = git@github.com:linux-bsp/sadboard-external.git
 	branch = main
+[submodule "obsidian-sadboard"]
+	path = obsidian-sadboard
+	url = git@github.com:linux-bsp/obsidian-sadboard.git
+	branch = master

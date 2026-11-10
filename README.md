@@ -8,11 +8,11 @@ SadBoard 是一个面向嵌入式 Linux 的故障定位与分析练习项目。�
 
 ## 当前状态
 
-已完成 AM6254 systemd 调试基线，支持 SSH、匹配符号、完整现场记录及参考修复，59 个案例均已实机验证。随机题库和通用自动评分尚未实现。学习内容全部在 [Obsidian 手册](docs/obsidian/sadboard/README.md) 中按章节和案例管理，每个案例一篇完整详解；通用工具参数在独立工具手册中维护，案例与工具通过双向链接关联。固件身份与已执行的验证见 [实机验证记录](docs/am625-debug-validation.md)。
+已完成 AM6254 systemd 调试基线，支持 SSH、匹配符号、完整现场记录及参考修复，59 个案例均已实机验证。随机题库和通用自动评分尚未实现。学习内容全部在 [Obsidian 手册](obsidian-sadboard/README.md) 中按章节和案例管理，每个案例一篇完整详解；通用工具参数在独立工具手册中维护，案例与工具通过双向链接关联。固件身份与已执行的验证见 [实机验证记录](docs/am625-debug-validation.md)。
 
-案例库共设计 **59 例**：七类基础各 5 例（35 例），性能、内存、网络进阶各 8 例（24 例）。目前 **59 例均有实现**：57 例使用设备命令，2 例由主机串口工具控制真实 AM625 的 RAM 启动；已全部完成实机验证。学习顺序与完整入口见[案例索引](docs/obsidian/sadboard/00-实验准备与通用方法/案例索引.md)，根因、取证任务和参考来源保存在各案例详解中。
+案例库共设计 **59 例**：七类基础各 5 例（35 例），性能、内存、网络进阶各 8 例（24 例）。目前 **59 例均有实现**：57 例使用设备命令，2 例由主机串口工具控制真实 AM625 的 RAM 启动；已全部完成实机验证。学习顺序与完整入口见[案例索引](obsidian-sadboard/00-实验准备与通用方法/案例索引.md)，根因、取证任务和参考来源保存在各案例详解中。
 
-SadBoard 默认使用 **TFTP 加载内核/DTB、NFS 挂载根文件系统**，普通 AM625 BSP 保持 SD A/B 启动。两个独立的 U-Boot 配置项 `CONFIG_AM62X_BOOT_TFTP_KERNEL`、`CONFIG_AM62X_BOOT_NFS_ROOT` 支持四种组合；配置、主机部署和运行时切换见[网络调试启动](docs/obsidian/sadboard/00-实验准备与通用方法/01-构建与启动部署.md)。NFS 下实验结果保存在板端 `/srv/sadboard`，主机可直接读取 `/srv/nfs/sadboard-am625/srv/sadboard`；本地启动仍使用 `/data/sadboard`。`sadboard results` 可查看当前路径。
+SadBoard 默认使用 **TFTP 加载内核/DTB、NFS 挂载根文件系统**，普通 AM625 BSP 保持 SD A/B 启动。两个独立的 U-Boot 配置项 `CONFIG_AM62X_BOOT_TFTP_KERNEL`、`CONFIG_AM62X_BOOT_NFS_ROOT` 支持四种组合；配置、主机部署和运行时切换见[网络调试启动](obsidian-sadboard/00-实验准备与通用方法/01-构建与启动部署.md)。NFS 下实验结果保存在板端 `/srv/sadboard`，主机可直接读取 `/srv/nfs/sadboard-am625/srv/sadboard`；本地启动仍使用 `/data/sadboard`。`sadboard results` 可查看当前路径。
 
 ## Workspace 分支与 Buildroot 扩展层
 
@@ -20,12 +20,13 @@ SadBoard 在 [linux-bsp/workspace](https://github.com/linux-bsp/workspace) 的 `
 
 - `bsp-base-external/`：板级支持、启动配置、镜像布局和基础软件包，external 名称保持 `LINUX_BSP`。
 - `sadboard-external/`：独立的实验层子模块，external 名称为 `SADBOARD`，包含故障程序、调试配置和实验 overlay。
-- `docs/`：Obsidian 手册、实机验收、工具链操作及板级参考资料。
+- `obsidian-sadboard/`：独立的 Obsidian 手册子模块，包含案例、工具手册及文档检查工具。
+- `docs/`：实机验收、工具链操作及板级参考资料。
 
-在 workspace 根目录初始化所需的三个子模块：
+在 workspace 根目录初始化构建配置和手册子模块：
 
 ```bash
-git submodule update --init -- buildroot bsp-base-external sadboard-external
+git submodule update --init -- buildroot bsp-base-external sadboard-external obsidian-sadboard
 ```
 
 初始化目标板需要的源码子模块后，可直接使用标准配置：
@@ -43,7 +44,7 @@ BR2_EXTERNAL="../bsp-base-external ../sadboard-external" \
 主机测试、文档检查、可选串口验收工具及上游 binman 等主机依赖仍可使用 Python。
 固件打包职责见 [生成器说明](bsp-base-external/support/firmware/README.md)。
 
-在新克隆的工作区中，先运行 `git submodule update --init --recursive`。`libbmc` 使用 `git@github.com:wanguo99/libbmc.git` 的 `master` 分支。`make list-defconfigs` 可以查看本实验入口。可选工具链、独立输出目录和详细构建步骤见 [环境指南](docs/obsidian/sadboard/附录B-构建与官方实验/00-章节导航.md)。
+在新克隆的工作区中，先运行 `git submodule update --init --recursive`。`libbmc` 使用 `git@github.com:wanguo99/libbmc.git` 的 `master` 分支。`make list-defconfigs` 可以查看本实验入口。可选工具链、独立输出目录和详细构建步骤见 [环境指南](obsidian-sadboard/附录B-构建与官方实验/00-章节导航.md)。
 
 `sadboard-external` 包含 AM6254 标准 defconfig、内核片段、原生构建 hooks、手动实验程序和目标端环境检查脚本，跟踪远端 `main` 分支。workspace 固定所有子模块的具体提交；复现实验时使用固定提交。`git submodule update --remote` 会尝试更新到跟踪分支的新提交。
 
@@ -140,7 +141,7 @@ SadBoard 希望提供一组可重复练习的现场，帮助学习者回答：
 
 ## 文档
 
-- [Obsidian 手册入口](docs/obsidian/sadboard/README.md)：打开 `docs/obsidian/sadboard` 仓库，从 `README.md` 进入；第 00 章集中维护案例索引与工具索引，59 个案例各一篇完整笔记，工具手册通过双向链接关联。
+- [Obsidian 手册入口](obsidian-sadboard/README.md)：打开 `obsidian-sadboard` 仓库，从 `README.md` 进入；第 00 章集中维护案例索引与工具索引，59 个案例各一篇完整笔记，工具手册通过双向链接关联。
 - [AM625 实机验收档案](docs/am625-debug-validation.md)：各阶段固件 ID、真实执行结果及附件位置。
 - [EDK libbmc 与 SadBoard 专利候选分析](docs/patent-candidate-analysis.md)：候选技术机制、源码依据、现有技术对照及公开时间与权属条件。
 - [Workspace 目录与 AM62x SDK](docs/workspace-toolchain.md)：独立 SDK、共享下载缓存与工具链管理。
@@ -150,8 +151,8 @@ SadBoard 希望提供一组可重复练习的现场，帮助学习者回答：
 
 ## 仓库
 
-项目名称为 **SadBoard**，开发仓库为 [linux-bsp/workspace](https://github.com/linux-bsp/workspace)，开发分支为 `SadBoard`。实验层仓库为 [linux-bsp/sadboard-external](https://github.com/linux-bsp/sadboard-external)。
+项目名称为 **SadBoard**，开发仓库为 [linux-bsp/workspace](https://github.com/linux-bsp/workspace)，开发分支为 `SadBoard`。实验层仓库为 [linux-bsp/sadboard-external](https://github.com/linux-bsp/sadboard-external)，独立手册仓库为 [linux-bsp/obsidian-sadboard](https://github.com/linux-bsp/obsidian-sadboard)，手册分支为 `master`。
 
 ## 资料署名
 
-教材中对 Bootlin 实验手册的归纳和改编沿用 CC BY-SA 3.0，具体署名与来源见 [教材附录 C](docs/obsidian/sadboard/附录C-Bootlin课程参考/00-章节导航.md)。项目设想不代表 Bootlin 官方课程安排，SadBoard 代码许可尚未确定。
+教材中对 Bootlin 实验手册的归纳和改编沿用 CC BY-SA 3.0，具体署名与来源见 [教材附录 C](obsidian-sadboard/附录C-Bootlin课程参考/00-章节导航.md)。项目设想不代表 Bootlin 官方课程安排，SadBoard 代码许可尚未确定。
