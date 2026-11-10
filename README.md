@@ -8,9 +8,9 @@ SadBoard 是一个面向嵌入式 Linux 的故障定位与分析练习项目。�
 
 ## 当前状态
 
-已完成 AM6254 systemd 调试基线，支持 SSH、匹配符号、完整现场记录及参考修复，59 个案例均已实机验证。随机题库和通用自动评分尚未实现。学习内容全部在 [Obsidian 手册](docs/obsidian/README.md) 中按章节和案例管理，每个案例一篇完整详解；通用工具参数在独立工具手册中维护，案例与工具通过双向链接关联。固件身份与已执行的验证见 [实机验证记录](docs/am625-debug-validation.md)。
+已完成 AM6254 systemd 调试基线，支持 SSH、匹配符号、完整现场记录及参考修复，59 个案例均已实机验证。随机题库和通用自动评分尚未实现。学习内容全部在 [Obsidian 手册](docs/obsidian/sadboard/README.md) 中按章节和案例管理，每个案例一篇完整详解；通用工具参数在独立工具手册中维护，案例与工具通过双向链接关联。固件身份与已执行的验证见 [实机验证记录](docs/am625-debug-validation.md)。
 
-案例库共设计 **59 例**：七类基础各 5 例（35 例），性能、内存、网络进阶各 8 例（24 例）。目前 **59 例均有实现**：57 例使用设备命令，2 例由主机串口工具控制真实 AM625 的 RAM 启动；已全部完成实机验证。学习顺序与完整入口见[案例索引](docs/obsidian/sadboard/案例索引.md)，根因、取证任务和参考来源保存在各案例详解中。
+案例库共设计 **59 例**：七类基础各 5 例（35 例），性能、内存、网络进阶各 8 例（24 例）。目前 **59 例均有实现**：57 例使用设备命令，2 例由主机串口工具控制真实 AM625 的 RAM 启动；已全部完成实机验证。学习顺序与完整入口见[案例索引](docs/obsidian/sadboard/00-实验准备与通用方法/案例索引.md)，根因、取证任务和参考来源保存在各案例详解中。
 
 SadBoard 默认使用 **TFTP 加载内核/DTB、NFS 挂载根文件系统**，普通 AM625 BSP 保持 SD A/B 启动。两个独立的 U-Boot 配置项 `CONFIG_AM62X_BOOT_TFTP_KERNEL`、`CONFIG_AM62X_BOOT_NFS_ROOT` 支持四种组合；配置、主机部署和运行时切换见[网络调试启动](docs/obsidian/sadboard/00-实验准备与通用方法/01-构建与启动部署.md)。NFS 下实验结果保存在板端 `/srv/sadboard`，主机可直接读取 `/srv/nfs/sadboard-am625/srv/sadboard`；本地启动仍使用 `/data/sadboard`。`sadboard results` 可查看当前路径。
 
@@ -140,7 +140,7 @@ SadBoard 希望提供一组可重复练习的现场，帮助学习者回答：
 
 ## 文档
 
-- [Obsidian 手册入口](docs/obsidian/README.md)：打开 `docs/obsidian/sadboard` 仓库，从 `首页.md` 进入；59 个案例按章节建目录，练习、工具、内核流程等独立成笔记，并提供案例索引、工具索引和双向链接。
+- [Obsidian 手册入口](docs/obsidian/sadboard/README.md)：打开 `docs/obsidian/sadboard` 仓库，从 `README.md` 进入；第 00 章集中维护案例索引与工具索引，59 个案例各一篇完整笔记，工具手册通过双向链接关联。
 - [AM625 实机验收档案](docs/am625-debug-validation.md)：各阶段固件 ID、真实执行结果及附件位置。
 - [EDK libbmc 与 SadBoard 专利候选分析](docs/patent-candidate-analysis.md)：候选技术机制、源码依据、现有技术对照及公开时间与权属条件。
 - [Workspace 目录与 AM62x SDK](docs/workspace-toolchain.md)：独立 SDK、共享下载缓存与工具链管理。

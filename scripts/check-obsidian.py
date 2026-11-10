@@ -9,6 +9,7 @@ from urllib.parse import unquote, urlsplit
 
 ROOT = Path(__file__).resolve().parents[1]
 VAULT = ROOT / "docs/obsidian/sadboard"
+ENTRY_NOTE = "README"
 WIKI = re.compile(r"\[\[([^\]\n]+)\]\]")
 LINK = re.compile(r"\[([^\]\n]+)\]\(([^)\n]+)\)")
 CASE_FOLDER = re.compile(r"([AB]-[A-Z]+\d{2})-\S.*")
@@ -68,6 +69,8 @@ def read_notes():
 
 def validate(notes):
     errors = []
+    if {name for name in notes if "/" not in name} != {ENTRY_NOTE}:
+        errors.append("Vault root must contain only README.md; keep indexes in chapter 00")
     link_count = 0
     source_paths = set()
     graph = {name: set() for name in notes}
@@ -133,14 +136,14 @@ def validate(notes):
     }
     if set(cases) != expected or len(cases) != len(expected):
         errors.append("Expected 35 basic and 24 advanced distinct cases")
-    reachable, pending = set(), ["首页"]
+    reachable, pending = set(), [ENTRY_NOTE]
     while pending:
         name = pending.pop()
         if name not in reachable:
             reachable.add(name)
             pending.extend(graph.get(name, set()) - reachable)
     for name in notes.keys() - reachable:
-        errors.append(f"{name}: not reachable from 首页")
+        errors.append(f"{name}: not reachable from {ENTRY_NOTE}.md")
     if errors:
         raise ValueError("\n".join(sorted(set(errors))))
     counts = Counter(case.split("-", 1)[0] for case in cases)
