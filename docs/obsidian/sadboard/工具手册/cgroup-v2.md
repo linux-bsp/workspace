@@ -38,7 +38,7 @@ cat /sys/fs/cgroup/sadboard-oom-PID/memory.events
 不要在不存在组 OOM 证据时只凭 137 判定 OOM。内核可能对同一退出路径产生多个计数增量；实验结束组已清理时，读取 run 目录保存的 limits/events。
 
 控制器和层级语义参考 [内核 cgroup v2 文档](https://docs.kernel.org/admin-guide/cgroup-v2.html)。
-分析本案例时仍须核对镜像对应的固定内核源码、配置及实际启用的控制器。
+分析本案例时仍须核对镜像对应的内核源码、配置及实际启用的控制器。
 
 ## 使用场景
 

@@ -83,11 +83,11 @@ panic 表示内核决定不能继续正常运行。Oops 是一次内核异常诊
   panic_timeout → emergency_restart → 启动链重新执行
 ```
 
-阅读 [sysrq.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/drivers/tty/sysrq.c)、
-[panic.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/kernel/panic.c)、
-[printk.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/kernel/printk/printk.c)、
-[pstore/platform.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/fs/pstore/platform.c)、
-[pstore/ram.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/fs/pstore/ram.c)。实际版本中 panic 公共实现会经过
+阅读 [sysrq.c](https://github.com/linux-bsp/linux-7.0/blob/master/drivers/tty/sysrq.c)、
+[panic.c](https://github.com/linux-bsp/linux-7.0/blob/master/kernel/panic.c)、
+[printk.c](https://github.com/linux-bsp/linux-7.0/blob/master/kernel/printk/printk.c)、
+[pstore/platform.c](https://github.com/linux-bsp/linux-7.0/blob/master/fs/pstore/platform.c)、
+[pstore/ram.c](https://github.com/linux-bsp/linux-7.0/blob/master/fs/pstore/ram.c)。实际版本中 panic 公共实现会经过
 内部辅助函数；以实机栈为准，不要求编译优化后每个源码函数都保留一个栈帧。
 SysRq 权限及掩码规则见 [内核官方说明](https://www.kernel.org/doc/html/latest/admin-guide/sysrq.html)。
 
@@ -239,9 +239,9 @@ boot-state、设置本次 `kernel.panic=3`、同步现场，向 `/proc/sysrq-tri
 
 ### 7.14 内核源码精读与关键分支
 
-读 [sysrq.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/drivers/tty/sysrq.c) 与
-[panic.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/kernel/panic.c)：本例通过 SysRq 明确进入 panic，
-不是演示未知内存踩踏。转到 [pstore](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/fs/pstore/platform.c) 看日志 dump，
+读 [sysrq.c](https://github.com/linux-bsp/linux-7.0/blob/master/drivers/tty/sysrq.c) 与
+[panic.c](https://github.com/linux-bsp/linux-7.0/blob/master/kernel/panic.c)：本例通过 SysRq 明确进入 panic，
+不是演示未知内存踩踏。转到 [pstore](https://github.com/linux-bsp/linux-7.0/blob/master/fs/pstore/platform.c) 看日志 dump，
 再分清内存保留、下次读取、落盘、上传和服务端确认是不同阶段。
 
 只看 vpanic 不能确定根因；只看 reset 标签不能证明发生 panic；只看 SSH 恢复不能
@@ -280,7 +280,7 @@ panic，但最前面的入口与错误状态不同。
 本内核根据 crash_kexec_post_notifiers 决定捕获内核尝试在 notifier/dump 之前还是之后。
 所以“总会先写好 pstore 再进入捕获内核”不是通用保证。本案例没有启用一套已验证的
 kdump 流程，实际证据来自串口、ramoops、启动接力缓冲及后续正常启动的归档。
-源码见 [panic.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/kernel/panic.c)。
+源码见 [panic.c](https://github.com/linux-bsp/linux-7.0/blob/master/kernel/panic.c)。
 
 #### 7.15.3 printk ring、pstore 与文件归档是三层不同的保存
 
@@ -302,8 +302,8 @@ panic 文本进入 printk 日志
 printk 环形缓冲不是普通磁盘文件，ramoops 也不是把整个内核内存转储到 rootfs。
 pstore 的容量、max_reason、压缩与平台保留行为会影响可得到多少文本；启动接力缓冲
 则另外保存 SPL/U-Boot/启动 kernel，不能用 pstore 代替所有前 Linux 阶段日志。
-源码参考 [pstore/platform.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/fs/pstore/platform.c)、
-[pstore/ram.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/fs/pstore/ram.c)。
+源码参考 [pstore/platform.c](https://github.com/linux-bsp/linux-7.0/blob/master/fs/pstore/platform.c)、
+[pstore/ram.c](https://github.com/linux-bsp/linux-7.0/blob/master/fs/pstore/ram.c)。
 
 #### 7.15.4 从失败原因往前追，而不是只背最后的栈
 
@@ -397,6 +397,6 @@ ksys_write          fs/read_write.c
 实验 marker 和 panic，恢复 kernel 段 24967 字节。完整数据与 boot ID 见
 [实机记录](https://github.com/linux-bsp/workspace/blob/cb2b20ab8d17e68f4782dd96efe5a1253b64f035/docs/am625-debug-validation.md)，不能把这里的长度作为其他版本的固定验收值。
 
-[[附录A-实验报告/00-章节导航|实验报告与复盘]] · [[00-实验准备与通用方法/01-构建与启动部署#固定源码与实机证据|匹配源码、固件与实测证据]]
+[[附录A-实验报告/00-章节导航|实验报告与复盘]] · [[00-实验准备与通用方法/01-构建与启动部署#源码与实机证据|匹配源码、固件与实测证据]]
 
 [[07-内核启动与恢复/B-BOOT02-initramfs动态加载器缺库导致PID1退出/B-BOOT02：initramfs 动态加载器缺库导致 PID 1 退出|下一例 B-BOOT02]]

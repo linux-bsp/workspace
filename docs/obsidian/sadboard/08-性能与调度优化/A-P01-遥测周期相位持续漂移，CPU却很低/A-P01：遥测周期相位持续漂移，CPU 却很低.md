@@ -89,7 +89,7 @@ for variant in ('bug', 'fixed'):
 
 ## 内核流程与汇编
 
-**内核源码阅读。** [posix-timers.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/kernel/time/posix-timers.c)：clock_nanosleep 系统调用、TIMER_ABSTIME 处理；[hrtimer.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/kernel/time/hrtimer.c)：hrtimer_nanosleep、do_nanosleep、定时唤醒。从用户接口找到入口，检查配置/标志/失败分支，再画出本题的路径；这些链接不是实机完整调用栈。
+**内核源码阅读。** [posix-timers.c](https://github.com/linux-bsp/linux-7.0/blob/master/kernel/time/posix-timers.c)：clock_nanosleep 系统调用、TIMER_ABSTIME 处理；[hrtimer.c](https://github.com/linux-bsp/linux-7.0/blob/master/kernel/time/hrtimer.c)：hrtimer_nanosleep、do_nanosleep、定时唤醒。从用户接口找到入口，检查配置/标志/失败分支，再画出本题的路径；这些链接不是实机完整调用栈。
 
 ### A-P01 深入到内核与汇编
 
@@ -170,6 +170,6 @@ trace-cmd list -e
 
 **本阶段实测。** 见[验收档案中的进阶场景阶段](https://github.com/linux-bsp/workspace/blob/cb2b20ab8d17e68f4782dd96efe5a1253b64f035/docs/am625-debug-validation.md#production-cases)。原始 CSV/JSON 与追踪附件随阶段归档；不把示例公式当作实测数值。
 
-[[附录A-实验报告/00-章节导航|实验报告与复盘]] · [[00-实验准备与通用方法/01-构建与启动部署#固定源码与实机证据|匹配源码、固件与实测证据]]
+[[附录A-实验报告/00-章节导航|实验报告与复盘]] · [[00-实验准备与通用方法/01-构建与启动部署#源码与实机证据|匹配源码、固件与实测证据]]
 
 [[08-性能与调度优化/A-P02-高优先级控制线程被低优先级锁持有者拖住/A-P02：高优先级控制线程被低优先级锁持有者拖住|下一例 A-P02]]

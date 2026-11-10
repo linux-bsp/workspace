@@ -54,7 +54,7 @@ sadboard check /srv/sadboard/实际目录
 
 ## 内核流程与汇编
 
-**内核源码阅读。** [fair.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/kernel/sched/fair.c)：CFS bandwidth 与 throttle_cfs_rq；[cgroup-v2.rst](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/Documentation/admin-guide/cgroup-v2.rst)：cpu.max、cpu.stat、cpu.pressure。从用户接口找到入口，检查配置/标志/失败分支，再画出本题的路径；这些链接不是实机完整调用栈。
+**内核源码阅读。** [fair.c](https://github.com/linux-bsp/linux-7.0/blob/master/kernel/sched/fair.c)：CFS bandwidth 与 throttle_cfs_rq；[cgroup-v2.rst](https://github.com/linux-bsp/linux-7.0/blob/master/Documentation/admin-guide/cgroup-v2.rst)：cpu.max、cpu.stat、cpu.pressure。从用户接口找到入口，检查配置/标志/失败分支，再画出本题的路径；这些链接不是实机完整调用栈。
 
 ## 修复与验收
 
@@ -62,6 +62,6 @@ sadboard check /srv/sadboard/实际目录
 
 **量化验收与清理。** 同输入吞吐、响应 P99、节流增量可关联；解除实验配额后恢复基线，记录其他进程是否受影响。
 
-[[附录A-实验报告/00-章节导航|实验报告与复盘]] · [[00-实验准备与通用方法/01-构建与启动部署#固定源码与实机证据|匹配源码、固件与实测证据]]
+[[附录A-实验报告/00-章节导航|实验报告与复盘]] · [[00-实验准备与通用方法/01-构建与启动部署#源码与实机证据|匹配源码、固件与实测证据]]
 
 [[08-性能与调度优化/A-P07-冷启动缺页导致首帧长尾/A-P07：冷启动缺页导致首帧长尾|上一例 A-P07]]

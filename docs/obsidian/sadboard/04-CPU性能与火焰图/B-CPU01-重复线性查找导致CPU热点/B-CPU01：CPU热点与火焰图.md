@@ -227,17 +227,17 @@ perf 用户程序 → perf_event_open 系统调用 → 事件分配/PMU 注册
   采样处理 → perf_output_sample → mmap ring buffer → perf.data
 ```
 
-读 [kernel/events/core.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/kernel/events/core.c) 的
+读 [kernel/events/core.c](https://github.com/linux-bsp/linux-7.0/blob/master/kernel/events/core.c) 的
 `SYSCALL_DEFINE5(perf_event_open)/perf_event_overflow/perf_output_sample`，以及
-[arm_pmu.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/drivers/perf/arm_pmu.c)、
-[arm_pmuv3.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/drivers/perf/arm_pmuv3.c)。
+[arm_pmu.c](https://github.com/linux-bsp/linux-7.0/blob/master/drivers/perf/arm_pmu.c)、
+[arm_pmuv3.c](https://github.com/linux-bsp/linux-7.0/blob/master/drivers/perf/arm_pmuv3.c)。
 `task-clock` 属于软件事件，定时采样可经过 `perf_swevent_hrtimer`，与 PMU IRQ 不同。
 PMU 支持、权限、事件数及硬件计数器都是测量前提。
 
 ### 4.16 内核源码精读与关键分支
 
-读 [events/core.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/kernel/events/core.c) 的 perf_event_open、
-perf_event_overflow、perf_output_sample，以及 [ARM PMU](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/drivers/perf/arm_pmuv3.c)。
+读 [events/core.c](https://github.com/linux-bsp/linux-7.0/blob/master/kernel/events/core.c) 的 perf_event_open、
+perf_event_overflow、perf_output_sample，以及 [ARM PMU](https://github.com/linux-bsp/linux-7.0/blob/master/drivers/perf/arm_pmuv3.c)。
 配置事件、处理中断、展开/保存调用链属于测量机制；被采样的 lookup_linear 属于
 业务工作。报告里两者可能同时出现，需要结合 self/children、事件类型和采样上下文。
 
@@ -267,7 +267,7 @@ perf 用户程序准备 perf_event_attr
 影响结果。任务迁移、上下文切换和 multiplex 时，计数器还要随上下文管理；不能认为
 一个 FD 永远占据同一个 CPU 的某个硬件槽。事件创建失败与采样无符号是两类问题。
 
-在 [events/core.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/kernel/events/core.c) 从
+在 [events/core.c](https://github.com/linux-bsp/linux-7.0/blob/master/kernel/events/core.c) 从
 `SYSCALL_DEFINE5(perf_event_open)` 追到分配、上下文安装，再看相应 PMU event_init。
 函数指针、静态包装和调度分支可能使实机栈不同于这张关键路径图。
 
@@ -291,8 +291,8 @@ CPU 正在执行用户 lookup_linear
 
 被采样 IP 指向业务程序，不意味着业务程序 BL 到 IRQ 函数。中断到来可能在用户态，
 也可能在内核态；ARM64 对这两种来源有不同入口。PMU 驱动见
-[arm_pmu.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/drivers/perf/arm_pmu.c) 和
-[arm_pmuv3.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/drivers/perf/arm_pmuv3.c)。
+[arm_pmu.c](https://github.com/linux-bsp/linux-7.0/blob/master/drivers/perf/arm_pmu.c) 和
+[arm_pmuv3.c](https://github.com/linux-bsp/linux-7.0/blob/master/drivers/perf/arm_pmuv3.c)。
 本轮提取了驱动静态反汇编，并未声称重新采集过一次真实 IRQ 的完整动态栈。
 
 #### 4.17.3 为什么宽栈不等于精确的耗时或访存次数
@@ -414,6 +414,6 @@ stacks、SVG、配套 ELF 和输入后清理自己的采样进程及目录。
 说明这个输入下工作成本显著减少；本次单次比值约 472.7，**不是通用提速承诺**。
 仍需重复测量与热点/源码证据，尤其短版本很容易受计时窗口及缓存状态影响。
 
-[[附录A-实验报告/00-章节导航|实验报告与复盘]] · [[00-实验准备与通用方法/01-构建与启动部署#固定源码与实机证据|匹配源码、固件与实测证据]]
+[[附录A-实验报告/00-章节导航|实验报告与复盘]] · [[00-实验准备与通用方法/01-构建与启动部署#源码与实机证据|匹配源码、固件与实测证据]]
 
 [[04-CPU性能与火焰图/B-CPU02-EAGAIN忙轮询耗尽一个CPU/B-CPU02：EAGAIN 忙轮询耗尽一个 CPU|下一例 B-CPU02]]

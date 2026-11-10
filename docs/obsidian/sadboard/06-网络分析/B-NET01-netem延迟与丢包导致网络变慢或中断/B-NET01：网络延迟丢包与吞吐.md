@@ -95,10 +95,10 @@ TCP connect → tcp_v4_connect → 建立控制流与路由
   netem_dequeue → veth 发送 → 对端接收 → IP/TCP/ICMP 处理
 ```
 
-阅读 [tcp_ipv4.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/net/ipv4/tcp_ipv4.c)、
-[dev.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/net/core/dev.c)、
-[sch_netem.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/net/sched/sch_netem.c)、
-[veth.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/drivers/net/veth.c)。重点看 netem 的 enqueue/dequeue、
+阅读 [tcp_ipv4.c](https://github.com/linux-bsp/linux-7.0/blob/master/net/ipv4/tcp_ipv4.c)、
+[dev.c](https://github.com/linux-bsp/linux-7.0/blob/master/net/core/dev.c)、
+[sch_netem.c](https://github.com/linux-bsp/linux-7.0/blob/master/net/sched/sch_netem.c)、
+[veth.c](https://github.com/linux-bsp/linux-7.0/blob/master/drivers/net/veth.c)。重点看 netem 的 enqueue/dequeue、
 定时唤醒与丢弃分支。softirq、NAPI、GRO 等路径会随配置及报文类型变化，不能假定每个
 报文都有同一条调用栈；本案例不把软件 veth 路径写成物理网卡中断路径。
 
@@ -238,8 +238,8 @@ netem 参数及模型限制参见 [tc-netem 手册](https://man7.org/linux/man-p
 
 ### 6.15 内核源码精读与关键分支
 
-读 [sch_netem.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/net/sched/sch_netem.c) 的入队、计划发送时间和出队，
-再回到 [dev.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/net/core/dev.c) 理解 qdisc 进入发送路径的位置。
+读 [sch_netem.c](https://github.com/linux-bsp/linux-7.0/blob/master/net/sched/sch_netem.c) 的入队、计划发送时间和出队，
+再回到 [dev.c](https://github.com/linux-bsp/linux-7.0/blob/master/net/core/dev.c) 理解 qdisc 进入发送路径的位置。
 抓包点不必等于出队点，不能把本机某接口的时间戳直接当作远端到达时间。
 
 命名 namespace 被 bind mount 引用后，即使测试进程已结束仍可能存在；veth 也可能
@@ -271,10 +271,10 @@ netem 参数及模型限制参见 [tc-netem 手册](https://man7.org/linux/man-p
 重传，GSO/GRO 也改变观测形态。send 成功首先说明相应数据被本地接口接受，不能直接
 推出远端应用已经读取全部业务字节。
 
-源码入口：[net/socket.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/net/socket.c)、
-[af_inet.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/net/ipv4/af_inet.c)、
-[tcp.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/net/ipv4/tcp.c)、
-[tcp_output.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/net/ipv4/tcp_output.c)。发送缓冲不足等条件可能让
+源码入口：[net/socket.c](https://github.com/linux-bsp/linux-7.0/blob/master/net/socket.c)、
+[af_inet.c](https://github.com/linux-bsp/linux-7.0/blob/master/net/ipv4/af_inet.c)、
+[tcp.c](https://github.com/linux-bsp/linux-7.0/blob/master/net/ipv4/tcp.c)、
+[tcp_output.c](https://github.com/linux-bsp/linux-7.0/blob/master/net/ipv4/tcp_output.c)。发送缓冲不足等条件可能让
 调用者等待，因而慢 send 也不一定是物理链路速率不足。
 
 #### 6.16.2 netem 不会让发送线程持有整个链路忙等
@@ -296,8 +296,8 @@ netem 参数及模型限制参见 [tc-netem 手册](https://man7.org/linux/man-p
 抓到请求与回复”的差里；ping 从发起操作计时的 RTT 则包含该等待。定位时要查具体
 抓包点，不用一对 pcap 时间戳直接替代应用 RTT。
 
-读 [dev.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/net/core/dev.c) 与
-[sch_netem.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/net/sched/sch_netem.c)，把 enqueue、到期检查、
+读 [dev.c](https://github.com/linux-bsp/linux-7.0/blob/master/net/core/dev.c) 与
+[sch_netem.c](https://github.com/linux-bsp/linux-7.0/blob/master/net/sched/sch_netem.c)，把 enqueue、到期检查、
 watchdog、dequeue 和设备 xmit 分开，解释“配置了 100 ms”怎样对应到实际观测。
 
 #### 6.16.3 veth 到接收协议与应用
@@ -315,9 +315,9 @@ veth_xmit → 找 peer → veth_forward_skb
 
 接收侧并非每包都保证经过同一组可见函数，ICMP 请求也不走 TCP 已建立连接处理。
 veth 的 use_napi 分支取决于实际接口特性；不要把它的行为直接外推到 AM625 CPSW
-物理 DMA/NAPI/IRQ 路径。源码在 [veth.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/drivers/net/veth.c)、
-[tcp_ipv4.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/net/ipv4/tcp_ipv4.c) 和
-[tcp_input.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/net/ipv4/tcp_input.c)。
+物理 DMA/NAPI/IRQ 路径。源码在 [veth.c](https://github.com/linux-bsp/linux-7.0/blob/master/drivers/net/veth.c)、
+[tcp_ipv4.c](https://github.com/linux-bsp/linux-7.0/blob/master/net/ipv4/tcp_ipv4.c) 和
+[tcp_input.c](https://github.com/linux-bsp/linux-7.0/blob/master/net/ipv4/tcp_input.c)。
 
 TCP 协议收到 ACK、socket 数据可读、应用实际读取完成是不同事件。把 iperf 收发
 字节、ss、qdisc 和 pcap 放在这些位置理解，才能解释“本地发送很快，远端完成却慢”。
@@ -381,6 +381,6 @@ sum_received，说明自己引用哪个速率口径，不能只截其中最大�
 时间窗和丢包统计可比。抓包工具自己丢包、网卡卸载和时钟不同步，都可能制造表面矛盾。
 证据冲突时先校验观测方法，不能选择性删除“不符合预期”的附件。
 
-[[附录A-实验报告/00-章节导航|实验报告与复盘]] · [[00-实验准备与通用方法/01-构建与启动部署#固定源码与实机证据|匹配源码、固件与实测证据]]
+[[附录A-实验报告/00-章节导航|实验报告与复盘]] · [[00-实验准备与通用方法/01-构建与启动部署#源码与实机证据|匹配源码、固件与实测证据]]
 
 [[06-网络分析/B-NET02-把TCP读取次数当成报文边界/B-NET02：把 TCP 读取次数当成报文边界|下一例 B-NET02]]

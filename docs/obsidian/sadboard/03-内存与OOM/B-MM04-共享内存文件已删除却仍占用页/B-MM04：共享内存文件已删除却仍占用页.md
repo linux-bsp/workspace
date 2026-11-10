@@ -54,7 +54,7 @@ sadboard check /srv/sadboard/实际目录
 
 ## 内核流程与汇编
 
-**内核阅读入口。** [shmem.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/mm/shmem.c)：shmem_get_folio、shmem_file_setup；[file_table.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/fs/file_table.c)：文件引用释放。先确认用户态接口或信号，再向对应内核分支追踪；这些是本仓库 Linux 7.0 的源码入口，不是已经采集到的动态调用栈。
+**内核阅读入口。** [shmem.c](https://github.com/linux-bsp/linux-7.0/blob/master/mm/shmem.c)：shmem_get_folio、shmem_file_setup；[file_table.c](https://github.com/linux-bsp/linux-7.0/blob/master/fs/file_table.c)：文件引用释放。先确认用户态接口或信号，再向对应内核分支追踪；这些是本仓库 Linux 7.0 的源码入口，不是已经采集到的动态调用栈。
 
 ## 修复与验收
 
@@ -62,6 +62,6 @@ sadboard check /srv/sadboard/实际目录
 
 **量化验收与现场恢复。** 最后一个受控引用释放后，实验对象消失且对应内存回落；IPC 失败或消费者退出也能完成清理。 最后停止实验进程，释放私有文件、描述符或 namespace；保存证据再清理，不删除系统日志，不影响管理网络。
 
-[[附录A-实验报告/00-章节导航|实验报告与复盘]] · [[00-实验准备与通用方法/01-构建与启动部署#固定源码与实机证据|匹配源码、固件与实测证据]]
+[[附录A-实验报告/00-章节导航|实验报告与复盘]] · [[00-实验准备与通用方法/01-构建与启动部署#源码与实机证据|匹配源码、固件与实测证据]]
 
 [[03-内存与OOM/B-MM03-虚拟地址很大但RSS仍小/B-MM03：虚拟地址很大但 RSS 仍小|上一例 B-MM03]] · [[03-内存与OOM/B-MM05-外部SIGKILL被误判成cgroup-OOM/B-MM05：外部 SIGKILL 被误判成 cgroup OOM|下一例 B-MM05]]

@@ -54,7 +54,7 @@ sadboard check /srv/sadboard/实际目录
 
 ## 内核流程与汇编
 
-**内核阅读入口。** [read_write.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/fs/read_write.c)：vfs_write；[pipe.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/fs/pipe.c)：pipe_write；[page-writeback.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/mm/page-writeback.c)：脏页节流路径。先确认用户态接口或信号，再向对应内核分支追踪；这些是本仓库 Linux 7.0 的源码入口，不是已经采集到的动态调用栈。
+**内核阅读入口。** [read_write.c](https://github.com/linux-bsp/linux-7.0/blob/master/fs/read_write.c)：vfs_write；[pipe.c](https://github.com/linux-bsp/linux-7.0/blob/master/fs/pipe.c)：pipe_write；[page-writeback.c](https://github.com/linux-bsp/linux-7.0/blob/master/mm/page-writeback.c)：脏页节流路径。先确认用户态接口或信号，再向对应内核分支追踪；这些是本仓库 Linux 7.0 的源码入口，不是已经采集到的动态调用栈。
 
 ## 修复与验收
 
@@ -62,6 +62,6 @@ sadboard check /srv/sadboard/实际目录
 
 **量化验收与现场恢复。** 记录内容和条数相同，系统调用数下降；增加的刷出延迟和异常断电可能丢失的窗口必须量化。 最后停止实验进程，释放私有文件、描述符或 namespace；保存证据再清理，不删除系统日志，不影响管理网络。
 
-[[附录A-实验报告/00-章节导航|实验报告与复盘]] · [[00-实验准备与通用方法/01-构建与启动部署#固定源码与实机证据|匹配源码、固件与实测证据]]
+[[附录A-实验报告/00-章节导航|实验报告与复盘]] · [[00-实验准备与通用方法/01-构建与启动部署#源码与实机证据|匹配源码、固件与实测证据]]
 
 [[04-CPU性能与火焰图/B-CPU02-EAGAIN忙轮询耗尽一个CPU/B-CPU02：EAGAIN 忙轮询耗尽一个 CPU|上一例 B-CPU02]] · [[04-CPU性能与火焰图/B-CPU04-错误订阅EPOLLOUT导致空转/B-CPU04：错误订阅 EPOLLOUT 导致空转|下一例 B-CPU04]]

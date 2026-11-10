@@ -298,7 +298,7 @@ strace 会改变时序，故本步骤用于证明调用关系，不能用它的�
 
 ### 2.7 从系统调用读到内核源码
 
-对应固定内核提交见 [[00-实验准备与通用方法/00-章节导航|案例索引]]。以下是**源码关键路径**，不是用户 GDB
+内核阅读入口见 [[00-实验准备与通用方法/01-构建与启动部署#源码与实机证据|源码与实机证据]]，具体函数按实际内核核对。以下是**源码关键路径**，不是用户 GDB
 能够直接打印的完整内核栈，也不是从其他旧内核照抄的函数列表：
 
 源码流程示意：先分配受 RLIMIT_NOFILE 约束的 FD，再创建并发布打开文件对象。
@@ -316,15 +316,15 @@ strace 会改变时序，故本步骤用于证明调用关系，不能用它的�
     成功后 fd_publish → fd_install，把 struct file 发布到 fd 表
 ```
 
-阅读 [open.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/fs/open.c) 的 `do_sys_openat2`，再转到
-[file.h](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/include/linux/file.h) 的 `__FD_PREPARE_INIT`、`FD_ADD`，
-最后读 [file.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/fs/file.c) 的 `alloc_fd`。当前版本通过宏和清理
+阅读 [open.c](https://github.com/linux-bsp/linux-7.0/blob/master/fs/open.c) 的 `do_sys_openat2`，再转到
+[file.h](https://github.com/linux-bsp/linux-7.0/blob/master/include/linux/file.h) 的 `__FD_PREPARE_INIT`、`FD_ADD`，
+最后读 [file.c](https://github.com/linux-bsp/linux-7.0/blob/master/fs/file.c) 的 `alloc_fd`。当前版本通过宏和清理
 guard 表达先保留 FD、失败自动归还等规则；旧文章里直接写在 open.c 中的步骤不一定
 仍以同样形式存在。不要把宏名字误认为一定会在实机栈中出现的普通函数。
 
 `alloc_fd` 用 file_lock 保护表操作，检查 next_fd、位图和可扩展范围；达到 end 便
 返回 -EMFILE。这个错误发生在描述符槽位分配阶段，不是 `/dev/null` 读写失败。
-文件对象全局限制则读 [file_table.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/fs/file_table.c) 的
+文件对象全局限制则读 [file_table.c](https://github.com/linux-bsp/linux-7.0/blob/master/fs/file_table.c) 的
 `alloc_empty_file`：它检查资源条件，也可能有 ENOMEM 等不同失败；ENFILE 是另一条
 资源分支，不应与进程 FD 范围混为一谈。
 
@@ -341,14 +341,14 @@ close 通过 `close_fd` 在表中摘除引用，归还 FD 号，再进入 `filp_
 
 ### 2.13 内核源码精读与关键分支
 
-从 [open.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/fs/open.c) 的 do_sys_openat2 进入
-[file.h](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/include/linux/file.h) 的 FD_ADD。当前内核使用组合清理宏：
+从 [open.c](https://github.com/linux-bsp/linux-7.0/blob/master/fs/open.c) 的 do_sys_openat2 进入
+[file.h](https://github.com/linux-bsp/linux-7.0/blob/master/include/linux/file.h) 的 FD_ADD。当前内核使用组合清理宏：
 先取 FD 槽，成功后才求值文件打开表达式，再发布引用；打开失败则由清理规则归还资源。
 宏名不一定成为栈帧，不能照搬旧内核中显式展开的源码来伪造当前调用栈。
 
-读 [file.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/fs/file.c) 的 alloc_fd：候选编号达到 end 时返回 EMFILE，
+读 [file.c](https://github.com/linux-bsp/linux-7.0/blob/master/fs/file.c) 的 alloc_fd：候选编号达到 end 时返回 EMFILE，
 end 来自该进程的 RLIMIT_NOFILE。再读 close_fd 如何在锁保护下摘除表项，转入
-filp_close 与文件引用释放。最后读 [file_table.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/fs/file_table.c)
+filp_close 与文件引用释放。最后读 [file_table.c](https://github.com/linux-bsp/linux-7.0/blob/master/fs/file_table.c)
 的 alloc_empty_file、fput、__fput，区分系统对象预算、FD 槽位、最后引用和延后清理。
 
 本例只降低子进程的预算；进程退出回收不等于业务正确释放。将局部变量覆盖与 fdtable
@@ -378,7 +378,7 @@ C: open("/dev/null", O_RDONLY|O_CLOEXEC)
 在应用的 C 调用入口，x0 是路径，x1/w1 是 flags；在 openat 系统调用入口，x0 是
 目录描述符，x1 是路径，x2 是 flags；在 `__arm64_sys_openat` 的 C 包装入口，x0
 又变成保存现场的 pt_regs 指针。脱离当前边界套用参数含义，很容易看错一个指针。
-宏定义见 [syscall_wrapper.h](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/arch/arm64/include/asm/syscall_wrapper.h)。
+宏定义见 [syscall_wrapper.h](https://github.com/linux-bsp/linux-7.0/blob/master/arch/arm64/include/asm/syscall_wrapper.h)。
 
 #### 2.14.2 先预留槽，再建立打开对象
 
@@ -394,9 +394,9 @@ C: open("/dev/null", O_RDONLY|O_CLOEXEC)
 进程 NOFILE，候选编号达到 end 就失败；因此 EMFILE 可能在真正打开该路径之前产生。
 同样路径若只是已经打开多次，并不会自动复用旧 FD 或替你执行 close。
 
-FD_ADD 和清理 guard 位于 [file.h](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/include/linux/file.h)，
-打开入口位于 [open.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/fs/open.c)，槽分配/发布位于
-[file.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/fs/file.c)。这里省略了路径解析内部的多层 VFS、LSM 与设备
+FD_ADD 和清理 guard 位于 [file.h](https://github.com/linux-bsp/linux-7.0/blob/master/include/linux/file.h)，
+打开入口位于 [open.c](https://github.com/linux-bsp/linux-7.0/blob/master/fs/open.c)，槽分配/发布位于
+[file.c](https://github.com/linux-bsp/linux-7.0/blob/master/fs/file.c)。这里省略了路径解析内部的多层 VFS、LSM 与设备
 回调；不同文件类型不应伪造成相同完整栈。
 
 #### 2.14.3 errno 从哪里来，描述符什么时候能重用
@@ -555,6 +555,6 @@ trace 开头还出现 `/etc/ld.so.cache` 的 ENOENT，随后 libc 正常打开�
 是否恢复，以及业务真正终止处的错误。进程退出时内核自动释放剩余 FD，不要求 strace
 出现每个资源的显式 close 调用；本例比较的是请求生命周期内是否主动归还。
 
-[[附录A-实验报告/00-章节导航|实验报告与复盘]] · [[00-实验准备与通用方法/01-构建与启动部署#固定源码与实机证据|匹配源码、固件与实测证据]]
+[[附录A-实验报告/00-章节导航|实验报告与复盘]] · [[00-实验准备与通用方法/01-构建与启动部署#源码与实机证据|匹配源码、固件与实测证据]]
 
 [[02-文件描述符/B-FD02-dup别名使文件描述符持续增长/B-FD02：dup 别名使文件描述符持续增长|下一例 B-FD02]]

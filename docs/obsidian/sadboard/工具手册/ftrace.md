@@ -48,7 +48,7 @@ cat /sys/kernel/tracing/tracing_on
 trace_pipe 消费流式记录，filter 限定函数。函数跟踪需先筛选，避免全局高频跟踪冲掉
 证据或改变系统行为。写这些文件会影响同一 tracing instance 的其他使用者；
 优先使用独立 instance 并恢复自己的配置。接口见
-[当前内核 ftrace 文档](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/Documentation/trace/ftrace.rst)。
+[当前内核 ftrace 文档](https://github.com/linux-bsp/linux-7.0/blob/master/Documentation/trace/ftrace.rst)。
 
 ## 使用场景
 

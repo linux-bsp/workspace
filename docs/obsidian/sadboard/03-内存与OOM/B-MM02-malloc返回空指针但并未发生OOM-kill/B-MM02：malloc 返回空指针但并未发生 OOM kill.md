@@ -54,7 +54,7 @@ sadboard check /srv/sadboard/实际目录
 
 ## 内核流程与汇编
 
-**内核阅读入口。** [mmap.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/mm/mmap.c)：do_mmap、brk；[memory.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/mm/memory.c)：handle_mm_fault；[oom_kill.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/mm/oom_kill.c)：out_of_memory。先确认用户态接口或信号，再向对应内核分支追踪；这些是本仓库 Linux 7.0 的源码入口，不是已经采集到的动态调用栈。
+**内核阅读入口。** [mmap.c](https://github.com/linux-bsp/linux-7.0/blob/master/mm/mmap.c)：do_mmap、brk；[memory.c](https://github.com/linux-bsp/linux-7.0/blob/master/mm/memory.c)：handle_mm_fault；[oom_kill.c](https://github.com/linux-bsp/linux-7.0/blob/master/mm/oom_kill.c)：out_of_memory。先确认用户态接口或信号，再向对应内核分支追踪；这些是本仓库 Linux 7.0 的源码入口，不是已经采集到的动态调用栈。
 
 ## 修复与验收
 
@@ -62,6 +62,6 @@ sadboard check /srv/sadboard/实际目录
 
 **量化验收与现场恢复。** 失败输入得到明确错误、无 SIGKILL、无新增 oom_kill；正常输入仍完成相同校验和。 最后停止实验进程，释放私有文件、描述符或 namespace；保存证据再清理，不删除系统日志，不影响管理网络。
 
-[[附录A-实验报告/00-章节导航|实验报告与复盘]] · [[00-实验准备与通用方法/01-构建与启动部署#固定源码与实机证据|匹配源码、固件与实测证据]]
+[[附录A-实验报告/00-章节导航|实验报告与复盘]] · [[00-实验准备与通用方法/01-构建与启动部署#源码与实机证据|匹配源码、固件与实测证据]]
 
 [[03-内存与OOM/B-MM01-分配内存未释放触发cgroup-OOM/B-MM01：内存泄漏与cgroup-OOM|上一例 B-MM01]] · [[03-内存与OOM/B-MM03-虚拟地址很大但RSS仍小/B-MM03：虚拟地址很大但 RSS 仍小|下一例 B-MM03]]

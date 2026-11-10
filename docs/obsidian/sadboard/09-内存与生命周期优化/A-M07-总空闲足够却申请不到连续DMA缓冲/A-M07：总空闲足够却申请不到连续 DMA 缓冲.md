@@ -38,7 +38,7 @@
 
 ## 内核流程与汇编
 
-**内核源码阅读。** [cma.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/mm/cma.c)：cma_alloc；[compaction.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/mm/compaction.c)：try_to_compact_pages；[page_alloc.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/mm/page_alloc.c)：__alloc_pages_slowpath。从用户接口找到入口，检查配置/标志/失败分支，再画出本题的路径；这些链接不是实机完整调用栈。
+**内核源码阅读。** [cma.c](https://github.com/linux-bsp/linux-7.0/blob/master/mm/cma.c)：cma_alloc；[compaction.c](https://github.com/linux-bsp/linux-7.0/blob/master/mm/compaction.c)：try_to_compact_pages；[page_alloc.c](https://github.com/linux-bsp/linux-7.0/blob/master/mm/page_alloc.c)：__alloc_pages_slowpath。从用户接口找到入口，检查配置/标志/失败分支，再画出本题的路径；这些链接不是实机完整调用栈。
 
 ## 修复与验收
 
@@ -46,6 +46,6 @@
 
 **量化验收与清理。** 硬件条件满足时按预定帧池规模多轮申请/释放并校验数据，无泄漏且尾延迟满足预算；当前仅设计，缺失条件明确标为未验证。
 
-[[附录A-实验报告/00-章节导航|实验报告与复盘]] · [[00-实验准备与通用方法/01-构建与启动部署#固定源码与实机证据|匹配源码、固件与实测证据]]
+[[附录A-实验报告/00-章节导航|实验报告与复盘]] · [[00-实验准备与通用方法/01-构建与启动部署#源码与实机证据|匹配源码、固件与实测证据]]
 
 [[09-内存与生命周期优化/A-M06-socket与slab增长被误判为用户堆泄漏/A-M06：socket 与 slab 增长被误判为用户堆泄漏|上一例 A-M06]] · [[09-内存与生命周期优化/A-M08-线程扩张带来的栈、TLS与调度预算失控/A-M08：线程扩张带来的栈、TLS 与调度预算失控|下一例 A-M08]]

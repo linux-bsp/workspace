@@ -54,7 +54,7 @@ sadboard check /srv/sadboard/实际目录
 
 ## 内核流程与汇编
 
-**内核阅读入口。** [socket.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/net/socket.c)：用户缓冲送入协议栈的边界；[fault.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/arch/arm64/mm/fault.c)：未对齐/访问异常的架构背景。先确认用户态接口或信号，再向对应内核分支追踪；这些是本仓库 Linux 7.0 的源码入口，不是已经采集到的动态调用栈。
+**内核阅读入口。** [socket.c](https://github.com/linux-bsp/linux-7.0/blob/master/net/socket.c)：用户缓冲送入协议栈的边界；[fault.c](https://github.com/linux-bsp/linux-7.0/blob/master/arch/arm64/mm/fault.c)：未对齐/访问异常的架构背景。先确认用户态接口或信号，再向对应内核分支追踪；这些是本仓库 Linux 7.0 的源码入口，不是已经采集到的动态调用栈。
 
 ## 修复与验收
 
@@ -62,6 +62,6 @@ sadboard check /srv/sadboard/实际目录
 
 **量化验收与现场恢复。** 同一线格式在不同端序模型下得到相同业务长度，非法长度在分配前拒绝，正常帧内容不变。 最后停止实验进程，释放私有文件、描述符或 namespace；保存证据再清理，不删除系统日志，不影响管理网络。
 
-[[附录A-实验报告/00-章节导航|实验报告与复盘]] · [[00-实验准备与通用方法/01-构建与启动部署#固定源码与实机证据|匹配源码、固件与实测证据]]
+[[附录A-实验报告/00-章节导航|实验报告与复盘]] · [[00-实验准备与通用方法/01-构建与启动部署#源码与实机证据|匹配源码、固件与实测证据]]
 
 [[06-网络分析/B-NET02-把TCP读取次数当成报文边界/B-NET02：把 TCP 读取次数当成报文边界|上一例 B-NET02]] · [[06-网络分析/B-NET04-UDP接收队列溢出而非链路丢包/B-NET04：UDP 接收队列溢出而非链路丢包|下一例 B-NET04]]

@@ -96,7 +96,7 @@ def validate(notes):
                 if not target.startswith(("https://", "http://", "mailto:")):
                     errors.append(f"{name}: use a vault link or a source URL: {target}")
                 url = urlsplit(target)
-                source = re.fullmatch(r"/([^/]+/[^/]+)/blob/[0-9a-f]{40}/(.+)", url.path)
+                source = re.fullmatch(r"/([^/]+/[^/]+)/blob/[^/]+/(.+)", url.path)
                 if url.netloc == "github.com" and source and source[1] in REPOS:
                     local = REPOS[source[1]] / unquote(source[2])
                     source_paths.add(local)

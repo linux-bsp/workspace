@@ -54,7 +54,7 @@ sadboard check /srv/sadboard/实际目录
 
 ## 内核流程与汇编
 
-**内核源码阅读。** [mmap.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/mm/mmap.c)：brk、munmap 路径；[madvise.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/mm/madvise.c)：madvise 丢弃页等路径。从用户接口找到入口，检查配置/标志/失败分支，再画出本题的路径；这些链接不是实机完整调用栈。
+**内核源码阅读。** [mmap.c](https://github.com/linux-bsp/linux-7.0/blob/master/mm/mmap.c)：brk、munmap 路径；[madvise.c](https://github.com/linux-bsp/linux-7.0/blob/master/mm/madvise.c)：madvise 丢弃页等路径。从用户接口找到入口，检查配置/标志/失败分支，再画出本题的路径；这些链接不是实机完整调用栈。
 
 ## 修复与验收
 
@@ -62,6 +62,6 @@ sadboard check /srv/sadboard/实际目录
 
 **量化验收与清理。** 重复 N 轮后活跃字节/映射/RSS 是否进入平台期，业务数不减少；明确何种“高水位保留”可接受，而不是要求每次 RSS 回到一模一样的数。
 
-[[附录A-实验报告/00-章节导航|实验报告与复盘]] · [[00-实验准备与通用方法/01-构建与启动部署#固定源码与实机证据|匹配源码、固件与实测证据]]
+[[附录A-实验报告/00-章节导航|实验报告与复盘]] · [[00-实验准备与通用方法/01-构建与启动部署#源码与实机证据|匹配源码、固件与实测证据]]
 
 [[09-内存与生命周期优化/A-M01-慢消费者使有效队列挤爆内存/A-M01：慢消费者使有效队列挤爆内存|上一例 A-M01]] · [[09-内存与生命周期优化/A-M03-数据流水线多次复制和缓冲池生命周期错误/A-M03：数据流水线多次复制和缓冲池生命周期错误|下一例 A-M03]]

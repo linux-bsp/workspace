@@ -30,7 +30,7 @@
 
 ## 内核流程与汇编
 
-**内核阅读入口。** [watchdog.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/kernel/watchdog.c)：soft lockup 检测；[tree_stall.h](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/kernel/rcu/tree_stall.h)：RCU stall 检查；[watchdog_core.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/drivers/watchdog/watchdog_core.c)：硬件 watchdog 设备框架。先确认用户态接口或信号，再向对应内核分支追踪；这些是本仓库 Linux 7.0 的源码入口，不是已经采集到的动态调用栈。
+**内核阅读入口。** [watchdog.c](https://github.com/linux-bsp/linux-7.0/blob/master/kernel/watchdog.c)：soft lockup 检测；[tree_stall.h](https://github.com/linux-bsp/linux-7.0/blob/master/kernel/rcu/tree_stall.h)：RCU stall 检查；[watchdog_core.c](https://github.com/linux-bsp/linux-7.0/blob/master/drivers/watchdog/watchdog_core.c)：硬件 watchdog 设备框架。先确认用户态接口或信号，再向对应内核分支追踪；这些是本仓库 Linux 7.0 的源码入口，不是已经采集到的动态调用栈。
 
 ## 修复与验收
 
@@ -38,6 +38,6 @@
 
 **量化验收与现场恢复。** 受控故障原因与复位证据对应，健康负载不误复位；检测器不可用、断电 RAM 不保留等边界单独标记。 最后核对恢复启动的固件身份、健康检查与日志归档；不清除系统历史记录。
 
-[[附录A-实验报告/00-章节导航|实验报告与复盘]] · [[00-实验准备与通用方法/01-构建与启动部署#固定源码与实机证据|匹配源码、固件与实测证据]]
+[[附录A-实验报告/00-章节导航|实验报告与复盘]] · [[00-实验准备与通用方法/01-构建与启动部署#源码与实机证据|匹配源码、固件与实测证据]]
 
 [[07-内核启动与恢复/B-BOOT04-内核Oops与panic策略的区别/B-BOOT04：内核 Oops 与 panic 策略的区别|上一例 B-BOOT04]]

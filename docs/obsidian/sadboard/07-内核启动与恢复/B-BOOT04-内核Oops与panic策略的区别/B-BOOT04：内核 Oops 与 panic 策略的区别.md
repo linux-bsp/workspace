@@ -30,7 +30,7 @@
 
 ## 内核流程与汇编
 
-**内核阅读入口。** [fault.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/arch/arm64/mm/fault.c)：__do_kernel_fault；[traps.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/arch/arm64/kernel/traps.c)：die；[panic.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/kernel/panic.c)：panic、oops 相关策略。先确认用户态接口或信号，再向对应内核分支追踪；这些是本仓库 Linux 7.0 的源码入口，不是已经采集到的动态调用栈。
+**内核阅读入口。** [fault.c](https://github.com/linux-bsp/linux-7.0/blob/master/arch/arm64/mm/fault.c)：__do_kernel_fault；[traps.c](https://github.com/linux-bsp/linux-7.0/blob/master/arch/arm64/kernel/traps.c)：die；[panic.c](https://github.com/linux-bsp/linux-7.0/blob/master/kernel/panic.c)：panic、oops 相关策略。先确认用户态接口或信号，再向对应内核分支追踪；这些是本仓库 Linux 7.0 的源码入口，不是已经采集到的动态调用栈。
 
 ## 修复与验收
 
@@ -38,6 +38,6 @@
 
 **量化验收与现场恢复。** 同一错误的上下文和策略差异可解释，修复后故障输入不再触发 Oops，正常设备路径仍有效。 最后核对恢复启动的固件身份、健康检查与日志归档；不清除系统历史记录。
 
-[[附录A-实验报告/00-章节导航|实验报告与复盘]] · [[00-实验准备与通用方法/01-构建与启动部署#固定源码与实机证据|匹配源码、固件与实测证据]]
+[[附录A-实验报告/00-章节导航|实验报告与复盘]] · [[00-实验准备与通用方法/01-构建与启动部署#源码与实机证据|匹配源码、固件与实测证据]]
 
 [[07-内核启动与恢复/B-BOOT03-根设备或文件系统参数错误导致VFS启动失败/B-BOOT03：根设备或文件系统参数错误导致 VFS 启动失败|上一例 B-BOOT03]] · [[07-内核启动与恢复/B-BOOT05-soft-lockup、RCU-stall与硬件watchdog复位归因/B-BOOT05：soft lockup、RCU stall 与硬件 watchdog 复位归因|下一例 B-BOOT05]]

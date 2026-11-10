@@ -54,7 +54,7 @@ sadboard check /srv/sadboard/实际目录
 
 ## 内核流程与汇编
 
-**内核源码阅读。** [sync.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/fs/sync.c)：vfs_fsync_range；[file.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/fs/nfs/file.c)：NFS 文件写入/同步；[page-writeback.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/mm/page-writeback.c)：脏页与回写。从用户接口找到入口，检查配置/标志/失败分支，再画出本题的路径；这些链接不是实机完整调用栈。
+**内核源码阅读。** [sync.c](https://github.com/linux-bsp/linux-7.0/blob/master/fs/sync.c)：vfs_fsync_range；[file.c](https://github.com/linux-bsp/linux-7.0/blob/master/fs/nfs/file.c)：NFS 文件写入/同步；[page-writeback.c](https://github.com/linux-bsp/linux-7.0/blob/master/mm/page-writeback.c)：脏页与回写。从用户接口找到入口，检查配置/标志/失败分支，再画出本题的路径；这些链接不是实机完整调用栈。
 
 ## 修复与验收
 
@@ -62,6 +62,6 @@ sadboard check /srv/sadboard/实际目录
 
 **量化验收与清理。** 输入字节与落盘校验相同；明确每种策略最大可丢窗口、吞吐及 P99，控制服务仍可响应，文件总量在限额内。
 
-[[附录A-实验报告/00-章节导航|实验报告与复盘]] · [[00-实验准备与通用方法/01-构建与启动部署#固定源码与实机证据|匹配源码、固件与实测证据]]
+[[附录A-实验报告/00-章节导航|实验报告与复盘]] · [[00-实验准备与通用方法/01-构建与启动部署#源码与实机证据|匹配源码、固件与实测证据]]
 
 [[08-性能与调度优化/A-P05-高频日志格式化与系统调用放大/A-P05：高频日志格式化与系统调用放大|上一例 A-P05]] · [[08-性能与调度优化/A-P07-冷启动缺页导致首帧长尾/A-P07：冷启动缺页导致首帧长尾|下一例 A-P07]]

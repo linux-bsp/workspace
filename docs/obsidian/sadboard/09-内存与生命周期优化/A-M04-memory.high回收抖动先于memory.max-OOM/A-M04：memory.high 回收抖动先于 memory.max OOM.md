@@ -54,7 +54,7 @@ sadboard check /srv/sadboard/实际目录
 
 ## 内核流程与汇编
 
-**内核源码阅读。** [memcontrol.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/mm/memcontrol.c)：__mem_cgroup_handle_over_high、try_charge_memcg；[vmscan.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/mm/vmscan.c)：回收扫描；[cgroup-v2.rst](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/Documentation/admin-guide/cgroup-v2.rst)：memory.events、memory.pressure。从用户接口找到入口，检查配置/标志/失败分支，再画出本题的路径；这些链接不是实机完整调用栈。
+**内核源码阅读。** [memcontrol.c](https://github.com/linux-bsp/linux-7.0/blob/master/mm/memcontrol.c)：__mem_cgroup_handle_over_high、try_charge_memcg；[vmscan.c](https://github.com/linux-bsp/linux-7.0/blob/master/mm/vmscan.c)：回收扫描；[cgroup-v2.rst](https://github.com/linux-bsp/linux-7.0/blob/master/Documentation/admin-guide/cgroup-v2.rst)：memory.events、memory.pressure。从用户接口找到入口，检查配置/标志/失败分支，再画出本题的路径；这些链接不是实机完整调用栈。
 
 ## 修复与验收
 
@@ -62,6 +62,6 @@ sadboard check /srv/sadboard/实际目录
 
 **量化验收与清理。** 同样工作量，明确 high 事件与卡顿关系；参考版保持容量边界且不 OOM，停止 unit 后实验 cgroup 自动回收。
 
-[[附录A-实验报告/00-章节导航|实验报告与复盘]] · [[00-实验准备与通用方法/01-构建与启动部署#固定源码与实机证据|匹配源码、固件与实测证据]]
+[[附录A-实验报告/00-章节导航|实验报告与复盘]] · [[00-实验准备与通用方法/01-构建与启动部署#源码与实机证据|匹配源码、固件与实测证据]]
 
 [[09-内存与生命周期优化/A-M03-数据流水线多次复制和缓冲池生命周期错误/A-M03：数据流水线多次复制和缓冲池生命周期错误|上一例 A-M03]] · [[09-内存与生命周期优化/A-M05-共享帧池跨进程引用未完成导致长期占用/A-M05：共享帧池跨进程引用未完成导致长期占用|下一例 A-M05]]

@@ -30,7 +30,7 @@
 
 ## 内核流程与汇编
 
-**内核阅读入口。** [exec.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/fs/exec.c)：bprm_execve；[binfmt_elf.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/fs/binfmt_elf.c)：load_elf_binary；[exit.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/kernel/exit.c)：do_exit；[panic.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/kernel/panic.c)：panic。先确认用户态接口或信号，再向对应内核分支追踪；这些是本仓库 Linux 7.0 的源码入口，不是已经采集到的动态调用栈。
+**内核阅读入口。** [exec.c](https://github.com/linux-bsp/linux-7.0/blob/master/fs/exec.c)：bprm_execve；[binfmt_elf.c](https://github.com/linux-bsp/linux-7.0/blob/master/fs/binfmt_elf.c)：load_elf_binary；[exit.c](https://github.com/linux-bsp/linux-7.0/blob/master/kernel/exit.c)：do_exit；[panic.c](https://github.com/linux-bsp/linux-7.0/blob/master/kernel/panic.c)：panic。先确认用户态接口或信号，再向对应内核分支追踪；这些是本仓库 Linux 7.0 的源码入口，不是已经采集到的动态调用栈。
 
 ## 修复与验收
 
@@ -38,6 +38,6 @@
 
 **量化验收与现场恢复。** 缺库故障在真实设备稳定可复现，完整副本可启动；依赖检查在打包阶段拒绝缺失文件。 最后核对恢复启动的固件身份、健康检查与日志归档；不清除系统历史记录。
 
-[[附录A-实验报告/00-章节导航|实验报告与复盘]] · [[00-实验准备与通用方法/01-构建与启动部署#固定源码与实机证据|匹配源码、固件与实测证据]]
+[[附录A-实验报告/00-章节导航|实验报告与复盘]] · [[00-实验准备与通用方法/01-构建与启动部署#源码与实机证据|匹配源码、固件与实测证据]]
 
 [[07-内核启动与恢复/B-BOOT01-内核panic触发后的启动日志取证与恢复/B-BOOT01：内核panic启动日志与恢复|上一例 B-BOOT01]] · [[07-内核启动与恢复/B-BOOT03-根设备或文件系统参数错误导致VFS启动失败/B-BOOT03：根设备或文件系统参数错误导致 VFS 启动失败|下一例 B-BOOT03]]

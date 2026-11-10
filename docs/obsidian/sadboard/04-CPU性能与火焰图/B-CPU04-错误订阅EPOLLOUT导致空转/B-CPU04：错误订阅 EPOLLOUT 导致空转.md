@@ -54,7 +54,7 @@ sadboard check /srv/sadboard/实际目录
 
 ## 内核流程与汇编
 
-**内核阅读入口。** [eventpoll.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/fs/eventpoll.c)：ep_poll_callback、ep_poll；[tcp.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/net/ipv4/tcp.c)：tcp_poll。先确认用户态接口或信号，再向对应内核分支追踪；这些是本仓库 Linux 7.0 的源码入口，不是已经采集到的动态调用栈。
+**内核阅读入口。** [eventpoll.c](https://github.com/linux-bsp/linux-7.0/blob/master/fs/eventpoll.c)：ep_poll_callback、ep_poll；[tcp.c](https://github.com/linux-bsp/linux-7.0/blob/master/net/ipv4/tcp.c)：tcp_poll。先确认用户态接口或信号，再向对应内核分支追踪；这些是本仓库 Linux 7.0 的源码入口，不是已经采集到的动态调用栈。
 
 ## 修复与验收
 
@@ -62,6 +62,6 @@ sadboard check /srv/sadboard/实际目录
 
 **量化验收与现场恢复。** 无输出时停止空转，有新输出时仍及时发送；缓冲区正确排空，无重复或遗漏。 最后停止实验进程，释放私有文件、描述符或 namespace；保存证据再清理，不删除系统日志，不影响管理网络。
 
-[[附录A-实验报告/00-章节导航|实验报告与复盘]] · [[00-实验准备与通用方法/01-构建与启动部署#固定源码与实机证据|匹配源码、固件与实测证据]]
+[[附录A-实验报告/00-章节导航|实验报告与复盘]] · [[00-实验准备与通用方法/01-构建与启动部署#源码与实机证据|匹配源码、固件与实测证据]]
 
 [[04-CPU性能与火焰图/B-CPU03-高频日志格式化与小写入放大开销/B-CPU03：高频日志格式化与小写入放大开销|上一例 B-CPU03]] · [[04-CPU性能与火焰图/B-CPU05-访问顺序破坏缓存局部性/B-CPU05：访问顺序破坏缓存局部性|下一例 B-CPU05]]

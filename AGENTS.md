@@ -33,6 +33,7 @@ Without `O=`, artifacts go to `buildroot/output/`; the current board validation 
 Use `git diff --check`, `git diff --cached --check`, and `git status --short`. Review untracked files separately.
 For learning-document changes, run `python3 scripts/check-obsidian.py` to validate wiki links, headings, case coverage, source paths and navigation reachability. Maintain the Obsidian vault directly; do not recreate a consolidated handbook or an export pipeline. Preserve the user's Obsidian settings; do not commit window state, caches or personal reports. Chinese chapter/note names are intentional in this vault.
 Obsidian displays the filename as the note title; do not repeat it as a level-one heading in the body or add YAML note properties. Body sections start at `##`. Case IDs come from descriptive directory names and must match the filename prefix; personal reports belong in an optional ignored `实验记录/` directory. Avoid standalone pages that only repeat navigation or a small section of their parent topic.
+Kernel learning material is not restricted to a particular commit. Use the kernel repository's `master` branch for reading links and the actual checked-out sources for local study. Keep historical evidence tied to its recorded build; addresses and disassembly require that firmware's matching sources and symbols.
 
 ## Coding Style & Naming Conventions
 

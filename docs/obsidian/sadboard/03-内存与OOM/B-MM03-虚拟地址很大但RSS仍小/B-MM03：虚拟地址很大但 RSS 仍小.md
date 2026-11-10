@@ -54,7 +54,7 @@ sadboard check /srv/sadboard/实际目录
 
 ## 内核流程与汇编
 
-**内核阅读入口。** [mmap.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/mm/mmap.c)：do_mmap；[memory.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/mm/memory.c)：do_anonymous_page、handle_mm_fault。先确认用户态接口或信号，再向对应内核分支追踪；这些是本仓库 Linux 7.0 的源码入口，不是已经采集到的动态调用栈。
+**内核阅读入口。** [mmap.c](https://github.com/linux-bsp/linux-7.0/blob/master/mm/mmap.c)：do_mmap；[memory.c](https://github.com/linux-bsp/linux-7.0/blob/master/mm/memory.c)：do_anonymous_page、handle_mm_fault。先确认用户态接口或信号，再向对应内核分支追踪；这些是本仓库 Linux 7.0 的源码入口，不是已经采集到的动态调用栈。
 
 ## 修复与验收
 
@@ -62,6 +62,6 @@ sadboard check /srv/sadboard/实际目录
 
 **量化验收与现场恢复。** 能解释每阶段地址空间与 RSS 的差异，解除映射后相关地址范围消失；不能把页缓存变化混入匿名页结论。 最后停止实验进程，释放私有文件、描述符或 namespace；保存证据再清理，不删除系统日志，不影响管理网络。
 
-[[附录A-实验报告/00-章节导航|实验报告与复盘]] · [[00-实验准备与通用方法/01-构建与启动部署#固定源码与实机证据|匹配源码、固件与实测证据]]
+[[附录A-实验报告/00-章节导航|实验报告与复盘]] · [[00-实验准备与通用方法/01-构建与启动部署#源码与实机证据|匹配源码、固件与实测证据]]
 
 [[03-内存与OOM/B-MM02-malloc返回空指针但并未发生OOM-kill/B-MM02：malloc 返回空指针但并未发生 OOM kill|上一例 B-MM02]] · [[03-内存与OOM/B-MM04-共享内存文件已删除却仍占用页/B-MM04：共享内存文件已删除却仍占用页|下一例 B-MM04]]

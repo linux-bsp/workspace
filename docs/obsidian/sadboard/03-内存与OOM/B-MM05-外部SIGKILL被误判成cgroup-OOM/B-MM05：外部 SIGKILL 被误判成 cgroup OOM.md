@@ -54,7 +54,7 @@ sadboard check /srv/sadboard/实际目录
 
 ## 内核流程与汇编
 
-**内核阅读入口。** [memcontrol.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/mm/memcontrol.c)：mem_cgroup_out_of_memory；[oom_kill.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/mm/oom_kill.c)：oom_kill_process；[signal.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/kernel/signal.c)：发送与处理信号。先确认用户态接口或信号，再向对应内核分支追踪；这些是本仓库 Linux 7.0 的源码入口，不是已经采集到的动态调用栈。
+**内核阅读入口。** [memcontrol.c](https://github.com/linux-bsp/linux-7.0/blob/master/mm/memcontrol.c)：mem_cgroup_out_of_memory；[oom_kill.c](https://github.com/linux-bsp/linux-7.0/blob/master/mm/oom_kill.c)：oom_kill_process；[signal.c](https://github.com/linux-bsp/linux-7.0/blob/master/kernel/signal.c)：发送与处理信号。先确认用户态接口或信号，再向对应内核分支追踪；这些是本仓库 Linux 7.0 的源码入口，不是已经采集到的动态调用栈。
 
 ## 修复与验收
 
@@ -62,6 +62,6 @@ sadboard check /srv/sadboard/实际目录
 
 **量化验收与现场恢复。** 两个实验均可得到 SIGKILL，但只有真正 OOM 的实验新增相应事件；报警原因和原始证据一一对应。 最后停止实验进程，释放私有文件、描述符或 namespace；保存证据再清理，不删除系统日志，不影响管理网络。
 
-[[附录A-实验报告/00-章节导航|实验报告与复盘]] · [[00-实验准备与通用方法/01-构建与启动部署#固定源码与实机证据|匹配源码、固件与实测证据]]
+[[附录A-实验报告/00-章节导航|实验报告与复盘]] · [[00-实验准备与通用方法/01-构建与启动部署#源码与实机证据|匹配源码、固件与实测证据]]
 
 [[03-内存与OOM/B-MM04-共享内存文件已删除却仍占用页/B-MM04：共享内存文件已删除却仍占用页|上一例 B-MM04]]

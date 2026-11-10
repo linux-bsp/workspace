@@ -54,7 +54,7 @@ sadboard check /srv/sadboard/实际目录
 
 ## 内核流程与汇编
 
-**内核源码阅读。** [atomic_t.rst](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/Documentation/core-api/wrappers/atomic_t.rst)：内核原子语义，用户 C 原子仍按其语言标准；[arm_pmuv3.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/drivers/perf/arm_pmuv3.c)：ARM PMUv3 事件支持。从用户接口找到入口，检查配置/标志/失败分支，再画出本题的路径；这些链接不是实机完整调用栈。
+**内核源码阅读。** [atomic_t.rst](https://github.com/linux-bsp/linux-7.0/blob/master/Documentation/core-api/wrappers/atomic_t.rst)：内核原子语义，用户 C 原子仍按其语言标准；[arm_pmuv3.c](https://github.com/linux-bsp/linux-7.0/blob/master/drivers/perf/arm_pmuv3.c)：ARM PMUv3 事件支持。从用户接口找到入口，检查配置/标志/失败分支，再画出本题的路径；这些链接不是实机完整调用栈。
 
 ## 修复与验收
 
@@ -62,6 +62,6 @@ sadboard check /srv/sadboard/实际目录
 
 **量化验收与清理。** 最终计数完全相同；预热后至少三次记录 wall/CPU、cycles/op 与事件可用性，单核对照不应被当作多核一致性证据。
 
-[[附录A-实验报告/00-章节导航|实验报告与复盘]] · [[00-实验准备与通用方法/01-构建与启动部署#固定源码与实机证据|匹配源码、固件与实测证据]]
+[[附录A-实验报告/00-章节导航|实验报告与复盘]] · [[00-实验准备与通用方法/01-构建与启动部署#源码与实机证据|匹配源码、固件与实测证据]]
 
 [[08-性能与调度优化/A-P03-共享事件循环中的慢回调阻塞控制请求/A-P03：共享事件循环中的慢回调阻塞控制请求|上一例 A-P03]] · [[08-性能与调度优化/A-P05-高频日志格式化与系统调用放大/A-P05：高频日志格式化与系统调用放大|下一例 A-P05]]

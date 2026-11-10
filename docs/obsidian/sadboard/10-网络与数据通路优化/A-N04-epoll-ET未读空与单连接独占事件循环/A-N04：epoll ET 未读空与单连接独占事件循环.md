@@ -54,7 +54,7 @@ sadboard check /srv/sadboard/实际目录
 
 ## 内核流程与汇编
 
-**内核源码阅读。** [eventpoll.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/fs/eventpoll.c)：ep_poll、EPOLLET 事件处理；[tcp.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/net/ipv4/tcp.c)：tcp_poll、tcp_recvmsg_locked。从用户接口找到入口，检查配置/标志/失败分支，再画出本题的路径；这些链接不是实机完整调用栈。
+**内核源码阅读。** [eventpoll.c](https://github.com/linux-bsp/linux-7.0/blob/master/fs/eventpoll.c)：ep_poll、EPOLLET 事件处理；[tcp.c](https://github.com/linux-bsp/linux-7.0/blob/master/net/ipv4/tcp.c)：tcp_poll、tcp_recvmsg_locked。从用户接口找到入口，检查配置/标志/失败分支，再画出本题的路径；这些链接不是实机完整调用栈。
 
 ## 修复与验收
 
@@ -62,6 +62,6 @@ sadboard check /srv/sadboard/实际目录
 
 **量化验收与清理。** 每个序号都被处理，双流均能推进；没有空转、长尾下降、重新注册不丢事件，所有 fd 与 namespace 清理。
 
-[[附录A-实验报告/00-章节导航|实验报告与复盘]] · [[00-实验准备与通用方法/01-构建与启动部署#固定源码与实机证据|匹配源码、固件与实测证据]]
+[[附录A-实验报告/00-章节导航|实验报告与复盘]] · [[00-实验准备与通用方法/01-构建与启动部署#源码与实机证据|匹配源码、固件与实测证据]]
 
 [[10-网络与数据通路优化/A-N03-慢对端背压使发送队列膨胀/A-N03：慢对端背压使发送队列膨胀|上一例 A-N03]] · [[10-网络与数据通路优化/A-N05-MTU与PMTU黑洞造成小包正常、大包卡住/A-N05：MTU／PMTU 黑洞造成小包正常、大包卡住|下一例 A-N05]]

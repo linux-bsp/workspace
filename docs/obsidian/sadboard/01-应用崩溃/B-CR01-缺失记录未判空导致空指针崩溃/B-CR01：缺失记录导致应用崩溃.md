@@ -80,11 +80,11 @@ EL0 访存异常
   do_coredump → coredump_write → ELF 的 elf_core_dump → 退出线程组
 ```
 
-阅读入口：[entry-common.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/arch/arm64/kernel/entry-common.c)、
-[fault.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/arch/arm64/mm/fault.c) 的 `do_page_fault/bad_area`、
-[signal.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/kernel/signal.c) 的 `get_signal`、
-[coredump.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/fs/coredump.c) 及
-[binfmt_elf.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/fs/binfmt_elf.c) 的 `elf_core_dump`。
+阅读入口：[entry-common.c](https://github.com/linux-bsp/linux-7.0/blob/master/arch/arm64/kernel/entry-common.c)、
+[fault.c](https://github.com/linux-bsp/linux-7.0/blob/master/arch/arm64/mm/fault.c) 的 `do_page_fault/bad_area`、
+[signal.c](https://github.com/linux-bsp/linux-7.0/blob/master/kernel/signal.c) 的 `get_signal`、
+[coredump.c](https://github.com/linux-bsp/linux-7.0/blob/master/fs/coredump.c) 及
+[binfmt_elf.c](https://github.com/linux-bsp/linux-7.0/blob/master/fs/binfmt_elf.c) 的 `elf_core_dump`。
 检查 `SEGV_MAPERR` 与 `SEGV_ACCERR` 两个分支，理解“无映射”和“权限错误”的差异。
 
 ## 练习任务
@@ -349,21 +349,21 @@ BusyBox ash 的 core 上限单位为 512 字节，上述上限为 32 MiB。该�
 符号 SHA256 与关键内核配置；符号文件存在不代表 GDB 已正确恢复加载地址。
 
 过滤器定义见内核源码的
-[proc 文档](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/Documentation/filesystems/proc.rst)，
+[proc 文档](https://github.com/linux-bsp/linux-7.0/blob/master/Documentation/filesystems/proc.rst)，
 实际初版现场和对照输出保存在 `output/validation/stage1-debug/`。
 
 ## 内核流程与汇编
 
 ### 1.14 内核源码精读与关键分支
 
-读 [fault.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/arch/arm64/mm/fault.c) 的 `do_page_fault`：
+读 [fault.c](https://github.com/linux-bsp/linux-7.0/blob/master/arch/arm64/mm/fault.c) 的 `do_page_fault`：
 
 1. 识别 EL0/EL1、读/写/取指，决定需要什么 VMA 权限。
 2. 根据地址查找有效 VMA；没有 VMA 与权限不符是不同的错误分支。
 3. 合法 VMA 进入 `handle_mm_fault`，可能建立页表或处理写时复制，恢复后重试原指令。
 4. 无法合法恢复才转入信号或内核异常处置；`VM_FAULT_OOM` 还有自己的处理分支。
 
-再读 [memory.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/mm/memory.c) 的 `handle_mm_fault`、
+再读 [memory.c](https://github.com/linux-bsp/linux-7.0/blob/master/mm/memory.c) 的 `handle_mm_fault`、
 `do_anonymous_page`：合法首次写触可以分配匿名 folio、做 memcg 计费、建立 PTE。
 因此“缺页数增加”“malloc 返回地址”“RSS 增加”是不同事件，不能混用。
 
@@ -373,7 +373,7 @@ SIGSEGV 还需区分 MAPERR/ACCERR，不能把所有访存异常都归为 NULL�
 
 ### 1.16 详细内核流程：错误指令怎样变成 SIGSEGV 和 core
 
-这里把入口、内存判定、信号和转储拆成四段。以下是固定 Linux 提交的**源码推导**，
+这里把入口、内存判定、信号和转储拆成四段。以下是 Linux 的**源码推导**，具体函数与分支应按实际内核核对，
 不是额外抓到的一条完整实机内核栈；第 1.12 节的用户 core 则是真实采集结果。
 
 #### 1.16.1 MMU 报错之前与之后
@@ -449,14 +449,14 @@ get_signal
 
 组内线程协调、dumpable/权限检查、core 大小限制、coredump_filter、普通文件/管道输出
 都是这条路径的条件。SIGKILL 不生成同样的 core；core 写入失败也不代表原先没有异常。
-参考 [signal.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/kernel/signal.c)、
-[coredump.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/fs/coredump.c)、
-[binfmt_elf.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/fs/binfmt_elf.c)。
+参考 [signal.c](https://github.com/linux-bsp/linux-7.0/blob/master/kernel/signal.c)、
+[coredump.c](https://github.com/linux-bsp/linux-7.0/blob/master/fs/coredump.c)、
+[binfmt_elf.c](https://github.com/linux-bsp/linux-7.0/blob/master/fs/binfmt_elf.c)。
 
 #### 1.16.4 ESR 解码入门：错误类别与页表阶段
 
 仅在确实保存了相应寄存器的现场中解码 ESR；用户 core 的 si_code 不是 ESR。
-固定内核 [esr.h](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/arch/arm64/include/asm/esr.h) 给出了字段宏：
+内核 [esr.h](https://github.com/linux-bsp/linux-7.0/blob/master/arch/arm64/include/asm/esr.h) 给出了字段宏：
 EC 位于高部位的 [31:26]，DABT_LOW 的类别值为 0x24，DABT_CUR 为 0x25；
 对于数据异常还要继续解释 ISS 中的读写与 Fault Status Code，而不是只看最高字节。
 
@@ -593,6 +593,6 @@ siginfo 是包含联合体的结构；GDB 一次打印可能把同一批字节�
 误读为“PID 4 发来了信号”。PC、栈地址受 ASLR 影响，不要求下一次数值完全相同；
 稳定的是输入、错误状态、指令语义与故障地址之间的关系。
 
-[[附录A-实验报告/00-章节导航|实验报告与复盘]] · [[00-实验准备与通用方法/01-构建与启动部署#固定源码与实机证据|匹配源码、固件与实测证据]]
+[[附录A-实验报告/00-章节导航|实验报告与复盘]] · [[00-实验准备与通用方法/01-构建与启动部署#源码与实机证据|匹配源码、固件与实测证据]]
 
 [[01-应用崩溃/B-CR02-配置状态不一致触发SIGABRT/B-CR02：配置状态不一致触发 SIGABRT|下一例 B-CR02]]

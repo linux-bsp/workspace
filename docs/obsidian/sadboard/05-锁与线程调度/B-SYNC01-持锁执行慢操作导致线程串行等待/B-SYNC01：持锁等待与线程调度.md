@@ -104,10 +104,10 @@ pthread mutex 是 libc 的用户态同步对象。无竞争时通常通过原子
 ```
 
 这里 libc 的具体函数名可能是 `__lll_lock_wait` 等；不能把它们写成 Linux 内核函数。
-内核阅读：[syscalls.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/kernel/futex/syscalls.c)、
-[waitwake.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/kernel/futex/waitwake.c) 的 `futex_wait_setup/futex_do_wait`，
-[hrtimer.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/kernel/time/hrtimer.c)、
-[sched/core.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/kernel/sched/core.c)。重点理解 futex 等待前的值检查、
+内核阅读：[syscalls.c](https://github.com/linux-bsp/linux-7.0/blob/master/kernel/futex/syscalls.c)、
+[waitwake.c](https://github.com/linux-bsp/linux-7.0/blob/master/kernel/futex/waitwake.c) 的 `futex_wait_setup/futex_do_wait`，
+[hrtimer.c](https://github.com/linux-bsp/linux-7.0/blob/master/kernel/time/hrtimer.c)、
+[sched/core.c](https://github.com/linux-bsp/linux-7.0/blob/master/kernel/sched/core.c)。重点理解 futex 等待前的值检查、
 队列与唤醒顺序如何避免 lost wakeup，而不是只背函数名。
 
 ## 练习任务
@@ -268,7 +268,7 @@ trace-cmd report -i ${SADBOARD_RESULTS}/manual-lock/sched.dat
 
 ### 5.16 内核源码精读与关键分支
 
-读 [waitwake.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/kernel/futex/waitwake.c) 的 `futex_wait_setup`：
+读 [waitwake.c](https://github.com/linux-bsp/linux-7.0/blob/master/kernel/futex/waitwake.c) 的 `futex_wait_setup`：
 先获取关联 key 和 hash bucket 保护，再读取用户态值并核对预期。值已改变时返回
 EWOULDBLOCK；应用/libc 重新检查，而不是无条件睡眠。
 
@@ -325,8 +325,8 @@ libc 快路径无法得到 mutex 后可能进入 futex。一次快路径加锁�
 | 排队执行 | futex_wake_mark、wake_up_q、try_to_wake_up 等协作 | 变为可运行不代表立即获得 CPU 或用户锁 |
 
 内存屏障与锁保护防止双方各自看到过期状态而错过唤醒，既不是“多加一次 sleep”，
-也不只是维护一个等待链表。源码见 [waitwake.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/kernel/futex/waitwake.c)
-及 [futex.h](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/kernel/futex/futex.h)。PI futex、requeue、超时和信号
+也不只是维护一个等待链表。源码见 [waitwake.c](https://github.com/linux-bsp/linux-7.0/blob/master/kernel/futex/waitwake.c)
+及 [futex.h](https://github.com/linux-bsp/linux-7.0/blob/master/kernel/futex/futex.h)。PI futex、requeue、超时和信号
 另有分支，本章不能作为所有 futex 操作的完整状态机。
 
 #### 5.17.3 调度究竟切换了什么
@@ -356,8 +356,8 @@ sequenceDiagram
 ```
 
 图只表达依赖关系，不表示中断、状态转换和真正运行都发生在同一瞬间。完整调度源码
-位于 [sched/core.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/kernel/sched/core.c)，底层保存与恢复位于
-[entry.S](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/arch/arm64/kernel/entry.S)。
+位于 [sched/core.c](https://github.com/linux-bsp/linux-7.0/blob/master/kernel/sched/core.c)，底层保存与恢复位于
+[entry.S](https://github.com/linux-bsp/linux-7.0/blob/master/arch/arm64/kernel/entry.S)。
 
 ### 5.18 汇编实战：从 BL 顺序判断锁保护范围
 
@@ -443,6 +443,6 @@ GDB 停住所有线程会改变调度和定时，所以它适合解释结构与�
 与两线程独立等待重叠的模型一致。这只是一次对照；具体谁等锁、谁睡眠仍要由线程栈、
 strace 与源码锁范围交叉解释，不能仅靠二倍比值推断所有锁问题。
 
-[[附录A-实验报告/00-章节导航|实验报告与复盘]] · [[00-实验准备与通用方法/01-构建与启动部署#固定源码与实机证据|匹配源码、固件与实测证据]]
+[[附录A-实验报告/00-章节导航|实验报告与复盘]] · [[00-实验准备与通用方法/01-构建与启动部署#源码与实机证据|匹配源码、固件与实测证据]]
 
 [[05-锁与线程调度/B-SYNC02-ABBA锁顺序造成互相等待/B-SYNC02：ABBA 锁顺序造成互相等待|下一例 B-SYNC02]]

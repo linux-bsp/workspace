@@ -54,7 +54,7 @@ sadboard check /srv/sadboard/实际目录
 
 ## 内核流程与汇编
 
-**内核阅读入口。** [tcp.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/net/ipv4/tcp.c)：tcp_sendmsg_locked、tcp_recvmsg_locked；[socket.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/net/socket.c)：__sys_sendto、接收分派。先确认用户态接口或信号，再向对应内核分支追踪；这些是本仓库 Linux 7.0 的源码入口，不是已经采集到的动态调用栈。
+**内核阅读入口。** [tcp.c](https://github.com/linux-bsp/linux-7.0/blob/master/net/ipv4/tcp.c)：tcp_sendmsg_locked、tcp_recvmsg_locked；[socket.c](https://github.com/linux-bsp/linux-7.0/blob/master/net/socket.c)：__sys_sendto、接收分派。先确认用户态接口或信号，再向对应内核分支追踪；这些是本仓库 Linux 7.0 的源码入口，不是已经采集到的动态调用栈。
 
 ## 修复与验收
 
@@ -62,6 +62,6 @@ sadboard check /srv/sadboard/实际目录
 
 **量化验收与现场恢复。** 任意拆分/合并发送后消息数、顺序和 checksum 一致；截断消息在 EOF 时报告明确错误。 最后停止实验进程，释放私有文件、描述符或 namespace；保存证据再清理，不删除系统日志，不影响管理网络。
 
-[[附录A-实验报告/00-章节导航|实验报告与复盘]] · [[00-实验准备与通用方法/01-构建与启动部署#固定源码与实机证据|匹配源码、固件与实测证据]]
+[[附录A-实验报告/00-章节导航|实验报告与复盘]] · [[00-实验准备与通用方法/01-构建与启动部署#源码与实机证据|匹配源码、固件与实测证据]]
 
 [[06-网络分析/B-NET01-netem延迟与丢包导致网络变慢或中断/B-NET01：网络延迟丢包与吞吐|上一例 B-NET01]] · [[06-网络分析/B-NET03-长度字段端序错误放大内存请求/B-NET03：长度字段端序错误放大内存请求|下一例 B-NET03]]

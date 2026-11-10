@@ -111,7 +111,7 @@ sadboard share "$R/manual-tcp"
 
 ## 内核流程与汇编
 
-**内核源码阅读。** [socket.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/net/socket.c)：__sys_sendto → sock_sendmsg；[tcp.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/net/ipv4/tcp.c)：tcp_sendmsg_locked、tcp_recvmsg_locked；[tcp_output.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/net/ipv4/tcp_output.c)：TCP 输出分段与发送。从用户接口找到入口，检查配置/标志/失败分支，再画出本题的路径；这些链接不是实机完整调用栈。
+**内核源码阅读。** [socket.c](https://github.com/linux-bsp/linux-7.0/blob/master/net/socket.c)：__sys_sendto → sock_sendmsg；[tcp.c](https://github.com/linux-bsp/linux-7.0/blob/master/net/ipv4/tcp.c)：tcp_sendmsg_locked、tcp_recvmsg_locked；[tcp_output.c](https://github.com/linux-bsp/linux-7.0/blob/master/net/ipv4/tcp_output.c)：TCP 输出分段与发送。从用户接口找到入口，检查配置/标志/失败分支，再画出本题的路径；这些链接不是实机完整调用栈。
 
 ### A-N01 内核路径与 ARM64 反汇编
 
@@ -125,7 +125,7 @@ sadboard share "$R/manual-tcp"
 用户 recv → __sys_recvfrom → sock_recvmsg → inet_recvmsg → tcp_recvmsg
 ```
 
-这条箭头省略了协议回调、内联函数和可选分支，不是本例抓到的完整内核栈。完整名字以固定源码为准；不要要求 GDB 用户回溯显示上述全部内核函数。读 `tcp_sendmsg_locked` 时区分复制到 skb、等待发送内存、push 和错误返回，读接收函数时解释“已有部分数据就返回”的条件。
+这条箭头省略了协议回调、内联函数和可选分支，不是本例抓到的完整内核栈。完整名字以实际使用的内核源码为准；不要要求 GDB 用户回溯显示上述全部内核函数。读 `tcp_sendmsg_locked` 时区分复制到 skb、等待发送内存、push 和错误返回，读接收函数时解释“已有部分数据就返回”的条件。
 
 在交叉 objdump 的 `main` 中观察两版循环调用 send 的位置与批量计数；ARM64 的 x0 是 fd、x1 是缓冲地址、x2 是字节数、x3 是 flags。GDB 在 send 调用前查看 x2，应能区分典型 64 B 和 4096 B 请求；x0 返回 ssize_t，必须先检查负值，不能当无符号长度。调用包装与内核 `svc` 位置可能位于共享 libc，使用本次 sysroot 解析。
 
@@ -154,6 +154,6 @@ fb8: tbz x0, #63, f90       // ssize_t 非负则检查 0/累加；负值走错�
 
 **本阶段实测。** send 次数、逐字节一致性、CPU/墙钟和取消清理的结果见[验收档案](https://github.com/linux-bsp/workspace/blob/cb2b20ab8d17e68f4782dd96efe5a1253b64f035/docs/am625-debug-validation.md#production-cases)。
 
-[[附录A-实验报告/00-章节导航|实验报告与复盘]] · [[00-实验准备与通用方法/01-构建与启动部署#固定源码与实机证据|匹配源码、固件与实测证据]]
+[[附录A-实验报告/00-章节导航|实验报告与复盘]] · [[00-实验准备与通用方法/01-构建与启动部署#源码与实机证据|匹配源码、固件与实测证据]]
 
 [[10-网络与数据通路优化/A-N02-UDP突发超过接收队列，平均带宽却不高/A-N02：UDP 突发超过接收队列，平均带宽却不高|下一例 A-N02]]

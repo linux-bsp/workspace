@@ -55,9 +55,9 @@ sadboard check /srv/sadboard/实际目录
 ## 内核流程与汇编
 
 RSS/RPS/RFS/XPS 术语可对照 [内核网络扩展文档](https://docs.kernel.org/networking/scaling.html)；
-具体路径以以下固定版本的源码为准，不能把当前硬件不具备的多队列能力当成已验证方案。
+以下链接提供源码阅读入口，具体路径按实际使用的内核核对，不能把当前硬件不具备的多队列能力当成已验证方案。
 
-**内核源码阅读。** [dev.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/net/core/dev.c)：net_rx_action、NAPI poll；[gro.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/net/core/gro.c)：GRO 聚合；[scaling.rst](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/Documentation/networking/scaling.rst)：RSS/RPS/RFS/XPS。从用户接口找到入口，检查配置/标志/失败分支，再画出本题的路径；这些链接不是实机完整调用栈。
+**内核源码阅读。** [dev.c](https://github.com/linux-bsp/linux-7.0/blob/master/net/core/dev.c)：net_rx_action、NAPI poll；[gro.c](https://github.com/linux-bsp/linux-7.0/blob/master/net/core/gro.c)：GRO 聚合；[scaling.rst](https://github.com/linux-bsp/linux-7.0/blob/master/Documentation/networking/scaling.rst)：RSS/RPS/RFS/XPS。从用户接口找到入口，检查配置/标志/失败分支，再画出本题的路径；这些链接不是实机完整调用栈。
 
 ## 修复与验收
 
@@ -65,6 +65,6 @@ RSS/RPS/RFS/XPS 术语可对照 [内核网络扩展文档](https://docs.kernel.o
 
 **量化验收与清理。** 仅在具备测试链路时报告吞吐、每核 CPU、丢包与尾延迟，保存并恢复配置；当前硬件未执行的部分明确标为条件性实验。
 
-[[附录A-实验报告/00-章节导航|实验报告与复盘]] · [[00-实验准备与通用方法/01-构建与启动部署#固定源码与实机证据|匹配源码、固件与实测证据]]
+[[附录A-实验报告/00-章节导航|实验报告与复盘]] · [[00-实验准备与通用方法/01-构建与启动部署#源码与实机证据|匹配源码、固件与实测证据]]
 
 [[10-网络与数据通路优化/A-N05-MTU与PMTU黑洞造成小包正常、大包卡住/A-N05：MTU／PMTU 黑洞造成小包正常、大包卡住|上一例 A-N05]] · [[10-网络与数据通路优化/A-N07-大文件与遥控共用队列产生队头阻塞/A-N07：大文件与遥控共用队列产生队头阻塞|下一例 A-N07]]

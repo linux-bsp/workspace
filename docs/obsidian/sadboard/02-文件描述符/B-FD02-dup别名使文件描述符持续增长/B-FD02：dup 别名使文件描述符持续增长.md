@@ -54,7 +54,7 @@ sadboard check /srv/sadboard/实际目录
 
 ## 内核流程与汇编
 
-**内核阅读入口。** [file.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/fs/file.c)：dup、dup2、dup3 的实现；[file_table.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/fs/file_table.c)：文件对象引用释放。先确认用户态接口或信号，再向对应内核分支追踪；这些是本仓库 Linux 7.0 的源码入口，不是已经采集到的动态调用栈。
+**内核阅读入口。** [file.c](https://github.com/linux-bsp/linux-7.0/blob/master/fs/file.c)：dup、dup2、dup3 的实现；[file_table.c](https://github.com/linux-bsp/linux-7.0/blob/master/fs/file_table.c)：文件对象引用释放。先确认用户态接口或信号，再向对应内核分支追踪；这些是本仓库 Linux 7.0 的源码入口，不是已经采集到的动态调用栈。
 
 ## 修复与验收
 
@@ -62,6 +62,6 @@ sadboard check /srv/sadboard/实际目录
 
 **量化验收与现场恢复。** 相同轮数下 fd 回到初始基线，正常文件偏移语义保留；低上限下不会减少业务完成数。 最后停止实验进程，释放私有文件、描述符或 namespace；保存证据再清理，不删除系统日志，不影响管理网络。
 
-[[附录A-实验报告/00-章节导航|实验报告与复盘]] · [[00-实验准备与通用方法/01-构建与启动部署#固定源码与实机证据|匹配源码、固件与实测证据]]
+[[附录A-实验报告/00-章节导航|实验报告与复盘]] · [[00-实验准备与通用方法/01-构建与启动部署#源码与实机证据|匹配源码、固件与实测证据]]
 
 [[02-文件描述符/B-FD01-循环打开文件未关闭导致FD耗尽/B-FD01：文件描述符泄漏与耗尽|上一例 B-FD01]] · [[02-文件描述符/B-FD03-exec继承管道写端导致读者等不到EOF/B-FD03：exec 继承管道写端导致读者等不到 EOF|下一例 B-FD03]]

@@ -54,7 +54,7 @@ sadboard check /srv/sadboard/实际目录
 
 ## 内核流程与汇编
 
-**内核源码阅读。** [udp.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/net/ipv4/udp.c)：__udp_queue_rcv_skb、__udp_enqueue_schedule_skb、udp_recvmsg；[datagram.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/net/core/datagram.c)：数据报队列读取。从用户接口找到入口，检查配置/标志/失败分支，再画出本题的路径；这些链接不是实机完整调用栈。
+**内核源码阅读。** [udp.c](https://github.com/linux-bsp/linux-7.0/blob/master/net/ipv4/udp.c)：__udp_queue_rcv_skb、__udp_enqueue_schedule_skb、udp_recvmsg；[datagram.c](https://github.com/linux-bsp/linux-7.0/blob/master/net/core/datagram.c)：数据报队列读取。从用户接口找到入口，检查配置/标志/失败分支，再画出本题的路径；这些链接不是实机完整调用栈。
 
 ## 修复与验收
 
@@ -62,6 +62,6 @@ sadboard check /srv/sadboard/实际目录
 
 **量化验收与清理。** 记录发送/收到/重复/乱序/丢失与 P99，每项能对账；缓冲增大后的延迟和内存代价也需报告，不修改宿主全局 sysctl。
 
-[[附录A-实验报告/00-章节导航|实验报告与复盘]] · [[00-实验准备与通用方法/01-构建与启动部署#固定源码与实机证据|匹配源码、固件与实测证据]]
+[[附录A-实验报告/00-章节导航|实验报告与复盘]] · [[00-实验准备与通用方法/01-构建与启动部署#源码与实机证据|匹配源码、固件与实测证据]]
 
 [[10-网络与数据通路优化/A-N01-小遥测记录逐条TCP-send导致CPU开销过高/A-N01：小遥测记录逐条 TCP send 导致 CPU 开销过高|上一例 A-N01]] · [[10-网络与数据通路优化/A-N03-慢对端背压使发送队列膨胀/A-N03：慢对端背压使发送队列膨胀|下一例 A-N03]]

@@ -54,7 +54,7 @@ sadboard check /srv/sadboard/实际目录
 
 ## 内核流程与汇编
 
-**内核源码阅读。** [sock.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/net/core/sock.c)：sk_mem_charge 等计费；[slub.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/mm/slub.c)：slab 分配器；[memcontrol.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/mm/memcontrol.c)：内核内存计费。从用户接口找到入口，检查配置/标志/失败分支，再画出本题的路径；这些链接不是实机完整调用栈。
+**内核源码阅读。** [sock.c](https://github.com/linux-bsp/linux-7.0/blob/master/net/core/sock.c)：sk_mem_charge 等计费；[slub.c](https://github.com/linux-bsp/linux-7.0/blob/master/mm/slub.c)：slab 分配器；[memcontrol.c](https://github.com/linux-bsp/linux-7.0/blob/master/mm/memcontrol.c)：内核内存计费。从用户接口找到入口，检查配置/标志/失败分支，再画出本题的路径；这些链接不是实机完整调用栈。
 
 ## 修复与验收
 
@@ -62,6 +62,6 @@ sadboard check /srv/sadboard/实际目录
 
 **量化验收与清理。** 相同连接/数据量，峰值在预算内，关闭后可解释地恢复；无业务丢失，管理网络计数不参与实验结论。
 
-[[附录A-实验报告/00-章节导航|实验报告与复盘]] · [[00-实验准备与通用方法/01-构建与启动部署#固定源码与实机证据|匹配源码、固件与实测证据]]
+[[附录A-实验报告/00-章节导航|实验报告与复盘]] · [[00-实验准备与通用方法/01-构建与启动部署#源码与实机证据|匹配源码、固件与实测证据]]
 
 [[09-内存与生命周期优化/A-M05-共享帧池跨进程引用未完成导致长期占用/A-M05：共享帧池跨进程引用未完成导致长期占用|上一例 A-M05]] · [[09-内存与生命周期优化/A-M07-总空闲足够却申请不到连续DMA缓冲/A-M07：总空闲足够却申请不到连续 DMA 缓冲|下一例 A-M07]]

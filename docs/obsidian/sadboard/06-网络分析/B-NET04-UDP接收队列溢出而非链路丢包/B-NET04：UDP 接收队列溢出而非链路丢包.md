@@ -54,7 +54,7 @@ sadboard check /srv/sadboard/实际目录
 
 ## 内核流程与汇编
 
-**内核阅读入口。** [udp.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/net/ipv4/udp.c)：__udp_queue_rcv_skb、__udp_enqueue_schedule_skb、udp_recvmsg；[sock.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/net/core/sock.c)：socket 接收内存记账。先确认用户态接口或信号，再向对应内核分支追踪；这些是本仓库 Linux 7.0 的源码入口，不是已经采集到的动态调用栈。
+**内核阅读入口。** [udp.c](https://github.com/linux-bsp/linux-7.0/blob/master/net/ipv4/udp.c)：__udp_queue_rcv_skb、__udp_enqueue_schedule_skb、udp_recvmsg；[sock.c](https://github.com/linux-bsp/linux-7.0/blob/master/net/core/sock.c)：socket 接收内存记账。先确认用户态接口或信号，再向对应内核分支追踪；这些是本仓库 Linux 7.0 的源码入口，不是已经采集到的动态调用栈。
 
 ## 修复与验收
 
@@ -62,6 +62,6 @@ sadboard check /srv/sadboard/实际目录
 
 **量化验收与现场恢复。** 在同样输入负载下核对 wire、socket 和业务三层的丢失，保留队列高水位和端到端时延，不能只看收到的包数。 最后停止实验进程，释放私有文件、描述符或 namespace；保存证据再清理，不删除系统日志，不影响管理网络。
 
-[[附录A-实验报告/00-章节导航|实验报告与复盘]] · [[00-实验准备与通用方法/01-构建与启动部署#固定源码与实机证据|匹配源码、固件与实测证据]]
+[[附录A-实验报告/00-章节导航|实验报告与复盘]] · [[00-实验准备与通用方法/01-构建与启动部署#源码与实机证据|匹配源码、固件与实测证据]]
 
 [[06-网络分析/B-NET03-长度字段端序错误放大内存请求/B-NET03：长度字段端序错误放大内存请求|上一例 B-NET03]] · [[06-网络分析/B-NET05-对端退出时SIGPIPE、EOF和复位处理错误/B-NET05：对端退出时 SIGPIPE、EOF 和复位处理错误|下一例 B-NET05]]

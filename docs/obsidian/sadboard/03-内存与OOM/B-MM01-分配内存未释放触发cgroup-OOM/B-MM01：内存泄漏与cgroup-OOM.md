@@ -121,9 +121,9 @@ glibc 的 malloc 管理用户堆，大申请可能通过 mmap 建立匿名 VMA�
   oom_kill_process → __oom_kill_process → SIGKILL
 ```
 
-阅读 [memory.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/mm/memory.c) 的 `alloc_anon_folio/do_anonymous_page`、
-[memcontrol.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/mm/memcontrol.c) 的 `try_charge_memcg/mem_cgroup_oom`，
-以及 [oom_kill.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/mm/oom_kill.c)。这些路径是源码分析，
+阅读 [memory.c](https://github.com/linux-bsp/linux-7.0/blob/master/mm/memory.c) 的 `alloc_anon_folio/do_anonymous_page`、
+[memcontrol.c](https://github.com/linux-bsp/linux-7.0/blob/master/mm/memcontrol.c) 的 `try_charge_memcg/mem_cgroup_oom`，
+以及 [oom_kill.c](https://github.com/linux-bsp/linux-7.0/blob/master/mm/oom_kill.c)。这些路径是源码分析，
 实际 OOM 的 dmesg 栈以实验归档为准；OOM 受害者也不必总是触发分配的进程。
 
 ## 练习任务
@@ -245,7 +245,7 @@ valgrind --leak-check=full --error-exitcode=99 \
 
 ### 3.14 内核源码精读与关键分支
 
-读 [memcontrol.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/mm/memcontrol.c) 的 `try_charge_memcg`：
+读 [memcontrol.c](https://github.com/linux-bsp/linux-7.0/blob/master/mm/memcontrol.c) 的 `try_charge_memcg`：
 
 - 计费是否能通过 page counter，首先决定是否需要慢路径。
 - 无法阻塞的分配、特殊 GFP 标志与可回收的普通用户页，走法不同。
@@ -254,7 +254,7 @@ valgrind --leak-check=full --error-exitcode=99 \
 - OOM 锁保证多个竞争者串行检查，取得锁后还会复查余量，不能把函数返回 true 简化成
   “必定新杀了一个进程”。
 
-配合 [oom_kill.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/mm/oom_kill.c) 读 victim 选择、组终止与后续回收。
+配合 [oom_kill.c](https://github.com/linux-bsp/linux-7.0/blob/master/mm/oom_kill.c) 读 victim 选择、组终止与后续回收。
 把 `.limits`、oom/max/oom_kill、进程及时间连起来；新 check 要求组 oom 事件和 kill
 事件共同存在。即使它通过，泄漏来源仍需分配栈和所有权分析来解释。
 
@@ -281,7 +281,7 @@ libc、大小和状态，不把本例所有申请都写死成一种系统调用�
 
 这是与崩溃案例相同异常入口的**合法地址分支**，不是另一种 SIGSEGV。匿名读缺页还可能
 先映射共享零页，写时再分配或 COW；本负载采用写触，不能用“读过同样范围”代替验证。
-源码见 [memory.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/mm/memory.c)。
+源码见 [memory.c](https://github.com/linux-bsp/linux-7.0/blob/master/mm/memory.c)。
 
 #### 3.15.2 计费为何会进入慢路径
 
@@ -326,8 +326,8 @@ mem_cgroup_oom
 
 SIGKILL 不能由业务捕获来 free，因而最后清理依靠内核。此后其他分配者可能重试成功，
 不应把“发送信号”当成“所有页已在此时释放”。group kill 的计数也不能直接解释成不同
-受害进程数量。看 [memcontrol.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/mm/memcontrol.c) 与
-[oom_kill.c](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/mm/oom_kill.c) 时，分别标出计费失败、victim 选择、
+受害进程数量。看 [memcontrol.c](https://github.com/linux-bsp/linux-7.0/blob/master/mm/memcontrol.c) 与
+[oom_kill.c](https://github.com/linux-bsp/linux-7.0/blob/master/mm/oom_kill.c) 时，分别标出计费失败、victim 选择、
 发信号、异步回收四段，不把它们画成一个不可分割动作。
 
 ### 3.16 汇编实战：一字节写入怎样触发整页成本
@@ -391,7 +391,7 @@ checksum 累加、free 五类指令，分别说明谁负责用户分配器、谁
 
 本案例是新建的无子组叶子，因此可以直接解释其 events。一般层级环境需要区分
 `memory.events` 的层级统计与 `memory.events.local`。接口细节见
-[当前内核的 cgroup 文档](https://github.com/linux-bsp/linux-7.0/blob/1c04c52c72b0e67ad4b5deca464ea70bc6ebb718/Documentation/admin-guide/cgroup-v2.rst)。
+[当前内核的 cgroup 文档](https://github.com/linux-bsp/linux-7.0/blob/master/Documentation/admin-guide/cgroup-v2.rst)。
 
 实机启用 `memory.oom.group=1` 后，日志显示对同一 PID 的初始选择和组终止，
 `oom_kill` 为 2、`oom_group_kill` 为 1。判定应结合退出 137、正 oom 与 oom_kill、实际组限制，
@@ -417,6 +417,6 @@ Valgrind 日志先看错误类别和块数量，再沿分配栈回到 malloc 所
 是否明确。调高 memory.max 可能是容量设计的一部分，但对每次请求都丢失引用的程序，
 它只会让故障更晚发生，不改变长期无界增长。
 
-[[附录A-实验报告/00-章节导航|实验报告与复盘]] · [[00-实验准备与通用方法/01-构建与启动部署#固定源码与实机证据|匹配源码、固件与实测证据]]
+[[附录A-实验报告/00-章节导航|实验报告与复盘]] · [[00-实验准备与通用方法/01-构建与启动部署#源码与实机证据|匹配源码、固件与实测证据]]
 
 [[03-内存与OOM/B-MM02-malloc返回空指针但并未发生OOM-kill/B-MM02：malloc 返回空指针但并未发生 OOM kill|下一例 B-MM02]]
