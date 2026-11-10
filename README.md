@@ -38,6 +38,11 @@ BR2_EXTERNAL="../bsp-base-external ../sadboard-external" \
 
 不指定 `O=` 时，产物位于 `buildroot/output/images/`。Buildroot 会记住本输出目录使用的两个 external；后续 `make all` 无需再次指定。默认独立构建工具链，配置输入保存在 Git 中，输出目录由构建生成。
 
+构建使用 Buildroot 原生包框架、Kconfig/CMake 和 shell hooks；固件 JSON 由 host 工具生成 ITS/ITB。
+设备程序和 Device Manager 均使用 C，自定义生产构建不调用 Python。
+主机测试、文档检查、可选串口验收工具及上游 binman 等主机依赖仍可使用 Python。
+固件打包职责见 [生成器说明](bsp-base-external/support/firmware/README.md)。
+
 在新克隆的工作区中，先运行 `git submodule update --init --recursive`。`libbmc` 使用 `git@github.com:wanguo99/libbmc.git` 的 `master` 分支。`make list-defconfigs` 可以查看本实验入口。可选工具链、独立输出目录和详细构建步骤见 [环境指南](docs/obsidian/sadboard/附录B-构建与官方实验/00-章节导航.md)。
 
 `sadboard-external` 包含 AM6254 配置生成脚本、Buildroot/内核配置片段、手动实验程序和目标端环境检查脚本，跟踪远端 `main` 分支。workspace 固定所有子模块的具体提交；复现实验时使用固定提交。`git submodule update --remote` 会尝试更新到跟踪分支的新提交。

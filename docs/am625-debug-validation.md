@@ -406,6 +406,43 @@ SD 与配套 TFTP/NFS 模式分别实测 PMTU、RPS、网络优先级，每例�
 
 证据位于 `output/validation/stage13-capture-readiness/`，包括实际 ELF SHA256 对照、发布/验收与匹配调试产物；旧 NFS 现场继续完整保留。设备最终保持网络调试启动 1/1。
 
+## 阶段 14：构建链移除自定义 Python（2026-11-10）
+
+固件 **v0.0.1 / af2fdbd12be6b3e5759528f7f8dc9f3e9e06bc30918f3b355d70b542b991489b**，
+服务器发布后，AM625 完成下载、写入非活动槽、自动重启、健康确认并上报 success。
+实际 SD 启动 ID `ed071092-bead-48ea-9fcd-9ed7ea51b186`，deployment 1，kernel/rootfs 均使用 B 槽。
+SD 验证及 OTA 重启时，仅在 U-Boot 内存中临时关闭 TFTP/NFS 开关，没有执行 saveenv；
+正常默认仍是 TFTP＋NFS，网络调试启动不会参与生产 OTA 或修改 SD 健康确认。
+
+- EDK target/host 构建使用 Buildroot `cmake-package` / `host-cmake-package`，PDM 使用
+  `kernel-module`。配置、编译来源和 Web 资源嵌入改用原生 Kconfig/CMake。
+- BSP 通过 Bash post-image、jq、CMake、原生 host-fw-tools、mkimage/genimage 和
+  Linux gen_init_cpio 生成 JSON→ITS→ITB、initramfs、冗余元数据与工厂镜像。
+  工厂 metadata 和环境的 CRC、标志及字节格式与旧实现对照一致。
+- SadBoard 只维护标准 Buildroot defconfig；移除额外配置合成入口，符号导出、网络启动资料和
+  RAM 实验打包改为 shell hooks，实验 ELF 由 Buildroot 目标编译器构建。
+- 清理 EDK/host-edk、实验包和 host-fw-tools 的旧输出目录后，完整 `make all` 通过。
+  目标目录没有 `.py`、`.pyc` 或 Python 解释器。上游主机 Python 依赖、主机测试、文档检查及
+  可选串口控制器保留，不进入设备运行链。
+- 52 项管理回归、原生构建框架、配置映射、HWID Web 嵌入检查通过；其中 HWID 回归补齐实际
+  libubootenv 源码路径后复验通过。固件 14 项、布局 11 项、恢复 6 项、实际 FIT 4 项、
+  案例 25 项、网络构建身份 4 项、结果目录 4 项通过。调试工件和 469 篇 Obsidian 笔记检查通过。
+- SD 实机 initramfs→rootfs 切换、持久日志、SSH、全部调试能力检查、CPU/FD 对照案例通过，
+  零失败服务，WDT active。服务器重载为本工作区新构建的原生 dmserver，Web 页面及上传发布验证通过。
+- 配套 TFTP/NFS 参考构建 `ef776d37a682a24a92d47107faeb29b710771d7083c1101a2626c43eb19aba3d`
+  正常启动；启动 ID `be63f0fb-26d2-4572-91fb-54bef4d899dc`。原 NFS 实验目录 5,786 个文件
+  逐项 SHA256 核对保留，旧根文件系统另行归档。SBNET1 是可变 NFS 树的参考标识，与 SD 固件 ID 分开记录。
+- 原生归档生成的 RAM 启动案例三组实机通过：缺库副本复现 PID 1 panic/exitcode 0x00007f00；
+  完整副本的独立守护在约 10 秒期限复位；参考副本正常加载 fwctl、校验 rootfs 并切换到 SD 根。
+  三组结束均恢复正常启动，最终返回配套网络调试环境。首次验收误用 TFTP 前缀 `am625/sadboard`
+  导致文件不存在，控制器恢复正常启动后，改用本机 TFTP 根下的 `sadboard` 重新完成全部验收。
+  最终启动 ID `68b7c2b5-f9ab-4a43-bfc0-0c99c10c8211`，网络 CPU/FD 对照复验通过；
+  日志为 persistent、启动归档 acknowledged、archive-pending=0、WDT active、零失败服务。
+
+工件位于 `output/validation/native-build/`，包括原生构建/回归日志、源码快照、发布审计、
+OTA 前后状态、原始串口和部署校验。仅在线更新 kernel/rootfs；没有烧写工厂镜像、调整分区或更新 SPL/U-Boot。
+本阶段不重复执行全部 59 例故障；完整基线仍见阶段 12，针对本次构建、加载和部署改动进行复验。
+
 <a id="bootlin-build-history"></a>
 
 ## 早期 Bootlin/NFS 构建验证档案（2026-10-30～31）

@@ -46,7 +46,7 @@ TFTP 服务根目录必须与实际 tftpd 配置一致，本机已经是 `/srv/t
 
 ```sh
 sudo apt install nfs-kernel-server
-sudo python3 sadboard-external/scripts/deploy-netboot.py \
+sudo sadboard-external/scripts/deploy-netboot.sh \
   output/am625-debug-systemd/images
 ```
 

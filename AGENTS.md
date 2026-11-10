@@ -11,7 +11,7 @@ SadBoard develops on the `SadBoard` branch of `linux-bsp/workspace`, using exist
 - `docs/am62x/`, `docs/imx6ull/`, `docs/h200/`: board and hardware references; i.MX6ULL examples do not imply a supported SadBoard profile.
 - `buildroot/`, `linux/`, `uboot/`: build system and versioned source submodules.
 - `bsp-base-external/`: board support; keep the `LINUX_BSP` external identifier.
-- `sadboard-external/`: `SADBOARD` external with AM6254 debugging fragments, setup script, and target overlay.
+- `sadboard-external/`: `SADBOARD` external with the AM6254 defconfig, diagnostic fragments, native build hooks, and target overlay.
 - `edk/`, `libbmc/`: existing software submodules.
 
 Put learning guides in `docs/`, board references in `docs/<board>/`, and generated builds in ignored `output/`. Link new guides from `README.md`. Read submodule-specific instructions before changing their contents.
@@ -28,7 +28,7 @@ BR2_EXTERNAL="../bsp-base-external ../sadboard-external" \
   make sadboard_am625_debug_defconfig && make all
 ```
 
-Without `O=`, artifacts go to `buildroot/output/`; the current board validation uses workspace `output/am625-debug-systemd/`. Keep output trees separate when changing toolchains. The Python helper remains optional for local toolchains and diagnostic variants. After changing baseline fragments, regenerate the checked-in defconfig with `--export-defconfig` in a fresh output directory and verify configuration equivalence; see the handbook's build appendix. Run `python3 sadboard-external/tests/test-labs.py` for scenario regressions. `sadboard list`, `sadboard run crash` and `sadboard verify crash` are target commands; verification checks the reference repair, not an arbitrary learner patch. Bootlin commands remain external lab instructions.
+Without `O=`, artifacts go to `buildroot/output/`; the current board validation uses workspace `output/am625-debug-systemd/`. Keep output trees separate when changing toolchains. Configure SDKs, download paths and diagnostic fragments with Buildroot menuconfig. Maintain the portable profile with native savedefconfig in a fresh output directory; see the vault build appendix. Production builds and device/Device Manager programs must not use custom Python tooling; Python is limited to host tests, documentation checks and the serial validation controller. Upstream host dependencies such as U-Boot binman remain managed by Buildroot. Run `python3 sadboard-external/tests/test-labs.py` for scenario regressions. `sadboard list`, `sadboard run crash` and `sadboard verify crash` are target commands; verification checks the reference repair, not an arbitrary learner patch. Bootlin commands remain external lab instructions.
 
 Use `git diff --check`, `git diff --cached --check`, and `git status --short`. Review untracked files separately.
 For learning-document changes, run `python3 scripts/check-obsidian.py` to validate wiki links, headings, case coverage, source paths and navigation reachability. Maintain the Obsidian vault directly; do not recreate a consolidated handbook or an export pipeline. Preserve the user's Obsidian settings; do not commit window state, caches or personal reports. Chinese chapter/note names are intentional in this vault.

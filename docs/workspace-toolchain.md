@@ -84,15 +84,19 @@ make -C output/am62x-sdk sdk BR2_SDK_PREFIX=am62x-gcc15-linux7-v1
 在含有 `sadboard-external` 的仓库根目录，使用新的输出目录：
 
 ```sh
-python3 sadboard-external/scripts/configure-am625.py \
-  --output output/am625-shared-sdk \
-  --toolchain "$HOME/workspaces/toolchain/aarch64-buildroot-linux-gnu_sdk-buildroot" \
-  --dl-dir "$HOME/workspaces/dl"
-make -C output/am625-shared-sdk
+make -C buildroot O="$PWD/output/am625-shared-sdk" \
+  BR2_EXTERNAL="$PWD/bsp-base-external $PWD/sadboard-external" \
+  sadboard_am625_debug_defconfig
+make -C output/am625-shared-sdk menuconfig
+make -C output/am625-shared-sdk all
 ```
 
 标准 `sadboard_am625_debug_defconfig` 仍默认自行构建工具链；解压 SDK 不会
-自动改变它。上述可选脚本会配置外部工具链。不要在已有输出目录中直接切换
+自动改变它。在 menuconfig 的 Toolchain 中选择 External toolchain / Custom /
+Pre-installed，将路径设为 `$HOME/workspaces/toolchain/aarch64-buildroot-linux-gnu_sdk-buildroot`
+对应的实际绝对路径，前缀为 `aarch64-buildroot-linux-gnu`，选择 GCC 15、glibc、
+Linux 7.0 headers 和 C++ 支持。Build options 的 Download dir 可设为
+`$HOME/workspaces/dl` 对应的实际路径。无需额外配置脚本。不要在已有输出目录中直接切换
 内部与外部工具链。这套 SDK 面向当前 Linux 7.0 的 AM62x 配置；若板上运行
 更早的内核，需要调整头文件版本及外部工具链配置。i.MX6ULL 需要独立的 ARM32 SDK。
 
