@@ -16,8 +16,17 @@ chapter: "00-实验准备与通用方法"
 
 ```sh
 SADBOARD_RESULTS=$(sadboard results)
+```
+
+```sh
 sadboard status ${SADBOARD_RESULTS}/RUN
+```
+
+```sh
 sadboard check ${SADBOARD_RESULTS}/RUN
+```
+
+```sh
 sadboard reset ${SADBOARD_RESULTS}/RUN
 ```
 

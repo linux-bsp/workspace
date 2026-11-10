@@ -36,6 +36,7 @@ For learning-document changes, run `python3 scripts/check-obsidian.py` to valida
 ## Coding Style & Naming Conventions
 
 Write learning documentation in Chinese; preserve official identifiers and commands. Use descriptive headings, hyphenated lowercase filenames, and language-tagged code fences. Follow existing language conventions in source submodules; otherwise use four-space indentation for new source files. No workspace-wide formatter is configured.
+In the Obsidian vault, put each executable Shell, U-Boot or GDB command in its own fenced block for individual copying. Keep a command's continuations, pipeline and quoted subprocess body together; put explanatory comments outside the block. Preserve complete source, configuration and output examples.
 
 ## Validation and Scenario Guidelines
 

@@ -18,8 +18,9 @@ python3 sadboard-external/scripts/sadboard-board.py boot-initlib \
   --images output/am625-debug-systemd/images --serial /dev/ttyACM2 \
   --known-hosts output/validation/STAGE/ssh-known-hosts \
   --output output/validation/boot-initlib-$(date +%Y%m%dT%H%M%S)
-# 根挂载实验用同样参数，将 boot-initlib 改为 boot-root，并换一个 output。
 ```
+
+根挂载实验用同样参数，将 boot-initlib 改为 boot-root，并换一个 output。
 
 工具校验工件 SHA256，记录基线，将 U-Boot 中的参数只改在 RAM 内，启动硬件 WDT，分别运行故障与参考副本。过程中不执行 saveenv、不写分区、不更新 SPL/U-Boot。若正常网络启动因 PHY/ARP/TFTP 重试退回 U-Boot，主机工具最多重试两次原有 fw_boot，记录重试次数；NFS 调试依赖主机服务，本地 SD 恢复另行实测。故障 kernel 的 `panic=3` 尝试三秒后复位；WDT 为后备。后续复位重新使用保存的正常网络启动配置。每次参考 SD 启动通过健康检查后，再回到正常 TFTP+NFS。当前 USB 串口不透传 BREAK，不依赖串口 SysRq 救援；RAM 参考 init 带独立 120 秒恢复守护，只有看到 PID 1 根目录下的健康确认才退出，卡在持续喂狗的 recovery 内也会强制复位。额外 guard 对照将此期限设为 10 秒，实测该路径再继续正常参考启动。`serial.log` 是完整原始串口，`bug-serial.log` / `fixed-serial.log` 是分段证据，`result.json` 记录对应启动与恢复。
 

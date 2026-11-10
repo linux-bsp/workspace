@@ -27,8 +27,14 @@ chapter: "附录B-构建与官方实验"
 
 ```sh
 make -C output/am625-native-debug menuconfig
+```
+
+```sh
 make -C output/am625-native-debug savedefconfig \
   DEFCONFIG="$PWD/sadboard-external/configs/sadboard_am625_debug_defconfig"
+```
+
+```sh
 git -C sadboard-external diff -- configs/sadboard_am625_debug_defconfig
 ```
 

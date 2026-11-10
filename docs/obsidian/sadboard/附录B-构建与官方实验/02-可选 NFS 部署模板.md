@@ -18,8 +18,17 @@ NFS 供独立调试环境使用，下面是部署模板，并非已在当前 sys
 
 ```sh
 sudo mkdir -p /srv/nfs/sadboard-am625
+```
+
+```sh
 sudo tar --numeric-owner -xpf output/am625-debug-systemd/images/rootfs.tar -C /srv/nfs/sadboard-am625
+```
+
+```sh
 BOARD_IP=192.168.10.211
+```
+
+```sh
 sudo exportfs -o rw,sync,no_subtree_check,no_root_squash "$BOARD_IP:/srv/nfs/sadboard-am625"
 ```
 

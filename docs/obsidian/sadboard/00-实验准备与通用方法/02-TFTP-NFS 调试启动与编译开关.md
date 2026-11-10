@@ -46,6 +46,9 @@ TFTP 服务根目录必须与实际 tftpd 配置一致，本机已经是 `/srv/t
 
 ```sh
 sudo apt install nfs-kernel-server
+```
+
+```sh
 sudo sadboard-external/scripts/deploy-netboot.sh \
   output/am625-debug-systemd/images
 ```
@@ -73,17 +76,53 @@ Buildroot 的 `target/`，其中的属主和设备文件尚未经过 fakeroot �
 
 ```sh
 printenv fw_boot_profile tftp_kernel nfs_root ipaddr serverip nfsroot
+```
+
+```sh
 setenv ipaddr 192.168.10.211
+```
+
+```sh
 setenv serverip 192.168.10.246
+```
+
+```sh
 setenv gatewayip 192.168.10.1
+```
+
+```sh
 setenv netmask 255.255.255.0
+```
+
+```sh
 setenv tftp_kernel_file Image
+```
+
+```sh
 setenv tftp_fdt_file k3-am625-alientek.dtb
+```
+
+```sh
 setenv nfsroot /srv/nfs/sadboard-am625
+```
+
+```sh
 setenv nfsopts vers=3,tcp
+```
+
+```sh
 setenv tftp_kernel 1
+```
+
+```sh
 setenv nfs_root 1
+```
+
+```sh
 saveenv
+```
+
+```sh
 run fw_boot
 ```
 
@@ -92,8 +131,17 @@ run fw_boot
 
 ```sh
 setenv tftp_kernel 0
+```
+
+```sh
 setenv nfs_root 0
+```
+
+```sh
 saveenv
+```
+
+```sh
 run fw_boot
 ```
 
@@ -118,10 +166,25 @@ SD `/data` 仍用于设备日志、SSH 主机密钥和启动确认。NFS 根下�
 
 ```sh
 cat /proc/cmdline
+```
+
+```sh
 cat /proc/mounts
+```
+
+```sh
 cat /run/fwctl-boot-confirmed
+```
+
+```sh
 /usr/libexec/sadboard/boot-context
+```
+
+```sh
 systemctl --failed --no-pager
+```
+
+```sh
 sadboard run crash
 ```
 

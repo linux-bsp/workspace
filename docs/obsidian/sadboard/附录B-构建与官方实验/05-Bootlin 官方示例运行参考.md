@@ -28,8 +28,17 @@ gdbserver :2345 ./linked_list
 
 ```gdb
 set sysroot /绝对路径/workspace/output/am625-debug-systemd/staging
+```
+
+```gdb
 target remote <板IP>:2345
+```
+
+```gdb
 break insert_name
+```
+
+```gdb
 continue
 ```
 
@@ -39,8 +48,17 @@ core 实验使用子进程的 32 MiB 有界上限；BusyBox ash 中为 `ulimit -
 
 ```sh
 strace -f -o /root/strace.log ./linked_list
+```
+
+```sh
 LD_LIBRARY_PATH=. ltrace ./authent
+```
+
+```sh
 trace-cmd record -o /root/trace.dat -e sched:sched_switch sleep 2
+```
+
+```sh
 perf record -g -o /root/perf.data -- ./crc_random
 ```
 
@@ -50,6 +68,9 @@ perf record -g -o /root/perf.data -- ./crc_random
 
 ```bash
 output/host-tools/FlameGraph/stackcollapse-perf.pl output/perf.script > output/perf.folded
+```
+
+```bash
 output/host-tools/FlameGraph/flamegraph.pl output/perf.folded > output/perf.svg
 ```
 
@@ -57,6 +78,9 @@ output/host-tools/FlameGraph/flamegraph.pl output/perf.folded > output/perf.svg
 
 ```bash
 git clone https://github.com/brendangregg/FlameGraph.git output/host-tools/FlameGraph
+```
+
+```bash
 git -C output/host-tools/FlameGraph checkout 41fee1f99f9276008b7cd112fca19dc3ea84ac32
 ```
 

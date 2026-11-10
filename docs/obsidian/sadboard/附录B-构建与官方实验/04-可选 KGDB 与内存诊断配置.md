@@ -17,9 +17,15 @@ chapter: "附录B-构建与官方实验"
 ```sh
 make -C buildroot O="$PWD/output/am625-kgdb" \
   BR2_EXTERNAL="$PWD/bsp-base-external $PWD/sadboard-external" sadboard_am625_debug_defconfig
+```
+
+```sh
 buildroot/utils/config --file output/am625-kgdb/.config \
   --set-str BR2_LINUX_KERNEL_CONFIG_FRAGMENT_FILES \
   '$(BR2_EXTERNAL_SADBOARD_PATH)/kernel/debug.config $(BR2_EXTERNAL_SADBOARD_PATH)/kernel/kgdb.config'
+```
+
+```sh
 make -C output/am625-kgdb olddefconfig all
 ```
 
