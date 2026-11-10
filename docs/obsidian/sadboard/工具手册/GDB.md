@@ -28,6 +28,9 @@
 | `disassemble /s FUNC` | 混合源行与反汇编；优化构建可能不能逐行对应 |
 | `info threads` / `thread N` | 选择线程；GDB 线程编号不同于 Linux TID |
 | `thread apply all bt` | 同时查看线程的等待关系 |
+| `set follow-fork-mode child` | fork 后优先跟踪子进程，适合 case-suite 的故障现场 |
+| `set detach-on-fork off` | 同时保留父子进程的调试控制；需结合 inferior 状态管理执行与清理 |
+| `info inferiors` | 检查 GDB 管理的进程；与线程列表不同，退出前确认实验进程已结束 |
 | `core-file PATH` | 载入离线 core；不能在 core 上 continue |
 | `set pagination off` / `--batch -ex CMD` | 关闭分页、自动化取证并保存输出 |
 
@@ -74,6 +77,76 @@ bt full
 ```gdb
 thread apply all bt
 ```
+
+## 跟踪 case-suite 的故障子进程
+
+`case-suite` 的故障通常发生在子进程中，只观察最外层父进程可能看不到断言或信号。
+以下用 [[01-应用崩溃/B-CR02-配置状态不一致触发SIGABRT/案例详解#定位方法|B-CR02 的 SIGABRT]] 演示；
+完整交叉 GDB 运行在主机，设备仅运行 gdbserver。手工单步与受监督的 `sadboard run`
+分开执行，先从工作区根目录加载这次构建的真实 ELF、库和源码。
+
+设备端：查询当前结果根目录并保存到 R，后面的手工取证使用同一位置。
+
+```sh
+R=$(sadboard results)
+```
+
+设备端：创建手工 SIGABRT 现场目录，供远程调试子进程保存证据。
+
+```sh
+mkdir -p "$R/manual-abort"
+```
+
+主机端：加载本次构建的 case-suite 符号文件，准备跟踪故障子进程。
+
+```sh
+output/am625-debug-systemd/host/bin/aarch64-buildroot-linux-gnu-gdb \
+  output/am625-debug-systemd/images/debug/labs/case-suite
+```
+
+主机 GDB：批量设置匹配的库/源码路径、跟随子进程，并保留父子进程的调试控制，随后再连接目标。
+
+```gdb
+set sysroot output/am625-debug-systemd/staging
+set substitute-path /usr/src/sadboard output/am625-debug-systemd/images/debug/source
+set follow-fork-mode child
+set detach-on-fork off
+```
+
+主机 GDB：通过 SSH 管道启动远程 gdbserver。下面按 NFS 结果根目录示例，最后一个参数必须与设备端创建的目录一致；本地 SD 根改为 `/data/sadboard/manual-abort`。
+
+```gdb
+target remote | ssh -T root@192.168.10.211 gdbserver --once - /usr/libexec/sadboard/case-suite crash-abort bug /srv/sadboard/manual-abort
+```
+
+主机 GDB：在 fault_child 设置断点，确认实际解析的源码位置。
+
+```gdb
+break fault_child
+```
+
+主机 GDB：继续到断点或信号，先检查停止原因再解释断言。
+
+```gdb
+continue
+```
+
+主机 GDB：打印带局部变量的调用栈，沿配置状态不一致的业务路径回溯。
+
+```gdb
+bt full
+```
+
+stdio 通道不需要另开调试端口；SSH 主机指纹按现有环境核对。`set detach-on-fork off`
+保留父子进程在 GDB 控制下，父进程停住期间不会由它的短实验计时器杀掉正在单步的子进程。
+退出前用 `info inferiors` 检查并终止自己创建的 inferior，或让它们完整结束；此方法已在
+AM625 实测跟进到 `fault_child`。
+
+普通 CPU/memory/sync 流程可在 `suite_cpu/suite_mem/suite_sync` 设断点。网络/CLOSE_WAIT
+手工单步只在自建 namespace 中运行 gdbserver，仍可用相同 SSH stdio 通道连接，结束后
+删除自己的空间。PMTU/RPS/优先队列入口自动保存 pcap、qdisc 和对端证据；先用 tcpdump
+离线分析，再按 `run-network-suite` 的拓扑复现。GDB、strace/Valgrind、原生性能基准
+分开执行，手工结果用 `sadboard share 目录` 开放 host 读取。
 
 ## 判断边界
 
