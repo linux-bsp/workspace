@@ -8,11 +8,11 @@ SadBoard 是一个面向嵌入式 Linux 的故障定位与分析练习项目。�
 
 ## 当前状态
 
-已完成 AM6254 systemd 调试基线；原有七个手动案例已实机验证：GDB/core、描述符泄漏、受限 OOM、CPU 热点、锁等待、隔离网络、启动 panic 与恢复取证。另新增周期相位漂移、队列内存积压、TCP 小记录批处理三个进阶案例，均完成 SD/NFS 实机验证，详见验收档案。支持 SSH、匹配符号、完整现场记录及参考修复。随机题库和通用自动评分尚未实现。全部学习内容统一在 [嵌入式 Linux 故障定位与分析教材](docs/sadboard-debugging-handbook.md)，按用例分章，包含基础原理、工具参数、源码路径、分级练习和参考修复。固件身份与已执行的验证见 [实机验证记录](docs/am625-debug-validation.md)。
+已完成 AM6254 systemd 调试基线，支持 SSH、匹配符号、完整现场记录及参考修复，59 个案例均已实机验证。随机题库和通用自动评分尚未实现。学习内容全部在 [Obsidian 手册](docs/obsidian/README.md) 中按章节和案例管理，练习任务、工具参数、内核流程、汇编与修复分别维护。固件身份与已执行的验证见 [实机验证记录](docs/am625-debug-validation.md)。
 
-案例库共设计 **59 例**：七类基础各 5 例（35 例），性能、内存、网络进阶各 8 例（24 例）。目前 **59 例均有实现**：57 例使用设备命令，2 例由主机串口工具控制真实 AM625 的 RAM 启动；已全部完成实机验证。完整索引、岗位能力映射、根因与取证任务见[案例地图](docs/sadboard-debugging-handbook.md#advanced-index)。
+案例库共设计 **59 例**：七类基础各 5 例（35 例），性能、内存、网络进阶各 8 例（24 例）。目前 **59 例均有实现**：57 例使用设备命令，2 例由主机串口工具控制真实 AM625 的 RAM 启动；已全部完成实机验证。完整索引、岗位能力映射、根因与取证任务见[案例地图](docs/obsidian/sadboard/08-案例地图与工程能力/00-章节导航.md)。
 
-SadBoard 默认使用 **TFTP 加载内核/DTB、NFS 挂载根文件系统**，普通 AM625 BSP 保持 SD A/B 启动。两个独立的 U-Boot 配置项 `CONFIG_AM62X_BOOT_TFTP_KERNEL`、`CONFIG_AM62X_BOOT_NFS_ROOT` 支持四种组合；配置、主机部署和运行时切换见[网络调试启动](docs/sadboard-debugging-handbook.md#netboot)。NFS 下实验结果保存在板端 `/srv/sadboard`，主机可直接读取 `/srv/nfs/sadboard-am625/srv/sadboard`；本地启动仍使用 `/data/sadboard`。`sadboard results` 可查看当前路径。
+SadBoard 默认使用 **TFTP 加载内核/DTB、NFS 挂载根文件系统**，普通 AM625 BSP 保持 SD A/B 启动。两个独立的 U-Boot 配置项 `CONFIG_AM62X_BOOT_TFTP_KERNEL`、`CONFIG_AM62X_BOOT_NFS_ROOT` 支持四种组合；配置、主机部署和运行时切换见[网络调试启动](docs/obsidian/sadboard/00-实验准备与通用方法/02-TFTP-NFS%20调试启动与编译开关.md)。NFS 下实验结果保存在板端 `/srv/sadboard`，主机可直接读取 `/srv/nfs/sadboard-am625/srv/sadboard`；本地启动仍使用 `/data/sadboard`。`sadboard results` 可查看当前路径。
 
 ## Workspace 分支与 Buildroot 扩展层
 
@@ -20,7 +20,7 @@ SadBoard 在 [linux-bsp/workspace](https://github.com/linux-bsp/workspace) 的 `
 
 - `bsp-base-external/`：板级支持、启动配置、镜像布局和基础软件包，external 名称保持 `LINUX_BSP`。
 - `sadboard-external/`：独立的实验层子模块，external 名称为 `SADBOARD`，包含故障程序、调试配置和实验 overlay。
-- `docs/`：统一教材、实机验收、工具链操作及板级参考资料。
+- `docs/`：Obsidian 手册、实机验收、工具链操作及板级参考资料。
 
 在 workspace 根目录初始化所需的三个子模块：
 
@@ -38,7 +38,7 @@ BR2_EXTERNAL="../bsp-base-external ../sadboard-external" \
 
 不指定 `O=` 时，产物位于 `buildroot/output/images/`。Buildroot 会记住本输出目录使用的两个 external；后续 `make all` 无需再次指定。默认独立构建工具链，配置输入保存在 Git 中，输出目录由构建生成。
 
-在新克隆的工作区中，先运行 `git submodule update --init --recursive`。`libbmc` 使用 `git@github.com:wanguo99/libbmc.git` 的 `master` 分支。`make list-defconfigs` 可以查看本实验入口。可选工具链、独立输出目录和详细构建步骤见 [环境指南](docs/sadboard-debugging-handbook.md#build-extensions)。
+在新克隆的工作区中，先运行 `git submodule update --init --recursive`。`libbmc` 使用 `git@github.com:wanguo99/libbmc.git` 的 `master` 分支。`make list-defconfigs` 可以查看本实验入口。可选工具链、独立输出目录和详细构建步骤见 [环境指南](docs/obsidian/sadboard/附录B-构建与官方实验/00-章节导航.md)。
 
 `sadboard-external` 包含 AM6254 配置生成脚本、Buildroot/内核配置片段、手动实验程序和目标端环境检查脚本，跟踪远端 `main` 分支。workspace 固定所有子模块的具体提交；复现实验时使用固定提交。`git submodule update --remote` 会尝试更新到跟踪分支的新提交。
 
@@ -116,11 +116,11 @@ SadBoard 希望提供一组可重复练习的现场，帮助学习者回答：
 
 ## 运行平台与后续方向
 
-当前可运行并完成实机验收的平台是 TI AM6254。i.MX6ULL 的硬件资料保留供板级开发参考，SadBoard 尚未提供对应配置；QEMU 的架构和运行配置也尚未实现。
+当前可运行并完成实机验收的平台是 TI AM6254。i.MX6ULL 的硬件资料保留供板级开发参考，SadBoard 尚未提供对应配置。当前案例统一在真实 AM625 上验证。
 
-QEMU 计划用于验证分析流程、逻辑故障和场景复现。依赖真实 PMU、缓存、DMA、网卡中断或实际吞吐的实验，需要单独适配并在对应硬件上验证。
+内核和启动故障实验要求先验证硬件 WDT 与正常恢复路径；PMU、缓存、DMA、网卡中断和吞吐等结论以对应实机证据为准。
 
-现阶段已建立 59 个手动案例及设备/串口入口、取证、参考修复和复位流程。后续可扩展随机抽题、兼容的多故障组合、QEMU 和更多板级问题；这些仍是项目方向，未记作已实现功能。
+现阶段已建立 59 个手动案例及设备/串口入口、取证、参考修复和复位流程。后续可扩展随机抽题、兼容的多故障组合和更多板级问题；这些仍是项目方向，未记作已实现功能。
 
 ## 参考项目与学习资料
 
@@ -135,7 +135,7 @@ QEMU 计划用于验证分析流程、逻辑故障和场景复现。依赖真实
 
 ## 文档
 
-- [嵌入式 Linux 故障定位与分析教材](docs/sadboard-debugging-handbook.md)：按七个基础方向与三个进阶方向组织，共 59 个案例设计，包含内核调用流程、关键分支、ARM64 汇编、真实反汇编对照、工具参数与练习；Bootlin 资料和报告模板放在附录。
+- [Obsidian 手册入口](docs/obsidian/README.md)：打开 `docs/obsidian/sadboard` 仓库，从 `首页.md` 进入；59 个案例按章节建目录，练习、工具、内核流程等独立成笔记，并提供案例索引、工具索引和双向链接。
 - [AM625 实机验收档案](docs/am625-debug-validation.md)：各阶段固件 ID、真实执行结果及附件位置。
 - [EDK libbmc 与 SadBoard 专利候选分析](docs/patent-candidate-analysis.md)：候选技术机制、源码依据、现有技术对照及公开时间与权属条件。
 - [Workspace 目录与 AM62x SDK](docs/workspace-toolchain.md)：独立 SDK、共享下载缓存与工具链管理。
@@ -149,4 +149,4 @@ QEMU 计划用于验证分析流程、逻辑故障和场景复现。依赖真实
 
 ## 资料署名
 
-教材中对 Bootlin 实验手册的归纳和改编沿用 CC BY-SA 3.0，具体署名与来源见 [教材附录 C](docs/sadboard-debugging-handbook.md#bootlin)。项目设想不代表 Bootlin 官方课程安排，SadBoard 代码许可尚未确定。
+教材中对 Bootlin 实验手册的归纳和改编沿用 CC BY-SA 3.0，具体署名与来源见 [教材附录 C](docs/obsidian/sadboard/附录C-Bootlin课程参考/00-章节导航.md)。项目设想不代表 Bootlin 官方课程安排，SadBoard 代码许可尚未确定。

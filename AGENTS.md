@@ -5,7 +5,7 @@
 SadBoard develops on the `SadBoard` branch of `linux-bsp/workspace`, using existing BSP submodules. AM6254 defaults to TFTP kernel/DTB and NFS root, with independent U-Boot switches and local SD A/B fallback. It provides systemd, SSH and 59 manual scenarios, including: crash, FD exhaustion, cgroup OOM, CPU hotspot, mutex wait, isolated networking, startup panic recovery, periodic drift, queue backlog and TCP batching. The handbook covers 35 basic and 24 advanced cases: 57 target commands and two host UART controllers for real AM625 RAM boot faults. All validation uses AM625 hardware; do not substitute QEMU. Random scenario orchestration and general automatic grading are not implemented. Record image build and board validation status separately.
 
 - `README.md`: project scope, status, and documentation index.
-- `docs/sadboard-debugging-handbook.md`: consolidated Chinese textbook, organized by case; includes preparation, tools, kernel reading, graded exercises, report template and Bootlin references. Extend the corresponding chapter rather than creating separate learning manuals. Distinguish source-derived paths from captured stacks.
+- `docs/obsidian/sadboard/`: canonical Chinese handbook in an Obsidian vault; start at `首页.md`. Each chapter has a directory and each case has separate exercises, tools, kernel flows and repair notes. Extend the corresponding note and its navigation. Distinguish source-derived paths from captured stacks.
 - `docs/am625-debug-validation.md`: dated build and board evidence, separate from learning instructions.
 - `docs/workspace-toolchain.md`: current shared directory layout and standalone SDK workflow.
 - `docs/am62x/`, `docs/imx6ull/`, `docs/h200/`: board and hardware references; i.MX6ULL examples do not imply a supported SadBoard profile.
@@ -31,6 +31,7 @@ BR2_EXTERNAL="../bsp-base-external ../sadboard-external" \
 Without `O=`, artifacts go to `buildroot/output/`; the current board validation uses workspace `output/am625-debug-systemd/`. Keep output trees separate when changing toolchains. The Python helper remains optional for local toolchains and diagnostic variants. After changing baseline fragments, regenerate the checked-in defconfig with `--export-defconfig` in a fresh output directory and verify configuration equivalence; see the handbook's build appendix. Run `python3 sadboard-external/tests/test-labs.py` for scenario regressions. `sadboard list`, `sadboard run crash` and `sadboard verify crash` are target commands; verification checks the reference repair, not an arbitrary learner patch. Bootlin commands remain external lab instructions.
 
 Use `git diff --check`, `git diff --cached --check`, and `git status --short`. Review untracked files separately.
+For learning-document changes, run `python3 scripts/check-obsidian.py` to validate wiki links, headings, case coverage, source paths and navigation reachability. Maintain the Obsidian vault directly; do not recreate a consolidated handbook or an export pipeline. Preserve the user's Obsidian settings; do not commit window state, caches or personal reports. Chinese chapter/note names are intentional in this vault.
 
 ## Coding Style & Naming Conventions
 

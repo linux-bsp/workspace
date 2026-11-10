@@ -271,7 +271,7 @@ TFTP/NFS 模式额外完成一次主动 SysRq panic 和恢复：
 
 工件在 `output/validation/stage7-netboot/`，包含构建、四组 CONFIG、原始串口、源码快照、
 发布审计、各模式验证、未改写启动区哈希、案例检查和 panic/SOL 附件。
-操作方法统一见[教材网络启动章节](sadboard-debugging-handbook.md#netboot)。
+操作方法统一见[教材网络启动章节](obsidian/sadboard/00-实验准备与通用方法/02-TFTP-NFS%20调试启动与编译开关.md)。
 
 ## 阶段 8：NFS 实验产物共享（2026-11-09）
 
@@ -410,7 +410,7 @@ SD 与配套 TFTP/NFS 模式分别实测 PMTU、RPS、网络优先级，每例�
 
 ## 早期 Bootlin/NFS 构建验证档案（2026-10-30～31）
 
-以下保留当时的主机验证结果。文中的“本次”“尚未验证”指这个早期阶段；当前 systemd、OTA 和七个案例的实机结果见本文件前面的各阶段记录。当前操作统一使用 [调试教材](sadboard-debugging-handbook.md#preparation)。
+以下保留当时的主机验证结果。文中的“本次”“尚未验证”指这个早期阶段；当前 systemd、OTA 和七个案例的实机结果见本文件前面的各阶段记录。当前操作统一使用 [调试教材](obsidian/sadboard/00-实验准备与通用方法/00-章节导航.md)。
 
 
 2026-10-30 至 2026-10-31，在当前 x86-64 主机完成以下验证：
