@@ -2,17 +2,17 @@
 
 每块板子都有问题，找到原因是你的任务。
 
-SadBoard 是一个面向嵌入式 Linux 的故障定位与分析练习项目。计划在 QEMU 和实体 Linux 开发板上构造不同难度、不同现象的问题现场，让学习者从现象出发，完成证据收集、问题分类、根因定位、修复和验证。
+SadBoard 是一个面向嵌入式 Linux 的故障定位与分析练习项目。当前在真实 AM625 开发板上构造不同难度、不同现象的问题现场，让学习者从现象出发，完成证据收集、问题分类、根因定位、修复和验证。
 
 名字表达的是“一块出了问题、等你修好的开发板”。希望借鉴 SadServers 的故障现场练习形式，围绕嵌入式 Linux 建立可以反复练习的场景库。
 
 ## 当前状态
 
-已完成 AM6254 systemd 调试基线，支持 SSH、匹配符号、完整现场记录及参考修复，59 个案例均已实机验证。随机题库和通用自动评分尚未实现。学习内容全部在 [Obsidian 手册](docs/obsidian/README.md) 中按章节和案例管理，练习任务、工具参数、内核流程、汇编与修复分别维护。固件身份与已执行的验证见 [实机验证记录](docs/am625-debug-validation.md)。
+已完成 AM6254 systemd 调试基线，支持 SSH、匹配符号、完整现场记录及参考修复，59 个案例均已实机验证。随机题库和通用自动评分尚未实现。学习内容全部在 [Obsidian 手册](docs/obsidian/README.md) 中按章节和案例管理，每个案例一篇完整详解；通用工具参数在独立工具手册中维护，案例与工具通过双向链接关联。固件身份与已执行的验证见 [实机验证记录](docs/am625-debug-validation.md)。
 
 案例库共设计 **59 例**：七类基础各 5 例（35 例），性能、内存、网络进阶各 8 例（24 例）。目前 **59 例均有实现**：57 例使用设备命令，2 例由主机串口工具控制真实 AM625 的 RAM 启动；已全部完成实机验证。完整索引、岗位能力映射、根因与取证任务见[案例地图](docs/obsidian/sadboard/08-案例地图与工程能力/00-章节导航.md)。
 
-SadBoard 默认使用 **TFTP 加载内核/DTB、NFS 挂载根文件系统**，普通 AM625 BSP 保持 SD A/B 启动。两个独立的 U-Boot 配置项 `CONFIG_AM62X_BOOT_TFTP_KERNEL`、`CONFIG_AM62X_BOOT_NFS_ROOT` 支持四种组合；配置、主机部署和运行时切换见[网络调试启动](docs/obsidian/sadboard/00-实验准备与通用方法/02-TFTP-NFS%20调试启动与编译开关.md)。NFS 下实验结果保存在板端 `/srv/sadboard`，主机可直接读取 `/srv/nfs/sadboard-am625/srv/sadboard`；本地启动仍使用 `/data/sadboard`。`sadboard results` 可查看当前路径。
+SadBoard 默认使用 **TFTP 加载内核/DTB、NFS 挂载根文件系统**，普通 AM625 BSP 保持 SD A/B 启动。两个独立的 U-Boot 配置项 `CONFIG_AM62X_BOOT_TFTP_KERNEL`、`CONFIG_AM62X_BOOT_NFS_ROOT` 支持四种组合；配置、主机部署和运行时切换见[网络调试启动](docs/obsidian/sadboard/00-实验准备与通用方法/01-构建与启动部署.md)。NFS 下实验结果保存在板端 `/srv/sadboard`，主机可直接读取 `/srv/nfs/sadboard-am625/srv/sadboard`；本地启动仍使用 `/data/sadboard`。`sadboard results` 可查看当前路径。
 
 ## Workspace 分支与 Buildroot 扩展层
 
@@ -45,7 +45,7 @@ BR2_EXTERNAL="../bsp-base-external ../sadboard-external" \
 
 在新克隆的工作区中，先运行 `git submodule update --init --recursive`。`libbmc` 使用 `git@github.com:wanguo99/libbmc.git` 的 `master` 分支。`make list-defconfigs` 可以查看本实验入口。可选工具链、独立输出目录和详细构建步骤见 [环境指南](docs/obsidian/sadboard/附录B-构建与官方实验/00-章节导航.md)。
 
-`sadboard-external` 包含 AM6254 配置生成脚本、Buildroot/内核配置片段、手动实验程序和目标端环境检查脚本，跟踪远端 `main` 分支。workspace 固定所有子模块的具体提交；复现实验时使用固定提交。`git submodule update --remote` 会尝试更新到跟踪分支的新提交。
+`sadboard-external` 包含 AM6254 标准 defconfig、内核片段、原生构建 hooks、手动实验程序和目标端环境检查脚本，跟踪远端 `main` 分支。workspace 固定所有子模块的具体提交；复现实验时使用固定提交。`git submodule update --remote` 会尝试更新到跟踪分支的新提交。
 
 开发时应先提交并推送子模块改动，再在 workspace 提交更新后的子模块指针。构建输出统一放在 `output/`，不提交生成文件。
 

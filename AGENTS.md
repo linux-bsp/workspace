@@ -5,7 +5,7 @@
 SadBoard develops on the `SadBoard` branch of `linux-bsp/workspace`, using existing BSP submodules. AM6254 defaults to TFTP kernel/DTB and NFS root, with independent U-Boot switches and local SD A/B fallback. It provides systemd, SSH and 59 manual scenarios, including: crash, FD exhaustion, cgroup OOM, CPU hotspot, mutex wait, isolated networking, startup panic recovery, periodic drift, queue backlog and TCP batching. The handbook covers 35 basic and 24 advanced cases: 57 target commands and two host UART controllers for real AM625 RAM boot faults. All validation uses AM625 hardware; do not substitute QEMU. Random scenario orchestration and general automatic grading are not implemented. Record image build and board validation status separately.
 
 - `README.md`: project scope, status, and documentation index.
-- `docs/obsidian/sadboard/`: canonical Chinese handbook in an Obsidian vault; start at `首页.md`. Case directories use `<case-id>-<specific-problem>`, such as `01-应用崩溃/B-CR01-缺失记录未判空导致空指针崩溃/`. Each case has separate exercises, tools, kernel flows and repair notes. Extend the corresponding note and its navigation. Distinguish source-derived paths from captured stacks.
+- `docs/obsidian/sadboard/`: canonical Chinese handbook; start at `首页.md`. Each `<case-id>-<specific-problem>/案例详解.md` contains the complete scenario, exercises, principles, kernel/assembly flow, diagnosis and repair evidence. Shared tool parameters live once in `工具手册/<tool>.md`, with reciprocal links to concrete cases. The vault root keeps only homepage, case index and tool index. Add content to its owning note; keep source-derived paths distinct from captured stacks.
 - `docs/am625-debug-validation.md`: dated build and board evidence, separate from learning instructions.
 - `docs/workspace-toolchain.md`: current shared directory layout and standalone SDK workflow.
 - `docs/am62x/`, `docs/imx6ull/`, `docs/h200/`: board and hardware references; i.MX6ULL examples do not imply a supported SadBoard profile.
@@ -32,6 +32,7 @@ Without `O=`, artifacts go to `buildroot/output/`; the current board validation 
 
 Use `git diff --check`, `git diff --cached --check`, and `git status --short`. Review untracked files separately.
 For learning-document changes, run `python3 scripts/check-obsidian.py` to validate wiki links, headings, case coverage, source paths and navigation reachability. Maintain the Obsidian vault directly; do not recreate a consolidated handbook or an export pipeline. Preserve the user's Obsidian settings; do not commit window state, caches or personal reports. Chinese chapter/note names are intentional in this vault.
+Use ordinary Markdown titles without YAML note properties. Case IDs come from descriptive directory names; personal reports belong in an optional ignored `实验记录/` directory. Avoid standalone pages that only repeat navigation or a small section of their parent topic.
 
 ## Coding Style & Naming Conventions
 

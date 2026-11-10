@@ -59,7 +59,7 @@ def read_notes():
         if any(part.startswith(".") for part in parts):
             continue
         name = note.relative_to(VAULT).as_posix()[:-3]
-        if name == "欢迎" or (name.startswith("实验记录/") and name != "实验记录/使用说明"):
+        if name.startswith("实验记录/"):
             continue
         notes[name] = note.read_text()
     return notes
@@ -72,6 +72,8 @@ def validate(notes):
     graph = {name: set() for name in notes}
     note_headings = {name: headings(text) for name, text in notes.items()}
     for name, text in notes.items():
+        if text.startswith("---\n"):
+            errors.append(f"{name}: keep note properties out of the handbook")
         if sum(level == 1 for level, _ in note_headings[name]) != 1:
             errors.append(f"{name}: expected exactly one note title")
 
@@ -104,15 +106,22 @@ def validate(notes):
         outside_code(text, check_line)
     cases = []
     for name, text in notes.items():
-        if name.endswith("/00-案例导航"):
-            match = re.search(r'^case:\s*["\']?([AB]-[A-Z]+\d{2})', text, re.M)
+        if name.endswith("/案例详解"):
+            folder = Path(name).parent.name
+            match = re.fullmatch(r"([AB]-[A-Z]+\d{2})-\S.*", folder)
             if not match:
-                errors.append(f"{name}: missing case property")
+                errors.append(f"{name}: case directory must use <case-id>-<specific-problem>")
             else:
                 cases.append(match[1])
-                folder = Path(name).parent.name
-                if not re.fullmatch(re.escape(match[1]) + r"-\S.*", folder):
-                    errors.append(f"{name}: case directory must use <case-id>-<specific-problem>")
+    case_notes = {name for name in notes if name.endswith("/案例详解")}
+    tool_notes = {name for name in notes if name.startswith("工具手册/")}
+    for name in case_notes:
+        for tool in graph[name] & tool_notes:
+            if name not in graph[tool]:
+                errors.append(f"{tool}: add a usage-scenario backlink to {name}")
+    for name in tool_notes:
+        if not graph[name] & case_notes:
+            errors.append(f"{name}: link to at least one concrete usage scenario")
     expected = {
         *[f"B-{family}{n:02d}" for family in ("CR", "FD", "MM", "CPU", "SYNC", "NET", "BOOT") for n in range(1, 6)],
         *[f"A-{family}{n:02d}" for family in ("P", "M", "N") for n in range(1, 9)],

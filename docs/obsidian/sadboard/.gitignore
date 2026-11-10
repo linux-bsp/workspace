@@ -8,5 +8,4 @@
 .DS_Store
 
 # Keep personal reports and large evidence out of the shared handbook by default.
-/实验记录/*
-!/实验记录/使用说明.md
+/实验记录/
