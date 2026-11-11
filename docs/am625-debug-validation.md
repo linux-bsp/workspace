@@ -574,3 +574,24 @@ NFS 模式 `sadboard results` 为 `/srv/sadboard`，主机普通用户可直接�
 确认没有将网络镜像误确认为 SD deployment。正式固件保持已成功 OTA 的
 `v0.0.1 / 239b82b9`；本次后续改动仅为主机同步工具，未生成不同内容的目标固件。
 验证工件仍位于 `output/validation/bsp-netboot-common/`。
+
+## 2026-11-11：补齐案例列表中的 01 编号
+
+旧列表由 `case-suite --list` 和 shell 中的单独输出拼接；初期的十个入口已经存在，
+但没有附带手册 ID，因此末尾的 `crash/oom/cpu/...` 看起来像未编号案例。
+现在由现有原生 `case-suite --catalog` 统一输出 59 个正式案例及一个辅助项，按手册
+章节、编号排序；`watchdog-probe` 的编号为 `-`。保留原命令入口与运行/验证语义，
+不把外部 shell/串口案例注册为 case-suite 直接执行的负载。目标不依赖 awk/sort。
+
+主机回归 25 项通过，现有入口测试增加对全部 35 个基础、24 个进阶 ID、顺序、
+唯一入口及十个 01 映射的校验。原生 Buildroot `sadboard-labs-rebuild all` 和配套
+符号/架构检查通过。固件版本维持 `v0.0.1`，内容 ID 为
+`52745c9f8c9f1eb3800b0570e73cce97ba7c72e3af77be994f65e66501244a3a`；
+OTA 发布事务 142 已收到 AM625 的 `success` 上报，SD 模式健康确认、零失败服务。
+
+随后从 SD 启动状态运行正式 `sync-artifacts.sh` 同步配套 NFS/TFTP，恢复两个网络
+启动开关。NFS 参考 ID 为
+`97287f0095fc0836b876f2069460e8ef4bcfaa04da3c395f46b9af32d4870273`。
+实机 SD 与 NFS 两次 `sadboard list` 输出逐字一致，59 个 ID 齐全且按手册排序；
+NFS 下 `sadboard verify crash` 通过，无失败服务。板卡最终保持 TFTP＋NFS 启动。
+未升级 SPL/U-Boot。工件保存在 `output/validation/case-list-ids/`。
