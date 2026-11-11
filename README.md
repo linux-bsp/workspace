@@ -12,6 +12,10 @@ SadBoard 是一个面向嵌入式 Linux 的故障定位与分析练习项目。�
 
 案例库共设计 **59 例**：七类基础各 5 例（35 例），性能、内存、网络进阶各 8 例（24 例）。目前 **59 例均有实现**：57 例使用设备命令，2 例由主机串口工具控制真实 AM625 的 RAM 启动；已全部完成实机验证。学习顺序与完整入口见[案例索引](obsidian-sadboard/00-实验准备与通用方法/案例索引.md)，根因、取证任务和参考来源保存在各案例详解中。
 
+补充教材见 [ABI 与数据模型](obsidian-sadboard/附录C-体系结构与补充知识/01-ABI与数据模型.md) 和
+[跨架构汇编与调试](obsidian-sadboard/附录C-体系结构与补充知识/02-常见架构汇编与调试.md)，
+覆盖 x86、ARMv7/ARMv8、RV32/RV64，并区分静态编译验证与实机运行范围。
+
 SadBoard 默认使用 **TFTP 加载内核/DTB、NFS 挂载根文件系统**，普通 AM625 BSP 保持 SD A/B 启动。两个独立的 U-Boot 配置项 `CONFIG_AM62X_BOOT_TFTP_KERNEL`、`CONFIG_AM62X_BOOT_NFS_ROOT` 支持四种组合；配置、主机部署和运行时切换见[网络调试启动](obsidian-sadboard/00-实验准备与通用方法/01-构建与启动部署.md)。NFS 下实验结果保存在板端 `/srv/sadboard`，主机可直接读取 `/srv/nfs/sadboard-am625/srv/sadboard`；本地启动仍使用 `/data/sadboard`。`sadboard results` 可查看当前路径。
 
 网络启动由 `bsp-base-external` 公共层提供，使用 `bsp.netboot=1`、`BSPNET1` 和
@@ -54,7 +58,7 @@ BR2_EXTERNAL="../bsp-base-external ../sadboard-external" \
 主机测试、文档检查、可选串口验收工具及上游 binman 等主机依赖仍可使用 Python。
 固件打包职责见 [生成器说明](bsp-base-external/support/firmware/README.md)。
 
-在新克隆的工作区中，先运行 `git submodule update --init --recursive`。`libbmc` 使用 `git@github.com:wanguo99/libbmc.git` 的 `master` 分支。`make list-defconfigs` 可以查看本实验入口。可选工具链、独立输出目录和详细构建步骤见 [环境指南](obsidian-sadboard/附录B-构建与官方实验/00-章节导航.md)。
+在新克隆的工作区中，先运行 `git submodule update --init --recursive`。`libbmc` 使用 `git@github.com:wanguo99/libbmc.git` 的 `master` 分支。`make list-defconfigs` 可以查看本实验入口。可选工具链、独立输出目录和详细构建步骤见 [环境指南](obsidian-sadboard/附录A-实验实践与构建/00-章节导航.md)。
 
 `sadboard-external` 包含 AM6254 标准 defconfig、内核片段、原生构建 hooks、手动实验程序和目标端环境检查脚本，跟踪远端 `main` 分支。workspace 固定所有子模块的具体提交；复现实验时使用固定提交。`git submodule update --remote` 会尝试更新到跟踪分支的新提交。
 
@@ -165,4 +169,4 @@ SadBoard 希望提供一组可重复练习的现场，帮助学习者回答：
 
 ## 资料署名
 
-教材中对 Bootlin 实验手册的归纳和改编沿用 CC BY-SA 3.0，具体署名与来源见 [教材附录 C](obsidian-sadboard/附录C-Bootlin课程参考/00-章节导航.md)。项目设想不代表 Bootlin 官方课程安排，SadBoard 代码许可尚未确定。
+教材中对 Bootlin 实验手册的归纳和改编沿用 CC BY-SA 3.0，具体署名与来源见 [教材附录 B](obsidian-sadboard/附录B-Bootlin课程参考/00-章节导航.md)。项目设想不代表 Bootlin 官方课程安排，SadBoard 代码许可尚未确定。

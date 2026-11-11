@@ -629,3 +629,23 @@ OTA 发布事务 144 已收到 AM625 的 success 上报。在本地 SD 模式实
 NFS 与 SD 全量列表逐字一致，`B-CR` 均只列出 B-CR01～05，网络健康确认通过、
 无失败 systemd 服务。设备最终保持 TFTP＋NFS 启动；未升级 SPL/U-Boot。
 手册更新了字段顺序、单元前缀及示例。验证工件为 `output/validation/catalog-prefix/`。
+
+## 2026-11-11：附录重组与 ABI、汇编教材验证
+
+手册原附录 A/B 合并为实验实践与构建，Bootlin 课程参考顺移到附录 B；新增附录 C
+保存 ABI 和跨架构汇编，24 篇工具说明迁入附录 D，移除两篇 i.MX6ULL 历史排错笔记。
+原有保留内容的 517 个代码块逐字一致，案例、工具与导航链接同步更新。
+
+教材七份手写 load_add 函数和统一 C 对照已用 Clang 19 编译、检查 ELF 并反汇编：
+IA-32、x86-64、ARMv7-A A32/T32、AArch64、RV32IMAC、RV64IMAC 均通过；
+另验证 A64 O0 与 RV64 关闭 C 扩展的对照。非 x86-64/AArch64 目标仅静态验证。
+
+x86-64 主机与 AM625 均运行 ABI 测量程序，结果为 LP64、小端，示例结构体大小 16、
+对齐 8、偏移 0/4/8。C 对照得到 load_add=12、wrapper=13、sum_array=31，
+手写 x86-64/A64 函数得到 12。AM625 gdbserver 实测入口参数 inc=5、内存首值 7，
+单步 ldr 后 w0=7、add 后 w0=12，ret 返回调用者并正常退出。
+
+本轮只调整文档、校验工具与学习示例，没有构建或发布新固件；示例放在 NFS 共享的
+`/srv/sadboard/`，设备继续 TFTP＋NFS 健康运行，无失败 systemd 服务。
+主机编译日志、各架构反汇编、ABI 输出和 GDB 实机记录位于
+`output/validation/appendix-textbook/`，学习程序位于 `output/learning/`。
