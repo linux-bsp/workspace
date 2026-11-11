@@ -595,3 +595,19 @@ OTA 发布事务 142 已收到 AM625 的 `success` 上报，SD 模式健康确�
 实机 SD 与 NFS 两次 `sadboard list` 输出逐字一致，59 个 ID 齐全且按手册排序；
 NFS 下 `sadboard verify crash` 通过，无失败服务。板卡最终保持 TFTP＋NFS 启动。
 未升级 SPL/U-Boot。工件保存在 `output/validation/case-list-ids/`。
+
+## 2026-11-11：将看门狗前置检查独立展示
+
+`watchdog-probe` 是 `kernel-lockup` 前的硬件恢复检查，不占 59 个正式案例编号。
+现在从正式案例元数据表移出，在清单末尾独立的 `Auxiliary checks (not handbook cases)`
+区域展示，不再使用 `-` 作为编号占位。手册提供了对应 B-BOOT05 的跳转链接。
+现有目录回归更新为校验 59 个编号案例及独立辅助区域；针对该入口的主机回归通过。
+
+原生构建与匹配符号检查通过，固件维持 `v0.0.1`，内容 ID 为
+`e44eb18baa13ee36fddcb7e1aae2d34ad29820e624d2169f8846f9714a0cff5a`。
+OTA 发布事务 143 已上报 success，SD 本地健康确认通过。随后同步 NFS/TFTP，
+网络参考 ID 为
+`221987529c140eebc5f7a37c5e8cc2b5ff40fdd4e4cd494b5aa5c477fc4a167c`。
+SD 与 NFS 清单逐字一致，正式区域完整包含 59 个案例，辅助检查在独立区域，
+NFS 健康确认通过、零失败服务，设备恢复 TFTP＋NFS 启动。
+验证工件为 `output/validation/auxiliary-catalog/`。
