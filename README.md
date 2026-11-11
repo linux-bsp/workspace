@@ -21,8 +21,9 @@ SadBoard 是一个面向嵌入式 Linux 的故障定位与分析练习项目。�
 共 62 个学习安排复用 50 个独立案例，不重复增加题目数量。覆盖缺口和待实现实验单独列出。
 
 补充教材见 [ABI 与数据模型](obsidian-sadboard/附录C-体系结构与补充知识/01-ABI与数据模型.md) 和
-[跨架构汇编与调试](obsidian-sadboard/附录C-体系结构与补充知识/02-汇编学习教材/00-学习导航.md)，
+[汇编与体系结构](obsidian-sadboard/11-汇编与体系结构/00-章节导航.md)，
 覆盖 x86、ARMv7/ARMv8、RV32/RV64，并区分静态编译验证与实机运行范围。
+教材、编译反汇编练习与AM625汇编案例集中在同一目录，按基础知识、各架构和实机实验分为二级目录。
 
 SadBoard 默认使用 **TFTP 加载内核/DTB、NFS 挂载根文件系统**，普通 AM625 BSP 保持 SD A/B 启动。两个独立的 U-Boot 配置项 `CONFIG_AM62X_BOOT_TFTP_KERNEL`、`CONFIG_AM62X_BOOT_NFS_ROOT` 支持四种组合；配置、主机部署和运行时切换见[网络调试启动](obsidian-sadboard/00-实验准备与通用方法/01-构建与启动部署.md)。NFS 下实验结果保存在板端 `/srv/sadboard`，主机可直接读取 `/srv/nfs/sadboard-am625/srv/sadboard`；本地启动仍使用 `/data/sadboard`。`sadboard results` 可查看当前路径。
 
