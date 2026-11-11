@@ -658,3 +658,29 @@ RV32、RV64、跨平台实验和工程分析。各架构补充数据流、调用
 原教材全部代码块保留，标题独立编号并迁移链接；127 篇笔记、933 个标题、
 2308 个双向链接及 120 个源码路径校验通过。本阶段为文档拆分，沿用上一节已验证的
 静态编译与 AM625 单步结果；配套新练习在下一阶段实现并单独记录构建与实机结果。
+
+## 2026-11-11：八个 A64 汇编与八个内核子系统实验
+
+新增 L-ASM01～08：访存宽度、符号扩展、指针截断、有/无符号条件、调用者临时寄存器、
+结构体布局、循环边界、callee-saved 寄存器。执行真实 A64 指令；错误指针只观察不解引用，
+逻辑越界读取位于已分配哨兵内，被测 callee 的违规由外层探针保护 C 调用者。
+非小端 AArch64 不模拟结果，返回 77。
+
+新增 K-MM/VFS/IPC/TIME/PROC/NET/IO/SCHED01：私有 COW、rename 后旧 FD、eventfd 聚合、
+timerfd 过期计数、僵尸回收、UDP 截断、管道短读和有效 CPU 亲和集合。
+使用真实接口与私有资源，UDP 受管运行使用独立 namespace，不改管理 eth0。
+故障和参考均回收实验子进程与资源；timerfd 数量按本次实际过期数检查，不编造固定 IRQ 次数。
+
+主机原生回归 27 项通过，包含新子系统契约、双层证据篡改拒绝、非目标架构拒绝与 75 个目录项。
+原生 Buildroot 构建、AArch64 ELF 和匹配符号校验通过。固件维持 v0.0.1，完整 ID 为
+`81f22be540a73fe2c2118850e42e30b76add7abd4f0e4772e220664fc5cfaea6`，
+OTA 发布 145 收到 success。AM625 本地 SD 与 TFTP＋NFS 分别完成新增 16 例 verify，
+每例均独立调用 check，通过全部业务、资源和 trace/summary 契约。
+
+NFS 参考 ID 为 `0fd5a423f9e30f4a81891cc8862462d25a2a6df2c8f01f99a83bcc9f39e9f4f5`。
+设备最终保持网络调试启动，未升级 SPL/U-Boot。构建、回归、OTA、SD/NFS 每例原始输出与
+独立检查保存在 `output/validation/assembly-course/`。手册增加两章共 16 个完整案例、
+共同调试步骤与工具反向链接，原 59 例历史验证范围与本批分开记录。
+另外实测手动 GDB 流程：在 sb_asm_width_bug 入口看到两个输入字段，单步 ldr x0 后
+观察到 `0x1234567889abcdef`，进程正常结束；kernel-cow 的手动 strace 采集成功。
+本次 A64 `.S` 源码同时保存在目标 `/usr/src/sadboard/src/` 与配套 `images/debug/source/src/`。
