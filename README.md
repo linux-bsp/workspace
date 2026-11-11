@@ -14,6 +14,16 @@ SadBoard 是一个面向嵌入式 Linux 的故障定位与分析练习项目。�
 
 SadBoard 默认使用 **TFTP 加载内核/DTB、NFS 挂载根文件系统**，普通 AM625 BSP 保持 SD A/B 启动。两个独立的 U-Boot 配置项 `CONFIG_AM62X_BOOT_TFTP_KERNEL`、`CONFIG_AM62X_BOOT_NFS_ROOT` 支持四种组合；配置、主机部署和运行时切换见[网络调试启动](obsidian-sadboard/00-实验准备与通用方法/01-构建与启动部署.md)。NFS 下实验结果保存在板端 `/srv/sadboard`，主机可直接读取 `/srv/nfs/sadboard-am625/srv/sadboard`；本地启动仍使用 `/data/sadboard`。`sadboard results` 可查看当前路径。
 
+网络启动由 `bsp-base-external` 公共层提供，使用 `bsp.netboot=1`、`BSPNET1` 和
+`/usr/libexec/bsp/boot-context`，普通 BSP 也可独立使用。Windows 接入的远程串口可通过
+USB/IP 导入 Debian 后用 tio 操作；连接、权限检查与日志采集见
+[环境检查与登录](obsidian-sadboard/00-实验准备与通用方法/02-环境检查、登录与符号准备.md)。
+
+构建后可运行 `sadboard-external/scripts/sync-artifacts.sh output/am625-debug-systemd/images`
+同步 NFS 根目录、TFTP 内核/DTB 及实验载荷。脚本按需从仓库外的
+`~/.config/.sudo.guo` 读取 sudo 密码；使用 `--check` 只校验产物。完整根目录同步前，
+先让板卡使用本地根文件系统或关机。
+
 ## Workspace 分支与 Buildroot 扩展层
 
 SadBoard 在 [linux-bsp/workspace](https://github.com/linux-bsp/workspace) 的 `SadBoard` 分支中开发，复用已有的 Buildroot、Linux、U-Boot 和 BSP 子模块。原先独立的 BadBoard 仓库不再作为本工作区的开发入口。

@@ -478,3 +478,99 @@ SquashFS 已接近原 128 MiB 槽位容量，且本环境没有生成产品启�
 已实际执行 `cd buildroot` 后通过环境变量传入两个 external，运行 `make sadboard_am625_debug_defconfig`。生成配置与原组合脚本的默认配置一致，仅 `BR2_DEFCONFIG` 的记录路径不同；入口可被 `make list-defconfigs` 列出。
 
 后续不传 `BR2_EXTERNAL` 的 `make printvars` 与 `make show-info` 均成功，确认 external 路径被记住、所需调试工具和本地源码软件包进入构建依赖图。本次验证了标准入口及配置一致性，没有重新执行内部工具链方式的完整 `make all`。
+
+## 2026-11-11：网络启动归入公共 BSP、USB/IP 串口文档
+
+本轮将网络启动标记改为 `bsp.netboot=1`，参考记录改为
+`BSPNET1 1 <SHA256>`，接口迁至 `/usr/libexec/bsp/boot-context`。
+公共 overlay、健康确认、TFTP/NFS 导出与部署脚本均属于
+`bsp-base-external`；SadBoard 只提供实验室 IP、案例依赖与 RAM 故障载荷。
+普通 BSP 仍默认关闭 TFTP/NFS，SadBoard 默认开启两项。
+
+最终构建：`v0.0.1 / 239b82b93d67d95111b57a7b07c7d178b233c31cffe7ec666af1e075e1a390d0`。
+网络参考：`1e506637ec852571f38537d26814bfa24800e50891c0da736d1aa56556a2429a`。
+OTA 服务已接收该固件的 `success` 上报；本地 SD 运行、健康确认、60 秒硬件看门狗正常。
+
+| 模式 | 本轮实机结果 |
+| --- | --- |
+| 本地 FIT + 本地 rootfs | OTA 安装与启动健康确认通过，无失败服务 |
+| TFTP Image/DTB + 本地 rootfs | 公共标记、BSPNET1、netboot 就绪、OTA/生产健康停用均通过 |
+| 本地 FIT + NFS rootfs | 实机启动、公共健康确认、案例运行通过 |
+| TFTP Image/DTB + NFS rootfs | 实机启动、公共健康确认、案例、perf 通过 |
+
+TFTP/本地根模式运行 `sadboard-debug-check`、`sadboard verify crash`、
+`perf stat -e task-clock -- sleep 1` 均通过。案例正确使用公共构建记录，结果仍写
+本地 `/data/sadboard`。主机回归为公共网络启动 6 项、U-Boot 启动环境 11 项、
+固件打包 14 项和案例 25 项，全部通过。另加载只含 BSP 的
+`alientek_am62x_defconfig`，确认不依赖 SadBoard external 即包含公共 overlay/hooks。
+
+U-Boot 二进制已重新构建，生成环境为 schema 10；**没有烧写新 U-Boot/SPL**。
+板上仍运行 2026-11-05 的 U-Boot，验证时只更新了已有环境中的
+`fw_set_net_bootargs`、`net_hostname` 和两个启动开关，原环境备份保留于设备
+`/data/bsp-netboot-env-before.txt`。初次环境导入文件使用了不适用于本机 libubootenv
+的空格分隔，公共标记未写入，触发调试健康拒绝与软件重启；已经串口恢复并改为
+`name=value` 格式，读回确认后重新实测通过。增量构建还补做了
+`sadboard-labs-rebuild`，避免沿用旧包中已删除路径的调用；最终固件包含新案例脚本。
+
+工件：`output/validation/bsp-netboot-common/`，保存构建、回归、OTA 上报、原始串口、
+串口恢复及 TFTP/本地根验收。NFS 根目录需要服务器 root 权限解包并更新导出配置；
+后续已使用统一同步入口完成两种 NFS 模式实测，见本节末尾。
+
+Obsidian 在现有“环境检查、登录与符号准备”一文中补充 Windows usbipd-win 共享、
+Debian 13 的 usbip 导入、节点权限与 tio 参数/退出/日志留存，不新增零散笔记。
+A 核控制台实测稳定路径为
+`/dev/serial/by-id/usb-1a86_USB_Dual_Serial_5757005084-if02`；
+`if00` 的 M 核归属仍待启动输出确认，不能把本机 STM32 的 `ttyACM0` 当作 AM625。
+已安装 tio 3.9，核对了命令选项并实测本地 `Ctrl+T` 后 `q` 退出。
+文档检查通过：117 篇笔记、2207 个有效 Wiki 链接、115 个源码路径。
+
+### 部署预检修正
+
+首次执行服务器部署时，Buildroot 的 host-jq 因构建参数 `--without-oniguruma`
+不能执行 `test()` 正则函数。此前主机测试用了系统 jq，未覆盖这一实际差异。
+已将两份部署脚本中的名称、哈希正则校验改为 Bash，jq 只处理 JSON 结构；新增
+`--check` 可在非 root 会话验证全部 SHA256、构建记录和 rootfs.tar 内的参考记录，
+不修改部署目录。缓存部署入口先完成这两项预检，随后才归档旧目录及变更 exports。
+
+首次失败时，旧 NFS 根已备份到
+`/srv/nfs/sadboard-am625-before-bsp-netboot-20261111-133924`，原 exports 内容在同名
+`.exports` 文件；没有创建新根目录或写入板卡固件。设备继续运行已确认的 SD 固件
+`v0.0.1 / 239b82b9`，可重试同一部署命令。
+
+已用实际 Buildroot host-jq 对完整构建产物执行两份 `--check`，均通过。网络启动
+回归增为 7 项，分别用系统 jq 与不含 Oniguruma 的 Buildroot host-jq 运行通过；
+新增覆盖非空旧根目录、非法名称/哈希、文件缺失、构建记录不一致及损坏产物，
+确认失败预检不改动旧根目录、不创建 TFTP 目录。本次修正只涉及主机部署与测试文档，
+固件内容 ID 不变；后续已完成 NFS 部署及启动测试，见下节。
+
+### 统一同步入口与实机验收收尾
+
+临时 `/home/guohao/.cache/bsp-netboot-common/deploy.sh` 已移除。正式入口为
+`sadboard-external/scripts/sync-artifacts.sh IMAGES`，默认 NFS/TFTP 路径和客户端来自
+SadBoard 策略，可用参数覆盖。公共 BSP 提供 `--sync`：先在临时目录解包，再用
+`rsync -aH --numeric-ids --checksum --delete` 同步；通用 `--preserve` 参数由 SadBoard
+传入 `srv/sadboard`、`etc/machine-id`，保留实验记录及主机身份。同步入口不登录板卡、
+不控制板卡重启或启动开关，同步前须由使用者让板卡使用本地根或关机。
+
+sudo 优先使用已有授权，需要密码时从用户指定的仓库外
+`~/.config/.sudo.guo` 读取；权限已设为 600。密码仅通过标准输入交给 `sudo -v`，
+提升后的进程标准输入为 `/dev/null`。保留调用脚本进程避免 sudo 的 parent-PID
+时间戳作用域变化。五项认证回归验证缓存授权、密码认证、失败终止、私有文件权限、
+预检不申请授权及密码不进入日志/参数。
+
+实际完整同步、重复同步均通过：NFS 根目录 inode 保持不变，过时探针文件删除，
+实验记录和 machine-id 保留；一次实际 NFS 启动、回到 SD 后重复同步，再次 NFS
+启动均正常。原有根目录备份保持原样。当前已完成四种模式的本轮验证，设备最终恢复
+SadBoard 默认的 `tftp_kernel=1`、`nfs_root=1`，运行公共 `bsp.netboot=1` 模式。
+
+两种 NFS 模式的案例均通过，最终现场为主机
+`/srv/nfs/sadboard-am625/srv/sadboard/crash-20261111T140356-XXmwPnbI/`。
+NFS 模式 `sadboard results` 为 `/srv/sadboard`，主机普通用户可直接读取共享证据。
+`perf stat -e task-clock -- sleep 1` 成功，硬件 watchdog timeout=60，无失败 systemd
+服务。生产 OTA/健康服务按公共条件停用，公共网络就绪服务正常完成。
+
+网络模式前后两个 A/B 元数据区的合并 SHA256 均为
+`b8f8a3c59a67a66fb549df23db5fe4bf39e43aabff64877456e69cc2636f3597`，
+确认没有将网络镜像误确认为 SD deployment。正式固件保持已成功 OTA 的
+`v0.0.1 / 239b82b9`；本次后续改动仅为主机同步工具，未生成不同内容的目标固件。
+验证工件仍位于 `output/validation/bsp-netboot-common/`。
