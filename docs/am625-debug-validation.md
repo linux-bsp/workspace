@@ -1148,3 +1148,19 @@ lookup_linear约占本次自耗权重99.60%。保留原始perf.data、栈文本�
 
 最后性能、SVG、22项回归、WDT/锁死完整串口、服务端原始日志及CRC检查保存在ignored的
 `output/validation/advanced-phase6/`；未改分区、刷factory或安装新bootloader。
+
+## 2026-11-12：fwctl status显示部署固件hash ID
+
+`fwctl status`在每个deployment的release后增加8位hash，区分版本号相同但内容不同的A/B固件。
+使用现有只读identity接口；ID属于kernel/rootfs组合固件，保留每个分区原有槽位、版本和时间，不把它当作bootloader或单分区摘要。
+身份不可获取时显示unknown，OTA机器协议与完整ID校验保持不变。新增回归覆盖NFS无booted deployment、两套不同ID、8位截断和未知身份。
+
+8项原生固件测试通过，原生Buildroot edk-reconfigure与all、调试产物检查通过。
+发布v0.0.1 / `aac8e4ac31d7c0fa2c564081c7088a306b1fe46cb7b01541a66e8317f2f2104e`（152），
+本地部署0、kernel/rootfs A槽confirmed；status正确显示部署0为aac8e4ac、部署1为0f3edbe4，重复查询均为sequence1053。
+最初切回NFS早于fwctld成功上报，已返回SD让真实设备完成上报，服务端最终成功1、失败0、设备异常0；未伪造回执。
+
+最终恢复TFTP/NFS，参考 `6037d12a026d3110d2420f7a798994f2ba28e9967872dd2ff3b74c4ec7831301`，
+boot为 `894d1fd7-d96a-438e-ac78-d1a82e9a9347`；新status输出与本地一致，fwctl可执行文件hash匹配构建，WDT active、服务失败0、SOL同步正常且归档待传0。
+未接管用户正在使用的tio或修改分区/bootloader。构建、原生测试、未剥离fwctl ELF、OTA回执和两种启动模式结果归档于ignored的
+`output/validation/fwctl-status-hash/`。
