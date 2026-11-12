@@ -875,3 +875,37 @@ diff返回1表示两份汇编存在差异，按预期解释，不作为失败。
 
 本轮只整理和补充教材，未改设备程序、构建配置或固件内容，未触发新的整机故障、
 重新验收原75例或发布相同内容的OTA；历史档案中的旧目录名仍表示各次验证当时的结构。
+
+## 2026-11-12：独立编译构建课程、交叉编译练习与案例导航命名
+
+编译课程从操作系统中移出，独立为 `03-编译原理与构建系统/`，保留原三篇编译/链接/优化教材，
+增加总导航及交叉编译、Buildroot、Yocto三篇教程。顶层依次为硬件、操作系统、编译构建、
+汇编、内核、系统调试与优化；实验准备及两个索引移入第6章的 `00-实验准备与通用方法/`。
+十个基础/进阶子类保留自己的导航，文件名与目录同名，例如 `01-应用崩溃/01-应用崩溃.md`，
+没有合并到一份大导航；原现象区分与学习检查保留，所有双链与前后章路线同步更新。
+
+交叉编译教程补齐build/host/target、sysroot/rootfs/DESTDIR、SDK环境、Make/CMake、
+Autotools与pkg-config、ELF/动态依赖及设备执行验收。实际按正文执行28个shell代码块，
+另有一个可选SDK环境source步骤没有混入测试终端；检查三份产物均为AArch64、ELF64、小端。
+直接GCC版、Make版和CMake版分别上传AM625自己的临时目录执行，均输出
+`toolchain-demo: pointer=8 value=17` 并退出0，随后只清理本次临时文件。
+设备boot ID仍为 `678087b2-b3fa-437e-b77f-9a19dfa52de6`，没有重启或注入新故障。
+
+Buildroot篇覆盖原生配置、external注册、包框架、host/target/staging、重建阶段、
+rootfs/打包、SDK和复现边界。在独立ignored输出树完成标准defconfig解析、help和
+savedefconfig导出；另将文内教学external/Config.in/.mk原样落地到ignored练习目录，
+用原生defconfig选择示例包，确认框架解析的SITE_METHOD=local及LICENSE=NOASSERTION。
+没有完整重建该示例包、板级镜像或SDK，不将配置解析当作这些构建成功的证据。
+
+Yocto篇以5.0.13/Scarthgap教学标签为基线，讲layer、recipe、任务、依赖、包/镜像、sstate、
+标准SDK与当前BSP适配边界。远程核对官方tag，提交为
+`f16cffd030d21d12dd57bb95cfc310bda41f8a1f`；核对对应genericarm64配置是SystemReady/EFI参考平台，
+不是当前ALIENTEK板BSP。该系列支持列表未列当前Debian 13，文内要求按其支持环境准备，
+不声明完成BitBake元数据解析、Yocto包/镜像/SDK构建或本板Yocto启动，不使用QEMU。
+
+文档检查通过：202篇笔记、1987个连续编号标题、3315个有效双链和182个本地源码路径；
+原75例及十章70个内核学习安排不变。逐篇核对原198篇、854个代码/证据块内容和顺序完整保留，
+新增三篇教程的67个shell块通过bash语法检查；十个子类导航均与目录同名，个人Obsidian配置未改。
+主机配置、源码核对和运行日志保存在ignored的 `output/validation/toolchain-course/`；
+所有练习输入与产物放在 `output/learning/`。本轮没有修改设备固件或产品构建配置，
+没有发布重复内容的OTA，原案例的历史实机验收范围继续按各自档案解释。

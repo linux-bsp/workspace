@@ -10,25 +10,25 @@ SadBoard 是一个面向嵌入式 Linux 的故障定位与分析练习项目。�
 
 已完成 AM6254 systemd 调试基线，支持 SSH、匹配符号、完整现场记录及参考修复，75 个案例均有实机验收记录。随机题库和通用自动评分尚未实现。学习内容全部在 [Obsidian 手册](obsidian-sadboard/README.md) 中按章节和案例管理，每个案例一篇完整详解；通用工具参数在独立工具手册中维护，案例与工具通过双向链接关联。固件身份与已执行的验证见 [实机验证记录](docs/am625-debug-validation.md)。
 
-案例库现有 **75 例**：35 个基础、24 个进阶、8 个 A64 汇编、8 个内核机制专用案例。73 例使用设备命令，2 例由主机串口工具控制真实 AM625 的 RAM 启动；均有实机验收记录，各批验证的固件与范围分别归档。学习顺序与完整入口见[案例索引](obsidian-sadboard/05-实验准备与通用方法/案例索引.md)，根因、取证任务和参考来源保存在各案例详解中。
+案例库现有 **75 例**：35 个基础、24 个进阶、8 个 A64 汇编、8 个内核机制专用案例。73 例使用设备命令，2 例由主机串口工具控制真实 AM625 的 RAM 启动；均有实机验收记录，各批验证的固件与范围分别归档。学习顺序与完整入口见[案例索引](obsidian-sadboard/06-系统调试与优化/00-实验准备与通用方法/案例索引.md)，根因、取证任务和参考来源保存在各案例详解中。
 
 教材面向有数年 BSP 经验、能阅读源码但尚未系统掌握原理的工程师。原有 59 例逐例补充
 硬件/操作系统模型、状态变化、关键源码分支、可证伪的定位思路与递进追问；实际受控负载
-和生产扩展目标分别说明。练习方法见[从项目经验建立原理解释](obsidian-sadboard/05-实验准备与通用方法/03-定位流程与工具选择.md)。
+和生产扩展目标分别说明。练习方法见[从项目经验建立原理解释](obsidian-sadboard/06-系统调试与优化/00-实验准备与通用方法/03-定位流程与工具选择.md)。
 
-内核课程集中在 [04-内核子系统](obsidian-sadboard/04-内核子系统/00-章节导航.md)，二级目录分别管理
+内核课程集中在 [05-内核子系统](obsidian-sadboard/05-内核子系统/00-章节导航.md)，二级目录分别管理
 进程、调度、内存、VFS、同步与 IPC、网络、时间、存储 I/O、启动恢复、多核SMP与异构系统。每章先讲框架与核心原理，再安排 5～10 个递进案例和对应源码、证据任务；
 共 70 个学习安排复用 51 个独立案例，不重复增加题目数量。覆盖缺口和待实现实验单独列出。
 
-教材按“硬件 → 操作系统与编译基础 → 汇编 → 内核子系统 → 实验准备 → 系统调试与优化”组织。
+教材按“硬件 → 操作系统 → 编译原理与构建系统 → 汇编 → 内核子系统 → 系统调试与优化”组织。
 [ABI 与数据模型](obsidian-sadboard/02-操作系统原理/01-ABI与数据模型/01-ABI与数据模型.md) 已合入操作系统章节；
-[编译原理与工具链](obsidian-sadboard/02-操作系统原理/02-编译原理与工具链/01-从源码到目标文件.md) 讲解源码、IR、目标文件、链接重定位、动态加载与优化调试，并提供可逐步执行的主机练习。
-[汇编与体系结构](obsidian-sadboard/03-汇编与体系结构/00-章节导航.md)
+[编译原理与构建系统](obsidian-sadboard/03-编译原理与构建系统/00-章节导航.md) 独立为第3章，讲解源码、IR、目标文件、链接加载、优化调试、常规交叉编译、Buildroot与Yocto，提供原生Make/CMake和AM625练习。
+[汇编与体系结构](obsidian-sadboard/04-汇编与体系结构/00-章节导航.md)
 覆盖 x86、ARMv7/ARMv8、RV32/RV64，并区分静态编译验证与实机运行范围。
 教材、编译反汇编练习与AM625汇编案例集中在同一目录，按基础知识、各架构和实机实验分为二级目录。
 
 基础教材补充 [02-操作系统原理](obsidian-sadboard/02-操作系统原理/00-章节导航.md) 与
-[01-常用硬件知识](obsidian-sadboard/01-常用硬件知识/00-章节导航.md)，分别有 11 篇和 15 篇正文。
+[01-常用硬件知识](obsidian-sadboard/01-常用硬件知识/00-章节导航.md)，分别有 8 篇和 15 篇正文。
 前者解释执行保护、调度、内存、并发、I/O、时间可靠性和排队；后者从
 [电平、开漏与上下拉](obsidian-sadboard/01-常用硬件知识/01-电气基础与GPIO/01-电平、推挽、开漏与上下拉.md)
 讲到元器件、电源复位、常用协议、存储和 AM625 的硬件与 Linux 映射，关联已有案例学习。
@@ -36,14 +36,14 @@ SadBoard 是一个面向嵌入式 Linux 的故障定位与分析练习项目。�
 跟踪、抓包及资源快照的解读边界。启动故障案例区分设备 `run-only` 与主机串口控制入口。
 
 [06-系统调试与优化](obsidian-sadboard/06-系统调试与优化/00-章节导航.md) 将基础定位与进阶优化收拢为十个学习单元，
-集中管理原理讲解、源码跟踪、定位方法、工具应用和59个基础/进阶场景；汇编与内核专用实验保留在对应课程中，以链接关联。
+内含 `00-实验准备与通用方法/`，其后十个单元集中管理原理讲解、源码跟踪、定位方法、工具应用和59个基础/进阶场景；汇编与内核专用实验保留在对应课程中，以链接关联。
 
-SadBoard 默认使用 **TFTP 加载内核/DTB、NFS 挂载根文件系统**，普通 AM625 BSP 保持 SD A/B 启动。两个独立的 U-Boot 配置项 `CONFIG_AM62X_BOOT_TFTP_KERNEL`、`CONFIG_AM62X_BOOT_NFS_ROOT` 支持四种组合；配置、主机部署和运行时切换见[网络调试启动](obsidian-sadboard/05-实验准备与通用方法/01-构建与启动部署.md)。NFS 下实验结果保存在板端 `/srv/sadboard`，主机可直接读取 `/srv/nfs/sadboard-am625/srv/sadboard`；本地启动仍使用 `/data/sadboard`。`sadboard results` 可查看当前路径。
+SadBoard 默认使用 **TFTP 加载内核/DTB、NFS 挂载根文件系统**，普通 AM625 BSP 保持 SD A/B 启动。两个独立的 U-Boot 配置项 `CONFIG_AM62X_BOOT_TFTP_KERNEL`、`CONFIG_AM62X_BOOT_NFS_ROOT` 支持四种组合；配置、主机部署和运行时切换见[网络调试启动](obsidian-sadboard/06-系统调试与优化/00-实验准备与通用方法/01-构建与启动部署.md)。NFS 下实验结果保存在板端 `/srv/sadboard`，主机可直接读取 `/srv/nfs/sadboard-am625/srv/sadboard`；本地启动仍使用 `/data/sadboard`。`sadboard results` 可查看当前路径。
 
 网络启动由 `bsp-base-external` 公共层提供，使用 `bsp.netboot=1`、`BSPNET1` 和
 `/usr/libexec/bsp/boot-context`，普通 BSP 也可独立使用。Windows 接入的远程串口可通过
 USB/IP 导入 Debian 后用 tio 操作；连接、权限检查与日志采集见
-[环境检查与登录](obsidian-sadboard/05-实验准备与通用方法/02-环境检查、登录与符号准备.md)。
+[环境检查与登录](obsidian-sadboard/06-系统调试与优化/00-实验准备与通用方法/02-环境检查、登录与符号准备.md)。
 
 构建后可运行 `sadboard-external/scripts/sync-artifacts.sh output/am625-debug-systemd/images`
 同步 NFS 根目录、TFTP 内核/DTB 及实验载荷。脚本按需从仓库外的
@@ -177,7 +177,7 @@ SadBoard 希望提供一组可重复练习的现场，帮助学习者回答：
 
 ## 文档
 
-- [Obsidian 手册入口](obsidian-sadboard/README.md)：打开 `obsidian-sadboard` 仓库，从 `README.md` 进入；第 05 章集中维护案例索引与工具索引，75 个案例各一篇完整笔记，工具手册通过双向链接关联。
+- [Obsidian 手册入口](obsidian-sadboard/README.md)：打开 `obsidian-sadboard` 仓库，从 `README.md` 进入；第6章内部的实验准备目录集中维护案例索引与工具索引，75 个案例各一篇完整笔记，工具手册通过双向链接关联。
 - [AM625 实机验收档案](docs/am625-debug-validation.md)：各阶段固件 ID、真实执行结果及附件位置。
 - [EDK libbmc 与 SadBoard 专利候选分析](docs/patent-candidate-analysis.md)：候选技术机制、源码依据、现有技术对照及公开时间与权属条件。
 - [Workspace 目录与 AM62x SDK](docs/workspace-toolchain.md)：独立 SDK、共享下载缓存与工具链管理。
