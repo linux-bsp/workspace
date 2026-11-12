@@ -1081,3 +1081,33 @@ WDT active、失败服务0、SOL sync-state=ok/archive-pending=0；服务端升�
 手册233篇，96个案例（94个目标命令、2个主机UART入口）；13个内核章节91个学习安排复用72个独立案例。
 补齐五篇完整教材、共享框架、raw锁实际故障反证与工具反链；原1195个命令/证据块保留，982个shell块语法检查通过。
 实机、负证据、OTA、debug与串口记录归档于ignored的 `output/validation/advanced-phase4/`。
+
+## 2026-11-12：进阶教程第五批——私有存储故障与runtime PM
+
+新增K-PM01～05：get_sync失败引用、autosuspend缺put、异步工作电源引用、初始化错误撤销与forbid/allow策略。
+模块拥有无物理资源的软件platform设备，真实执行Linux runtime PM核心与驱动回调；记录清理前状态快照、回调trace和最终引用/策略，
+不把suspended状态声明为实际电源轨已断电。清理取消工作、barrier/disable后恢复本设备拥有的引用和策略。
+
+新增K-IO02～06：真实tmpfs ENOSPC、ext4 fsync EIO、O_DIRECT对齐、扇区/字节单位与永久EIO重试。
+原生host-e2fsprogs生成固定16MiB无journal ext4夹具，运行时复制到自己的tmpfs/namespace和AUTOCLEAR loop；
+DM ioctl只操作自建映射，error目标不会作用于SD、data、NFS或现有映射。真实write接纳65536字节、fsync返回EIO，
+参考拒绝业务确认；读取题保留原始.bin并逐字节校验。没有将错误后仍有页缓存误认为落盘成功。
+
+暂存实测发现最后RAM挂载在异步DM/loop释放期间短暂EBUSY，已增加有界释放等待及实际资源检查；未强行清布尔字段掩盖泄漏。
+全部十例暂存verify/check/reset通过，原生28项通过，Buildroot包、all及配套AArch64/源码/符号完整性检查通过。
+发布v0.0.1 / `0f3edbe41f4ddaf48cc62370228eed20bee6d942d7b24ee6ffd92525a0e27fd3`，发布151。
+本地部署1、kernel/rootfs B槽confirmed，boot为 `3c101c94-eefc-4eb4-a84c-6b951444f168`；
+十例及irq-drain、rcu-callback共12项verify/check通过，服务端成功1、失败0、设备异常0。
+
+同步匹配TFTP/NFS后恢复两个保存开关为1；网络参考为
+`718e15cf321c2cfe057f0340ae7bc68ae88c6f75a8dcbc452a77165288d80285`，boot为
+`fd145090-4d54-43b7-b432-a1f8d44b23f6`。十例run/verify分别通过check/reset，共20项。
+篡改PM的work状态和fsync的errno均被拒绝、恢复后通过。另用匹配主机交叉GDB与设备gdbserver，
+在真实挂载/DM/loop均已建立的replace_table入口停止并SIGKILL进程；两秒后DM、loop后端及RAM namespace均已释放，
+只留下可安全rmdir的空目录。没有额外安装设备gdb或改变启动介质。
+
+最终无实验映射、模块或trace遗留，WDT active、debug_locks=1、systemd失败0、SOL正常/archive-pending=0。
+主机可读结果、程序/脚本/模块hash匹配镜像。教材245篇，106例（104目标命令、2主机UART），
+14个内核章节101个学习安排复用82个独立案例；原1260个命令/证据块保留，1102个shell块语法通过。
+新runtime PM框架、五例电源和五例存储教材包含原理、真实错误、条件源码、反证、工具反链和硬件边界。
+完整验证与配套debug归档于ignored的 `output/validation/advanced-phase5/`。
