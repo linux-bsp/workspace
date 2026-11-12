@@ -16,26 +16,26 @@ SadBoard 是一个面向嵌入式 Linux 的故障定位与分析练习项目。�
 硬件/操作系统模型、状态变化、关键源码分支、可证伪的定位思路与递进追问；实际受控负载
 和生产扩展目标分别说明。练习方法见[从项目经验建立原理解释](obsidian-sadboard/06-系统调试与优化/00-实验准备与通用方法/03-定位流程与工具选择.md)。
 
-内核课程集中在 [05-内核子系统](obsidian-sadboard/05-内核子系统/00-章节导航.md)，二级目录分别管理
+内核课程集中在 [05-内核子系统](obsidian-sadboard/05-内核子系统/05-内核子系统.md)，二级目录分别管理
 进程、调度、内存、VFS、同步与 IPC、网络、时间、存储 I/O、启动恢复、多核SMP与异构系统。每章先讲框架与核心原理，再安排 5～10 个递进案例和对应源码、证据任务；
 共 70 个学习安排复用 51 个独立案例，不重复增加题目数量。覆盖缺口和待实现实验单独列出。
 
 教材按“硬件 → 操作系统 → 编译原理与构建系统 → 汇编 → 内核子系统 → 系统调试与优化”组织。
 [ABI 与数据模型](obsidian-sadboard/02-操作系统原理/01-ABI与数据模型/01-ABI与数据模型.md) 已合入操作系统章节；
-[编译原理与构建系统](obsidian-sadboard/03-编译原理与构建系统/00-章节导航.md) 独立为第3章，讲解源码、IR、目标文件、链接加载、优化调试、常规交叉编译、Buildroot与Yocto，提供原生Make/CMake和AM625练习。
-[汇编与体系结构](obsidian-sadboard/04-汇编与体系结构/00-章节导航.md)
+[编译原理与构建系统](obsidian-sadboard/03-编译原理与构建系统/03-编译原理与构建系统.md) 独立为第3章，讲解源码、IR、目标文件、链接加载、优化调试、常规交叉编译、Buildroot与Yocto，提供原生Make/CMake和AM625练习。
+[汇编与体系结构](obsidian-sadboard/04-汇编与体系结构/04-汇编与体系结构.md)
 覆盖 x86、ARMv7/ARMv8、RV32/RV64，并区分静态编译验证与实机运行范围。
 教材、编译反汇编练习与AM625汇编案例集中在同一目录，按基础知识、各架构和实机实验分为二级目录。
 
-基础教材补充 [02-操作系统原理](obsidian-sadboard/02-操作系统原理/00-章节导航.md) 与
-[01-常用硬件知识](obsidian-sadboard/01-常用硬件知识/00-章节导航.md)，分别有 8 篇和 15 篇正文。
+基础教材补充 [02-操作系统原理](obsidian-sadboard/02-操作系统原理/02-操作系统原理.md) 与
+[01-常用硬件知识](obsidian-sadboard/01-常用硬件知识/01-常用硬件知识.md)，分别有 8 篇和 15 篇正文。
 前者解释执行保护、调度、内存、并发、I/O、时间可靠性和排队；后者从
 [电平、开漏与上下拉](obsidian-sadboard/01-常用硬件知识/01-电气基础与GPIO/01-电平、推挽、开漏与上下拉.md)
 讲到元器件、电源复位、常用协议、存储和 AM625 的硬件与 Linux 映射，关联已有案例学习。
 各章导航包含现象区分与学习检查，原理篇补充状态推演、计算和自测答案；工具手册说明采样、
 跟踪、抓包及资源快照的解读边界。启动故障案例区分设备 `run-only` 与主机串口控制入口。
 
-[06-系统调试与优化](obsidian-sadboard/06-系统调试与优化/00-章节导航.md) 将基础定位与进阶优化收拢为十个学习单元，
+[06-系统调试与优化](obsidian-sadboard/06-系统调试与优化/06-系统调试与优化.md) 将基础定位与进阶优化收拢为十个学习单元，
 内含 `00-实验准备与通用方法/`，其后十个单元集中管理原理讲解、源码跟踪、定位方法、工具应用和59个基础/进阶场景；汇编与内核专用实验保留在对应课程中，以链接关联。
 
 SadBoard 默认使用 **TFTP 加载内核/DTB、NFS 挂载根文件系统**，普通 AM625 BSP 保持 SD A/B 启动。两个独立的 U-Boot 配置项 `CONFIG_AM62X_BOOT_TFTP_KERNEL`、`CONFIG_AM62X_BOOT_NFS_ROOT` 支持四种组合；配置、主机部署和运行时切换见[网络调试启动](obsidian-sadboard/06-系统调试与优化/00-实验准备与通用方法/01-构建与启动部署.md)。NFS 下实验结果保存在板端 `/srv/sadboard`，主机可直接读取 `/srv/nfs/sadboard-am625/srv/sadboard`；本地启动仍使用 `/data/sadboard`。`sadboard results` 可查看当前路径。
@@ -80,7 +80,7 @@ BR2_EXTERNAL="../bsp-base-external ../sadboard-external" \
 主机测试、文档检查、可选串口验收工具及上游 binman 等主机依赖仍可使用 Python。
 固件打包职责见 [生成器说明](bsp-base-external/support/firmware/README.md)。
 
-在新克隆的工作区中，先运行 `git submodule update --init --recursive`。`libbmc` 使用 `git@github.com:wanguo99/libbmc.git` 的 `master` 分支。`make list-defconfigs` 可以查看本实验入口。可选工具链、独立输出目录和详细构建步骤见 [环境指南](obsidian-sadboard/附录A-实验实践与构建/00-章节导航.md)。
+在新克隆的工作区中，先运行 `git submodule update --init --recursive`。`libbmc` 使用 `git@github.com:wanguo99/libbmc.git` 的 `master` 分支。`make list-defconfigs` 可以查看本实验入口。可选工具链、独立输出目录和详细构建步骤见 [环境指南](obsidian-sadboard/附录A-实验实践与构建/附录A-实验实践与构建.md)。
 
 `sadboard-external` 包含 AM6254 标准 defconfig、内核片段、原生构建 hooks、手动实验程序和目标端环境检查脚本，跟踪远端 `main` 分支。workspace 固定所有子模块的具体提交；复现实验时使用固定提交。`git submodule update --remote` 会尝试更新到跟踪分支的新提交。
 
@@ -191,4 +191,4 @@ SadBoard 希望提供一组可重复练习的现场，帮助学习者回答：
 
 ## 资料署名
 
-教材中对 Bootlin 实验手册的归纳和改编沿用 CC BY-SA 3.0，具体署名与来源见 [教材附录 B](obsidian-sadboard/附录B-Bootlin课程参考/00-章节导航.md)。项目设想不代表 Bootlin 官方课程安排，SadBoard 代码许可尚未确定。
+教材中对 Bootlin 实验手册的归纳和改编沿用 CC BY-SA 3.0，具体署名与来源见 [教材附录 B](obsidian-sadboard/附录B-Bootlin课程参考/附录B-Bootlin课程参考.md)。项目设想不代表 Bootlin 官方课程安排，SadBoard 代码许可尚未确定。
