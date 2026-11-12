@@ -1018,3 +1018,41 @@ systemd失败服务0、SOL同步正常且archive-pending=0。未更改分区、�
 
 匹配debug副本、固件包、原始串口、暂存/本地/NFS测试、取消反证、trace隔离与OTA回执保存在ignored的
 `output/validation/advanced-phase2/`。其余案例沿用各自历史批次，未声明本轮重跑全部破坏性场景。
+
+## 2026-11-12：进阶教程第三批——真实lockdep、锁事务与RCU/SRCU
+
+新增K-LOCK01～03（sync-transaction、sync-trylock、sync-assert）及K-RCU01～03
+（rcu-readside、rcu-srcu、rcu-callback）。真实spinlock保护的分段事务稳定丢一次更新；
+trylock由独立线程构造忙/空闲并比较内核返回语义；缺锁断言采集真正WARNING；其余分别验证
+读侧持有状态、允许睡眠的SRCU宽限期及普通RCU回调。旧对象只逻辑失效，实际内存保留到读者/回调退出，未执行真实UAF。
+
+SadBoard调试配置增加PROVE_LOCKING、DEBUG_ATOMIC_SLEEP、PROVE_RCU；按原生Buildroot重新配置编译Linux，
+显式重建EDK/PDM及全部实验模块。内部锁布局变化，未将新模块插入旧内核；运行入口检查lockdep接口和
+panic_on_warn=0，不修改该sysctl。新study.h只复用状态/时间线/调试传输，具体机制仍由模块实现。
+普通RCU有限读者的放行使用release/acquire；超时出口也退出读侧，卸载前等待已登记回调完成。
+
+28项原生回归通过，修复新增sync命令与原B-SYNC前缀分派冲突；完整镜像、AArch64架构、符号/配置/源码
+清单检查通过。发布v0.0.1，内容ID为
+`e749a2fb286b0691094c6c9900f68fb28dcb9ae48bf55541db492a567758d0b0`。
+一个被构建替代的未发布草稿通过管理API删除，仅保留审计；实际发布148只含kernel/rootfs升级。
+
+本地OTA后部署0、kernel/rootfs A槽confirmed，boot为 `79783fa1-32e2-4dfd-b15a-0070421fd63d`。
+服务端成功1、升级失败0、设备异常0。首次实验被64MiB空闲空间门禁拦下；等待fwctld自动回收旧缓存后
+恢复到约110MiB可用，不删除旧实验、不降低门限。六例verify/check及sync-condvar、async-reference、driver-remove
+回归均通过。故障断言出现真实WARNING、参考窗口无该WARNING；debug_locks始终为1。
+篡改WARNING、SRCU reader-use及非零overrun均被拒绝，恢复原始证据后通过。
+
+匹配产物在本地根模式下同步到TFTP/NFS后恢复两个保存开关为1，网络参考ID为
+`1a25a912d5c9dd4f236e82410c76afecd06663b0ee32270fabdaac7d93eb6173`，boot为
+`9cb0cef7-62c8-4bf1-b1ab-c6c88a8a0133`。六例run、verify分别通过check/reset，共12项；主机普通用户
+可读证据，检查器/脚本/模块hash匹配构建target，最终模块/owner/trace清理、WDT active、失败服务0、
+日志同步正常且archive-pending=0。未改分区、刷factory或升级SPL/U-Boot。
+
+教材增加第13章六例、框架与lockdep工具说明，含真实WARNING与匹配模块反汇编。
+本轮pc偏移0x3c对应brk #0x800；解释内核邻近符号范围0x60与ELF st_size=0x4c、节内值与objdump显示地址、
+未重定位CALL26占位的差别，避免将不同地址概念混用。全库228篇、2209个编号标题、3546个双链及207个本地源码路径
+检查通过；原219篇1106个命令/证据块保留，新88个shell块语法与前置说明检查通过。现有91例，内核十三章86个学习安排
+复用67个独立案例。有限交错和调试配置的实测不外推为所有并发、所有RCU实现或生产绝对性能保证。
+
+完整构建、EDK重建、OTA回执、两种模式、真实WARN、匹配反汇编和debug副本归档于ignored的
+`output/validation/advanced-phase3/`。收尾清单继续进入IRQ、独立资源后端和综合复盘各批。
