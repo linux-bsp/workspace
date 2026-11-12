@@ -973,3 +973,48 @@ machine-id；随后恢复保存的tftp_kernel=1、nfs_root=1。网络启动boot 
 构建、候选、篡改反证、两种启动模式、OTA服务回执及原始UART记录位于ignored的
 `output/validation/advanced-phase1/`；匹配源文件、配置、vmlinux和模块另保留在该目录的debug副本。
 当前正式产物与学习符号仍位于 `output/am625-debug-systemd/images/`。
+
+## 2026-11-12：进阶教程第二阶段——内核并发与异步执行
+
+新增第12章“中断与异步执行”，配套五个手动内核案例：K-ASY01 async-coalesce验证重复pending的work
+不会替业务保存16个事件；K-ASY02 async-ordered验证慢工作阻塞同一有序队列中的控制工作；
+K-ASY03 async-predicate区分等待队列通知与业务谓词；K-ASY04 async-reference验证创建者与回调的
+kref交接；K-ASY05 async-stop验证等待谓词缺少停止条件会让kthread等到超时才退出。
+
+使用独立sadboard-async模块、真实workqueue/waitqueue/kref/kthread及共享实验flock，不接触管理网卡、
+存储驱动、MMIO、CPU在线状态或物理IRQ。引用故障通过隔离对象观察逻辑释放，全部回调退出后才真正free，
+未制造真实UAF。工作与线程有有限等待和统一清理；性能结论以因果关系为准，不将门控交错或超时粒度
+写成真实业务截止时间。实际物理IRQ、RCU和lockdep专项继续列为覆盖缺口。
+
+每个变体保存20字段摘要、单调ns/事件/value/CPU/PID/上下文CSV、独立模块函数ftrace和每CPU丢记录统计。
+trace使用私有instance、mono时钟、每CPU64KiB及模块过滤，保留实际filter后清理自己的实例。
+check同时核对结果、原始因果、回调入口及overrun/dropped events。实机默认函数输出不带模块名，
+已用独立filter与函数入口共同核对，避免将格式差异误判为未执行。
+
+在旧NFS系统独立目录暂存运行五例verify/check通过；有序队列证据中的控制事件值篡改、非零overrun、
+缺失函数trace均被拒绝，恢复原始文件后通过。此部分记录旧网络参考50f557e8及暂存模块，不冒充新镜像。
+原生回归28项通过；Buildroot包重建与all完成，AArch64程序/模块、匹配源文件、调试段及清单hash检查通过。
+
+发布固件保持v0.0.1，完整内容ID为
+`15b46b0796c06822f5568bcce2bd5cc29cbca62c190f3f34d706c16eb834b0eb`。
+只发布release/kernel/rootfs ITB，经正常本地OTA升级至部署1、kernel/rootfs B槽并confirmed；
+启动ID为 `6e960224-6ab1-41ed-aa19-7a036d3ec7a1`。服务端确认成功1、升级失败0、设备异常0。
+运行镜像内五例verify/check、driver-remove与crash回归均通过。另用自己的canary trace实例验证
+其内容、开关和全局tracer在实验前后不变；主动reset运行中的async-stop后，模块/owner/trace清理完成，
+现场标记cancelled=1，check正确拒绝将不完整实验当成通过。
+
+板卡仍用本地根时同步匹配TFTP/NFS产物，保留原NFS结果与machine-id，恢复保存的两个网络开关为1。
+网络启动ID为 `1ebdf6af-d6a9-4f55-aabf-09d4f5e1bc17`，参考构建为
+`cf5527d8ef32d554fcc82c625b546b35088a517b3baa56c5a59e40509ff72224`，确认标记netboot。
+五例run与verify分别通过check/reset，主机普通用户可读取JSON、CSV和函数trace；设备check-result、
+run-async及模块SHA256与构建target逐一匹配。结束时无实验模块、owner或trace实例，WDT active、
+systemd失败服务0、SOL同步正常且archive-pending=0。未更改分区、刷factory或更新SPL/U-Boot二进制。
+
+七篇新笔记包含框架、同名导航和五例完整教材；补充GIC/IRQ domain/handler到线程处理的条件源码地图、
+等待发布、引用交接、退出协议及真实函数trace解读，并分别注明已执行范围。全库219篇、2143个编号标题、
+3456个有效双链、199个本地源码路径检查通过；原212篇的1029个代码/证据块保留，新75个shell块语法与
+前置说明检查通过。案例增至85个，其中83个目标命令、2个主机UART入口；内核十二章80个学习安排复用
+61个独立案例，没有把复用、只读IRQ统计或理论说明重复算成新故障场景。
+
+匹配debug副本、固件包、原始串口、暂存/本地/NFS测试、取消反证、trace隔离与OTA回执保存在ignored的
+`output/validation/advanced-phase2/`。其余案例沿用各自历史批次，未声明本轮重跑全部破坏性场景。
