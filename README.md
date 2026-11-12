@@ -18,7 +18,8 @@ SadBoard 是一个面向嵌入式 Linux 的故障定位与分析练习项目。�
 
 内核课程集中在 [05-内核子系统](obsidian-sadboard/05-内核子系统/05-内核子系统.md)，二级目录分别管理
 进程、调度、内存、VFS、同步与 IPC、网络、时间、存储 I/O、启动恢复、多核SMP与异构系统、设备模型与驱动核心、中断与异步执行、内核锁与RCU、运行时电源管理。每章先讲框架与核心原理，再安排 5～10 个递进案例和对应源码、证据任务；
-共 101 个学习安排复用 82 个独立案例，不重复增加题目数量。覆盖缺口和待实现实验单独列出。
+共 101 个学习安排复用 82 个独立案例，不重复增加题目数量。物理外设、电源轨和介质验证边界单独列出。
+另有[五条综合工程复盘路线](obsidian-sadboard/06-系统调试与优化/11-综合工程复盘/11-综合工程复盘.md)，贯穿时延、内存、网络、存储恢复与驱动退出。
 
 教材按“硬件 → 操作系统 → 编译原理与构建系统 → 汇编 → 内核子系统 → 系统调试与优化”组织。
 [ABI 与数据模型](obsidian-sadboard/02-操作系统原理/01-ABI与数据模型/01-ABI与数据模型.md) 已合入操作系统章节；
@@ -182,7 +183,7 @@ SadBoard 希望提供一组可重复练习的现场，帮助学习者回答：
 ## 文档
 
 - [Obsidian 手册入口](obsidian-sadboard/README.md)：打开 `obsidian-sadboard` 仓库，从 `README.md` 进入；第6章内部的实验准备目录集中维护案例索引与工具索引，106 个案例各一篇完整笔记，工具手册通过双向链接关联。
-- [进阶教程收尾清单](docs/advanced-course-completion.md)：本轮剩余批次、完成状态和硬件边界。
+- [进阶教材交付与验证范围](docs/advanced-course-completion.md)：六批完成结果、验收范围和硬件边界。
 - [AM625 实机验收档案](docs/am625-debug-validation.md)：各阶段固件 ID、真实执行结果及附件位置。
 - [EDK libbmc 与 SadBoard 专利候选分析](docs/patent-candidate-analysis.md)：候选技术机制、源码依据、现有技术对照及公开时间与权属条件。
 - [Workspace 目录与 AM62x SDK](docs/workspace-toolchain.md)：独立 SDK、共享下载缓存与工具链管理。

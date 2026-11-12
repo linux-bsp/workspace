@@ -1111,3 +1111,40 @@ DM ioctl只操作自建映射，error目标不会作用于SD、data、NFS或现�
 14个内核章节101个学习安排复用82个独立案例；原1260个命令/证据块保留，1102个shell块语法通过。
 新runtime PM框架、五例电源和五例存储教材包含原理、真实错误、条件源码、反证、工具反链和硬件边界。
 完整验证与配套debug归档于ignored的 `output/validation/advanced-phase5/`。
+
+## 2026-11-12：进阶教程第六批——综合复盘、性能与最后恢复验证
+
+新增五条综合路线，分别聚焦周期时延、帧内存/背压、共享网络、日志/升级错误传播、驱动退出的IRQ/引用/RCU/PM责任。
+每条复用唯一案例详解，给出业务目标、对象模型、逐个验证、反证、代价和交付要求；没有把五份路线算作新案例。
+最后覆盖其中全部22个verify入口，各自check/reset通过；它们是分别运行的机制实验，不宣称合成了完整生产系统。
+
+沿用已验收的v0.0.1 / `0f3edbe41f4ddaf48cc62370228eed20bee6d942d7b24ee6ffd92525a0e27fd3`，
+网络参考仍为 `718e15cf321c2cfe057f0340ae7bc68ae88c6f75a8dcbc452a77165288d80285`，无额外纯文档固件发布。
+实际perf stat取得task-clock、cycles、instructions、切换和缺页；249条采样记录，Lost Samples=0，
+lookup_linear约占本次自耗权重99.60%。保留原始perf.data、栈文本、折叠数据和SVG，按动态period累加约3161999408周期权重，
+没有误标为31亿条采样。目标端使用手册已有的--no-inline路径；默认内联展开依赖addr2line的差别已补入工具说明。
+
+主机从已有iperf3-3.21源包原生构建临时服务端；仅用自有52061端口，客户端限10Mbit/s、1200字节、3秒。
+本次发送3127个数据报、3752400字节，接收无丢包，约9.98Mbit/s；未改管理eth0、IRQ/RPS、CPU在线或交换机配置。
+该结果是有明确时间窗口的链路观测，不外推长期可靠性或满载控制时延。
+
+最新配置实测独立硬件WDT：额外未封存启动暂停fw-confirm，停止喂狗后捕获ESM复位，窗口78.05秒；
+失败boot `e6b0bd9a-4ee3-4a3b-86cf-a647b3e88958`，恢复boot `4dcb912c-5e62-4411-9a35-73cfae047a98`。
+随后另一次新启动执行真正全CPU IRQ-off锁死，捕获ESM并自动恢复，窗口47.49秒；
+失败boot `7ab12fd4-0f26-419a-8f91-a86a54e35298`，恢复boot `212bc7f1-1d94-454e-b2d6-be4610aea709`。
+控制器窗口从命令到SPL输出，包含已经走过的喂狗周期和早期启动，不是60秒硬件定时精度测量。
+两例均通过failed-marker、不同boot、匹配固件、健康确认、归档gzip/tar与pstore导出检查；无需手工救援，正常启动重试0。
+
+服务端回读锁死失败与健康启动的四个原始stage：R5 SPL各418字节、A53 SPL各445字节，
+失败U-Boot1533/kernel29618字节，健康U-Boot1532/kernel26321字节；逐段长度、CRC32、dropped=0和valid状态全部一致。
+失败kernel含确切锁死标记，正常boot恢复已确认。早期归档ID与Linux boot_id分别保留，通过recovery-boot/buffer/generation关联。
+因此没有把“当前串口恢复可读”误当“上一轮失败日志已上报”。
+
+最终251篇、106独立案例，14个内核章节101个学习安排复用82个独立案例；全库标题、双链、源码与独立仓库检查通过。
+旧1381个命令/证据块保留，1170个shell块语法与前置说明检查通过；修正PM表格、索引、跨章顺序及过期覆盖描述。
+设备WDT active/60秒、debug_locks=1、systemd失败0、SOL sync-state=ok/archive-pending=0，两个保存网络开关均1；
+主机产物hash与设备匹配，无实验模块、owner、trace实例遗留，全局tracer仍nop/tracing_on=1，串口释放。
+服务端发布151仍是当前版本，成功1、升级失败0、设备异常0。所有六批工作已完成；物理电气、随机断电与其他介质资格验证单列边界。
+
+最后性能、SVG、22项回归、WDT/锁死完整串口、服务端原始日志及CRC检查保存在ignored的
+`output/validation/advanced-phase6/`；未改分区、刷factory或安装新bootloader。
