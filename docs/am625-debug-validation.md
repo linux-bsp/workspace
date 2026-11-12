@@ -921,3 +921,55 @@ Yocto篇以5.0.13/Scarthgap教学标签为基线，讲layer、recipe、任务、
 75例及内核学习安排不变。逐篇检查原命令/证据块内容与顺序、31项同名导航、旧链接残留和
 个人Obsidian配置，记录位于ignored的 `output/validation/navigation-names/`。
 本次仅文档结构收尾，未构建或发布相同固件。完成提交推送后继续进阶课程第一阶段。
+
+## 2026-11-12：进阶教程第一阶段——启动主线、驱动模型与自己的修复验收
+
+教材定位为约三年BSP经验、能够阅读源码但需要形成机制解释与诊断体系的工程师。
+增加AM625从ROM、R5/A53 SPL、ATF、U-Boot到本地FIT/initramfs或TFTP/NFS、systemd及业务就绪的
+正常启动主线；明确实际路线、阶段输入与交接条件，不把不同启动分支拼成一次调用栈。
+新增第11章设备模型与驱动核心，按匹配、固件属性、延迟探测、probe失败回收、remove异步停用
+组织K-DRV01～05，附条件源码路径、对象/资源账本、反证、修复和适用边界。
+
+五例使用手动加载的独立sadboard-driver模块、真实platform总线及自有设备，命令为
+driver-match/property/defer/unwind/remove。保存初始/最终JSON、modalias/uevent、sysfs绑定、
+deferred列表、内核片段及清理状态；公共入口沿用健康确认、受管unit、资源预算和共享实验flock。
+匹配使用平台名字，属性使用软件节点，defer使用显式ready门与核心重试；没有以此证明真实DT
+外设、clock/regulator供应者、IRQ或电气已验证。失败保留仅96字节且有最终回收者，remove案例
+仅观察模块保留对象上的迟到回调，未制造无界泄漏或真实UAF，也没有卸载网卡、MMC等管理驱动。
+
+新增 `sadboard evaluate crash /绝对路径/程序`，运行学习者候选ELF快照，保存SHA256、十项输入表、
+原始stdout/stderr与摘要。分别约束正常输入、缺失记录、无效参数，带CPU/文件输出/core及外层unit
+预算；check复算快照hash并核对原始证据。当前仅覆盖B-CR01十输入契约，不是恶意代码沙箱或
+全部案例的通用自动评分。实机发现BusyBox不支持sha256sum -c，已改成基础计算与直接比较。
+教材给出独立源码目录、原生Makefile/交叉编译、匹配符号、临时上传、候选验收和归档流程。
+
+原生回归28项和结果目录策略4项通过；Buildroot sadboard-labs-rebuild及all完成，AArch64 ELF、
+模块、源文件、调试段及全部清单hash检查通过。发布固件保持v0.0.1，内容ID为
+`f50301694c4ae38131a4bd5b4f510790ecaa8cc86e75af94430ce3692b2820da`。
+只上传/发布release、kernel、rootfs三个ITB；OTA服务记录成功1、升级失败0、设备异常0。
+
+先在旧NFS系统的独立临时目录完成五例verify/check、修复候选通过与原故障拒绝，以及篡改快照hash
+或modalias证据后拒绝通过、恢复原证据后通过。这部分只证明暂存程序，不冒充新整机启动验证。
+之后经UART切到正常本地A/B模式，暂存网络开关为0以保证OTA重启仍走本地；升级后boot ID为
+`78f486e4-2dde-4f12-9591-d68bd64af97c`，kernel/rootfs使用A槽、部署0已confirmed。
+运行镜像内五例verify/check、crash与fd回归，以及候选修复成功/原故障失败，均符合契约。
+WDT active，systemd失败服务0，SOL同步正常、启动缓冲已确认归档、archive-pending=0。
+未刷factory镜像、未调整分区，未升级SPL/U-Boot二进制。
+
+板卡使用本地根时，以现有sync-artifacts脚本部署匹配TFTP文件与rootfs.tar，保留NFS实验结果及
+machine-id；随后恢复保存的tftp_kernel=1、nfs_root=1。网络启动boot ID为
+`6e08b923-d469-44e0-a2b4-d82bf89b8b71`，参考构建ID为
+`50f557e82033bd4a4459829861a0593665a458c6c54e69264b5d5bf9c621c54f`，确认标记netboot。
+再次通过五例verify/check、五例run/check/reset；按教材原生Make流程构建的候选通过evaluate/check。
+主机普通用户可直接读取NFS结果与候选快照，三个新程序/模块的设备hash与构建target逐一匹配，
+结束后实验模块、平台设备与owner标记均清理。生产OTA在网络调试模式继续停用。
+
+真实只读观察确认CPSW设备对应am65-cpsw-nuss驱动和运行OF节点；采集当前FDT并以host dtc解析。
+新增十篇笔记，补充dmesg独立手册及双向场景链接；原202篇的929个命令/证据块内容与顺序保留，
+新笔记97个shell块通过语法及前置说明检查。全库212篇、2072个连续编号标题、3394个有效双链、
+193个本地源码路径检查通过；案例增至80个，内核十一章75个学习安排复用56个独立案例。
+旧75例继续按历史批次解释，没有声明本轮重跑全部破坏性案例或完成真实外设依赖/IRQ/RCU/PM课程。
+
+构建、候选、篡改反证、两种启动模式、OTA服务回执及原始UART记录位于ignored的
+`output/validation/advanced-phase1/`；匹配源文件、配置、vmlinux和模块另保留在该目录的debug副本。
+当前正式产物与学习符号仍位于 `output/am625-debug-systemd/images/`。
