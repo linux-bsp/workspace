@@ -1056,3 +1056,28 @@ panic_on_warn=0，不修改该sysctl。新study.h只复用状态/时间线/调�
 
 完整构建、EDK重建、OTA回执、两种模式、真实WARN、匹配反汇编和debug副本归档于ignored的
 `output/validation/advanced-phase3/`。收尾清单继续进入IRQ、独立资源后端和综合复盘各批。
+
+## 2026-11-12：进阶教程第四批——hardirq、线程化及共享IRQ
+
+新增K-IRQ01～05：事件认领、IRQ_WAKE_THREAD协议、共享action来源判定、等量工作延后及IRQ线程退出同步。
+独立irq_desc与无操作irq_chip由模块拥有，IRQ_WORK_INIT_HARD触发generic_handle_irq；顶半部确处hardirq，
+线程/worker确处进程上下文。不修改外部domain、管理IRQ或affinity，不把软件源声称为物理引脚/GIC验证。
+
+首个完整镜像a9d18336通过启动健康，却在IRQ记录器触发Invalid wait context并关闭lockdep；后续RCU回归正确拒绝。
+已将固定容量事件记录的短锁改为raw_spinlock，重建所有实验模块，并在实验前/各变体后检查debug_locks有效性。
+未以摘要通过掩盖诊断器失效，原始告警与替代镜像保存在同批superseded证据内。
+
+最终发布v0.0.1 / `6c263361472f3d5ceff84a7aa7e2ab85cd99755cab401e2ce7d53403fefe2a07`，发布150。
+本地部署0、kernel/rootfs A槽confirmed；五个IRQ案例及SRCU、异步引用、驱动移除共8项verify/check通过，
+debug_locks始终1。主机自动验收改为明确匹配运行中身份，避免将备用槽ID出现在状态中误认作新系统已启动。
+原生28项通过，完整镜像、配套符号/源码/AArch64校验通过，未更新SPL/U-Boot二进制。
+
+在本地根时同步匹配网络产物后恢复两个保存开关为1；网络参考为
+`7debaa580d7c6b5d92d5b836d2fcfe8360ba070cc253f4230e0213c93030f933`，boot为
+`bc58b519-d64b-4181-9980-1ec88ad2aef5`。五例run/verify各自通过check/reset，共10项；
+改变remove事件值被拒绝，恢复后通过。检查器、脚本、模块hash匹配构建，主机可读证据；模块、owner、私有trace清理。
+WDT active、失败服务0、SOL sync-state=ok/archive-pending=0；服务端升级成功1、失败0、设备异常0。
+
+手册233篇，96个案例（94个目标命令、2个主机UART入口）；13个内核章节91个学习安排复用72个独立案例。
+补齐五篇完整教材、共享框架、raw锁实际故障反证与工具反链；原1195个命令/证据块保留，982个shell块语法检查通过。
+实机、负证据、OTA、debug与串口记录归档于ignored的 `output/validation/advanced-phase4/`。
