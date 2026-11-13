@@ -1,73 +1,109 @@
 # Repository Guidelines
 
-## Project Structure & Module Organization
+## Project Scope and Current State
 
-SadBoard develops on the `SadBoard` branch of `linux-bsp/workspace`, using existing BSP submodules. AM6254 defaults to TFTP kernel/DTB and NFS root, with independent U-Boot switches and local SD A/B fallback. It provides systemd, SSH and 106 manual scenarios, including: crash, FD exhaustion, cgroup OOM, CPU hotspot, mutex wait, isolated networking, startup panic recovery, periodic drift, queue backlog and TCP batching. The handbook covers 35 basic, 24 advanced, 8 A64 and 39 kernel-subsystem cases: 104 target commands and two host UART controllers for real AM625 RAM boot faults. All validation uses AM625 hardware; do not substitute QEMU. Random scenario orchestration and general automatic grading are not implemented. Record image build and board validation status separately.
+SadBoard is an advanced embedded Linux debugging course for engineers with about three years of BSP experience. Develop this workspace on `SadBoard`; use real AM625 hardware for validation; do not substitute QEMU. The baseline uses systemd, SSH, independent U-Boot `tftp_kernel`/`nfs_root` switches, TFTP/NFS debugging and local SD A/B firmware.
 
-- `README.md`: project scope, status, and documentation index.
-- `obsidian-sadboard/`: independent Chinese handbook repository and Git submodule, tracking `linux-bsp/obsidian-sadboard` on `master`. Start at `README.md`, the only Markdown note at the vault root. Chapters 01–06 follow hardware, OS foundations, compiler/build systems, assembly, kernel subsystems, and system debugging/optimization. Experiment preparation is nested under chapter 06. Case and tool indexes live in `06-系统调试与优化/00-实验准备与通用方法/`; the 35 basic and 24 advanced cases live under ten units in `06-系统调试与优化/`. Unit `11-综合工程复盘/` combines canonical cases in five engineering routes without increasing scenario totals. Each scenario unit keeps its own navigation named after the directory, e.g. `01-应用崩溃/01-应用崩溃.md`. Each `<case-id>-<specific-problem>/<case-id>：<actual-title>.md` contains the complete scenario, exercises, principles, kernel/assembly flow, diagnosis and repair evidence; use the full-width colon, for example `B-CPU04：错误订阅 EPOLLOUT 导致空转.md`. Shared tool parameters live once in `附录C-工具手册/<tool>.md`, with reciprocal links to concrete cases. Appendix A combines experiment reports/build practice, B covers Bootlin, and C contains tools. Add content to its owning note; keep source-derived paths distinct from captured stacks.
-- `docs/am625-debug-validation.md`: dated build and board evidence, separate from learning instructions.
-- `docs/workspace-toolchain.md`: current shared directory layout and standalone SDK workflow.
-- `docs/am62x/`, `docs/imx6ull/`, `docs/h200/`: board and hardware references; i.MX6ULL examples do not imply a supported SadBoard profile.
-- `buildroot/`, `linux/`, `uboot/`: build system and versioned source submodules.
-- `bsp-base-external/`: board support; keep the `LINUX_BSP` external identifier.
-- `sadboard-external/`: `SADBOARD` external with the AM6254 defconfig, diagnostic fragments, native build hooks, and target overlay.
-- `edk/`, `libbmc/`: existing software submodules.
+The six curriculum batches are complete: 106 independent cases (35 basic, 24 advanced, 8 A64 and 39 kernel cases), with 104 target commands and two host UART boot-fault controllers. The Obsidian handbook has 251 notes; 14 kernel chapters arrange 101 studies reusing 82 cases. Five engineering review routes reuse canonical cases without adding scenario IDs. Random fault orchestration and general automatic grading remain outside the implementation. Read `docs/advanced-course-completion.md` for completed scope and hardware boundaries; keep dated evidence in `docs/am625-debug-validation.md`. Read the latest dated validation for published build IDs; historical batch IDs remain tied to their recorded evidence.
 
-Put learning guides in `obsidian-sadboard/`, workspace guides in `docs/`, board references in `docs/<board>/`, and generated builds in ignored `output/`. Link new guides from `README.md`. Read submodule-specific instructions before changing their contents.
-Keep firmware and device-management architecture in `edk/docs/`; link to it instead of maintaining another copy in this workspace. Completed phase results belong in the validation archive.
+## Project Structure and Module Organization
+
+- `obsidian-sadboard/`: independent Chinese handbook submodule on `master`. Its only root note is `README.md`. Chapters 01–06 cover hardware, OS, compilation/build systems, assembly, kernel subsystems, and system debugging/optimization. Indexes and preparation live under `06-系统调试与优化/00-实验准备与通用方法/`; unit `11-综合工程复盘/` contains the five review routes.
+- `sadboard-external/`: laboratory code, AM625 debug configuration, kernel fragments, native build hooks and deployment helpers; submodule branch `main`, external identifier `SADBOARD`.
+- `bsp-base-external/`: shared board support and general netboot functionality; preserve external identifier `LINUX_BSP`.
+- `edk/`: integrated management software on `master`. Firmware CLI, OTA daemon and initramfs entry belong to `user/apps/fwctl/`; logging/SOL to `user/apps/logctl/`; time to `user/apps/timectl/`; host `dmserver`/`dmcli` to `user/apps/device-manager/`. Shared OSA, HWID, transfer and protocol libraries live under `user/lib/`. Read `edk/AGENTS.md` before editing it; management architecture belongs in `edk/docs/`.
+- `buildroot/`, `linux/`, `uboot/`, `libbmc/`: existing source submodules; libbmc remains separate from EDK.
+- `README.md`: project entry and documentation index; keep new guide links reachable.
+- `docs/`: workspace instructions and board references, including `workspace-toolchain.md` and the validation archive. i.MX6ULL references do not establish a supported SadBoard profile. Generated builds and raw evidence belong in ignored `output/`.
 
 ## Build, Test, and Development Commands
 
-Initialize source submodules, then use the standard Buildroot entry:
+For a fresh checkout, initialize submodules and use native Buildroot:
 
 ```sh
 git submodule update --init --recursive
 cd buildroot
-BR2_EXTERNAL="../bsp-base-external ../sadboard-external" \
-  make sadboard_am625_debug_defconfig && make all
+BR2_EXTERNAL="../bsp-base-external ../sadboard-external" make sadboard_am625_debug_defconfig
+make all
 ```
 
-Without `O=`, artifacts go to `buildroot/output/`; the current board validation uses workspace `output/am625-debug-systemd/`. Keep output trees separate when changing toolchains. Configure SDKs, download paths and diagnostic fragments with Buildroot menuconfig. Maintain the portable profile with native savedefconfig in a fresh output directory; see the vault build appendix. Production builds and device/Device Manager programs must not use custom Python tooling; Python is limited to host tests, documentation checks and the serial validation controller. Upstream host dependencies such as U-Boot binman remain managed by Buildroot. Run `python3 sadboard-external/tests/test-labs.py` for scenario regressions. `sadboard list`, `sadboard run crash` and `sadboard verify crash` are target commands; verification checks the reference repair. Use `sadboard evaluate crash /absolute/candidate` for a learner's B-CR01 ELF snapshot; its ten-input contract is not a general grader. Bootlin commands remain external lab instructions.
+Without `O=`, output goes to `buildroot/output/`. The existing validated tree is workspace `output/am625-debug-systemd/`. Run incremental commands from the workspace root:
 
-Use `git diff --check`, `git diff --cached --check`, and `git status --short`. Review untracked files separately.
-For learning-document changes, run `python3 obsidian-sadboard/scripts/check-obsidian.py --workspace .` from the workspace to validate wiki links, headings, case coverage, source paths and navigation reachability. A standalone handbook checkout can run `python3 scripts/check-obsidian.py` for documentation checks without BSP sources. Maintain the Obsidian vault directly; do not recreate a consolidated handbook or an export pipeline. Preserve the user's Obsidian settings; do not commit window state, caches or personal reports. Chinese chapter/note names are intentional in this vault.
-Obsidian displays the filename as the note title; do not repeat it as a level-one heading in the body or add YAML note properties. Body sections start at `##`. Case IDs come from descriptive directory names and must match the filename prefix; personal reports belong in an optional ignored `实验记录/` directory. Avoid standalone pages that only repeat navigation or a small section of their parent topic.
-Number body headings locally within each note: `## 1. Title`, `### 1.1 Title`, `#### 1.1.1 Title`. Keep siblings consecutive and nested under their parent; chapter directory numbers and case IDs remain separate. Every course, subsystem, scenario-unit and appendix navigation uses its directory's exact basename, e.g. `05-内核子系统/05-内核子系统.md`; do not recreate `00-章节导航.md`. Update heading links together and leave fenced commands and captured evidence unchanged.
-Kernel learning material is not restricted to a particular commit. Use the kernel repository's `master` branch for reading links and the actual checked-out sources for local study. Keep historical evidence tied to its recorded build; addresses and disassembly require that firmware's matching sources and symbols.
-Kernel teaching lives under `obsidian-sadboard/05-内核子系统/`, with a shared navigation note and numbered subsystem directories `01-进程管理/` through `14-运行时电源管理/`. Each subsystem has a framework/principles note and 5–10 progressive studies, covering design goals, core objects, conditional source paths, evidence, diagnosis and repair. Reuse a case's canonical note and link back to every learning route; do not inflate scenario totals for reuse. Distinguish implemented experiments from proposed driver, IRQ, RCU, power-management and storage-fault extensions. A single API demonstration does not constitute a subsystem course. Keep SMP CPU topology and lifecycle distinct from AMP remote firmware; AM625 A53 read-only observations do not prove M4F/R5F RPMsg or CPU-hotplug validation. Do not change CPU online, management IRQ/RPS or remote firmware for documentation exercises.
-Assembly teaching lives under `obsidian-sadboard/04-汇编与体系结构/`, with second-level directories for fundamentals, x86, ARMv7, ARMv8, RV32, RV64, compilation/debugging, and AM625 experiments. Keep one canonical note per topic and preserve all case IDs and command blocks when moving notes. ABI/data-model reference lives in `02-操作系统原理/01-ABI与数据模型/` and is linked from the assembly course.
-OS foundations live under `obsidian-sadboard/02-操作系统原理/`, hardware foundations under `01-常用硬件知识/`, both grouped by topic with case backlinks. OS study starts with ABI/data models. Compiler principles, cross-compilation, Buildroot and Yocto have their own `03-编译原理与构建系统/` chapter; distinguish compiler/build responsibilities from OS execution and resource management. Keep Yocto teaching-version and host/BSP compatibility distinct from current Buildroot product support. Mark host-run exercises separately from cross-compiled objects and AM625 execution. Explain mechanisms and assumptions before implementation details. Electrical limits and protocol timings need primary vendor/specification sources; label teaching calculations and distinguish schematic/DTS review from physical measurement. Do not treat GPIO polarity as output topology, software enumeration as electrical validation, or SD evidence as proof for other storage media. Theory notes do not increase runnable case totals.
+```sh
+make -C output/am625-debug-systemd sadboard-labs-rebuild
+make -C output/am625-debug-systemd all
+bash sadboard-external/scripts/verify-debug.sh output/am625-debug-systemd/images
+```
 
-## Coding Style & Naming Conventions
+For EDK changes, use its native Buildroot configure/build path:
 
-Write learning documentation in Chinese; preserve official identifiers and commands. Use descriptive headings, hyphenated lowercase filenames, and language-tagged code fences. Follow existing language conventions in source submodules; otherwise use four-space indentation for new source files. No workspace-wide formatter is configured.
-In the Obsidian vault, group safe related configuration commands such as consecutive U-Boot setenv or GDB settings. Keep build, connection, fault-trigger, validation and inspection steps separate when their results must be checked. Keep background launch/PID capture and exit-status capture together. Precede every code block with a concise purpose and execution context or interpretation note. Preserve complete continuations, pipelines, quoted subprocess bodies, source, configuration and output examples.
+```sh
+make -C output/am625-debug-systemd edk-reconfigure BR2_PACKAGE_EDK_DEFCONFIG=ti_am62x_defconfig BR2_PACKAGE_EDK_WEB=y
+```
 
-## Validation and Scenario Guidelines
+Use separate output trees for toolchain changes. Maintain portable defconfigs through native menuconfig/savedefconfig. Shared `../dl/` is a download cache; `../toolchain/` holds manually extracted SDKs, not a shared `BR2_HOST_DIR`. Existing output trees contain absolute paths and require reconfiguration after relocation.
 
-Check relative links, citations, platform assumptions, and configuration loading. Report the actual environment and distinguish reviewed instructions from executed experiments. Proposed scenarios should specify symptoms, prerequisites, triggers, expected evidence, root cause, repair verification, and reset procedures. Keep planned behavior distinct from implemented functionality. Use each submodule's own testing instructions for code changes.
+Run relevant laboratory regressions with `python3 sadboard-external/tests/test-labs.py`; storage-policy changes also require `sadboard-external/tests/test-results.py`, and deployment changes have `sadboard-external/tests/test-sync-artifacts.py`. EDK owns its native CMake/CTest harness; firmware CLI/engine regressions also have `edk/user/apps/fwctl/tests/test_firmware.py`. Supply native dependency include/library paths when needed; Buildroot `host/include` and `host/lib` are distinct from the AArch64 target sysroot. Keep native test binaries in temporary build directories.
 
-## Commit & Pull Request Guidelines
+Production builds, device software and Device Manager use native C, shell and Buildroot/CMake. Python is limited to host tests, documentation maintenance and serial validation controllers. Upstream host dependencies such as U-Boot binman remain managed by Buildroot. Documentation-only changes require relevant file/link and diff checks, without a firmware rebuild or board reboot.
 
-Use focused `docs:`, `chore:`, `feat:`, or `fix:` commits. PRs should explain the change, affected components, validation, and related issues. Commit and push submodule changes before publishing parent pointers. Preserve unrelated work and reproducible commit pins.
+## Handbook Organization and Writing
 
-## Sources & Attribution
+Write teaching material in Chinese for the experienced BSP audience. Explain phenomena, object/state models, hardware/OS prerequisites, conditional source paths, competing hypotheses, evidence, repair and regression. Distinguish source-derived paths from captured stacks and measured results from proposed exercises.
 
-Preserve Bootlin source links and CC BY-SA 3.0 attribution. Separate project proposals from official course content. SadBoard's code license remains undecided; existing submodule licenses still apply.
+- Keep one complete canonical note per case: `<ID>-<specific-problem>/<ID>：<actual-title>.md`. Preserve IDs and commands. Each navigation note uses its directory's exact basename, such as `01-应用崩溃/01-应用崩溃.md`.
+- Obsidian uses the filename as the title. Omit YAML properties and body H1 headings; number sections locally as `## 1.`, `### 1.1`, `#### 1.1.1`. Update heading links together with renames.
+- Shared tool parameters live in `附录C-工具手册/<tool>.md`; link cases to tools and tools back to concrete cases. Appendix A covers practice/builds, B Bootlin and C tools. Preserve Bootlin attribution and CC BY-SA 3.0 notices.
+- Give each independent command its own fenced block with purpose and execution context. Related `setenv`/GDB settings may share a block. Preserve existing commands, captured evidence, continuations and pipelines during reorganization.
+- Maintain the vault directly. Preserve personal `.obsidian/` settings and ignored experiment reports; keep ABI knowledge with OS foundations and compilation/Buildroot/Yocto with chapter 03. Mark host exercises separately from cross-compilation and AM625 execution.
+- Kernel reading links follow repository `master`; actual addresses/disassembly require the recorded firmware's matching source and symbols. Keep hardware calculations and physical measurements distinct; electrical claims need primary specifications. A53 observations do not establish AMP/RPMsg, CPU-hotplug or other-storage validation.
 
-## Experiment Release Workflow
+Each kernel chapter has a framework/principles note and 5–10 progressive studies covering source paths, evidence, diagnosis and repair. Assembly stays under chapter 04, grouped by architecture and AM625 experiments; reading other architectures is separate from board validation.
 
-Keep firmware at v0.0.1 and distinguish builds with full content IDs. Preserve matched vmlinux, source, configuration and symbols under images/debug/. Debug programs retain symbols; generic target binaries are stripped to fit the unchanged A/B slots. No scenario starts at boot. Verify the image, validate kernel/rootfs OTA in local A/B mode, then deploy the matching images/netboot/ and rootfs.tar for network-mode checks before committing and pushing. Wait for the server to receive fwctld success before restoring network boot; local confirmation alone can precede the next reporting poll. Network debug boots skip production OTA/slot confirmation; their BSPNET1 reference build ID does not prove a mutable NFS tree is unchanged. Do not interpret saved SD metadata as the running network image. Never flash the generated factory image, change the partition layout, or bypass the production bootloader-update restriction for a debugging exercise. State separately whether a new U-Boot was built, its generated environment tested, or its binary actually installed.
+Check handbook changes from the workspace root:
 
-Use `sadboard status/check/reset RUN_DIRECTORY` for managed evidence. Network faults belong to owned namespaces, never the management eth0. The manual panic/Oops/lockup exercises require a previously confirmed firmware, an extra reboot and an unsealed startup; pause confirmation with SIGSTOP/SIGCONT, since stopping its unit triggers OnFailure. Verify failed and healthy SPL/U-Boot/kernel archives, pstore and local recovery before committing that case. Preserve BusyBox configuration as well as kernel configuration: tool availability alone does not prove option support.
+```sh
+python3 obsidian-sadboard/scripts/check-obsidian.py --workspace .
+```
 
-Use `sadboard results` to locate artifacts: NFS roots default to `/srv/sadboard` (host `/srv/nfs/sadboard-am625/srv/sadboard`), local roots to `/data/sadboard`. Check space on the selected result filesystem. Completed NFS runs grant host read access; `sadboard share DIRECTORY` handles manual captures without following symlinks. Keep device logs, OTA state and boot confirmation on SD data. Preserve existing SD evidence when copying it to NFS. Run `tests/test-results.py` for storage policy changes.
+A standalone vault can run `python3 scripts/check-obsidian.py`. The checker covers headings, links, case coverage, navigation, tool backlinks and available workspace source paths.
 
-Advanced cases preserve completed work and checksums. Validate raw timestamp/queue CSV against summaries; do not equate send calls with wire packets or treat low CPU as proof of low latency. Separate repeatable correctness/resource contracts from measured performance. Keep production-inspired synthetic designs distinct from documented public incidents and actual hardware evidence.
+## Coding and Laboratory Contracts
 
-Run native scenario tests in their temporary build directory. Buildroot must recompile local lab binaries with TARGET_CC even if synchronized files have newer timestamps; verify AArch64 ELF machine/class/endianness as well as debug sections before deployment.
+Follow each source module's style; otherwise use four-space indentation. No workspace-wide formatter is configured. Keep shared mechanisms separate from scenario policy. Buildroot must recompile local laboratory binaries with `TARGET_CC` regardless of synchronized file timestamps; verify AArch64 ELF properties, debug sections and source manifests. Preserve BusyBox and Linux configurations; check required tool options as well as binary availability.
 
-Kernel laboratories use a shared inherited flock, an idle manually loaded module, bounded owned DMA allocations and exact-firmware recovery checks. Prove actual hardware watchdog reset with `sadboard-external/scripts/sadboard-board.py watchdog-probe` in network mode or the documented recorded SD probe before an all-CPU lockup; the proof must match the running content ID. RAM boot exercises never save bad U-Boot arguments or write partitions. The USB UART does not forward BREAK; the complete laboratory initramfs includes an independent timeout rescue child and a tested short-deadline reference.
+Kernel experiments now implement real driver-core, workqueue/waitqueue/kref/kthread, spin/mutex/lockdep, RCU/SRCU, generic IRQ and runtime PM mechanisms. `study.h` shares bounded event/status transport; concrete mechanisms remain in their owning modules. Software IRQ descriptors, resource-free platform devices and private RAM/loop/DM backends establish their stated software contracts, while physical IRQ routing, power rails, real power-loss/FTL behavior and long-duration stress require separate evidence.
 
-K-ASY laboratories own a private module, bounded workqueues/kthreads and a trace instance. Validate event order, outcome, independent function trace, trace-loss statistics and resource cleanup together; preserve unrelated/global tracing configuration. Reference-count faults quarantine memory until callbacks finish. Ordinary worker execution does not prove physical IRQ, RCU or lockdep behavior, and controlled gates do not establish production latency guarantees.
+- Preserve the inherited laboratory flock, owned-resource markers, bounded waits and private trace instances. Do not alter global tracing or take over an already loaded module. Verify outcome, raw event order, callback trace, zero trace loss and cleanup together. Reset only resources belonging to that run.
+- Keep the short hardirq event recorder protected by `raw_spinlock`; blocking work stays outside it. Require live `debug_locks=1` before/after studies and the documented `panic_on_warn=0` prerequisite. An invalid wait context or disabled detector invalidates evidence; correct the cause rather than bypassing checks.
+- Lock-debug configuration changes affect internal module ABI. Rebuild all out-of-tree modules, including EDK/PDM, with the matching kernel; identical `uname -r` is insufficient.
+- Reference/lifetime faults quarantine actual memory until readers/callbacks finish. Storage faults use only owned tmpfs, loop and DM devices; restore mappings and reclaim mounts/loops, including cancellation paths. Runtime PM snapshots and final reference/policy cleanup are separate observations; `suspended` alone is not a physical power measurement.
+- Preserve work counts and checksums when comparing repairs. Separate on-CPU samples, waiting, queueing and completion. Use documented `perf report/script --no-inline` paths on the minimal target; folded dynamic periods are weights, not sample-record counts. Label flamegraph weights correctly.
+
+## Hardware Validation and Evidence
+
+Use `sadboard list B-CR` to filter a unit, `run` to reproduce and `verify` to exercise the reference repair. `evaluate crash /absolute/candidate` checks the ten-input B-CR01 learner contract only. Manage evidence with `status/check/reset`; interrupted or incomplete runs cannot pass as complete experiments. No scenario starts automatically at boot.
+
+Use `sadboard results`: NFS roots default to `/srv/sadboard` (host `/srv/nfs/sadboard-am625/srv/sadboard`), local roots to `/data/sadboard`. Check free space; preserve SD evidence during NFS synchronization. Completed NFS runs and `sadboard share` provide host read access without following symlinks. Device logs, OTA state and boot confirmation stay on persistent data storage; never format it automatically.
+
+All board validation uses AM625 hardware, with WDT active. Network faults belong to owned namespaces. Keep management eth0, IRQ/RPS, CPU online state and remote firmware intact. Before opening UART, check its current owner; preserve a user's tio session and use SSH for independent work. USB/IP/tio instructions live in the preparation chapter. Prior serial access does not authorize killing a new owner.
+
+Panic/Oops/lockup exercises require a confirmed matching firmware, an extra reboot and an unsealed startup. Pause confirmation with SIGSTOP/SIGCONT; stopping its service invokes OnFailure. Before all-CPU lockup, prove actual hardware reset with `sadboard-external/scripts/sadboard-board.py watchdog-probe` for the running content ID. RAM boot faults never save bad bootargs or write firmware partitions; the USB UART cannot forward BREAK, so retain the independent timed rescue child.
+
+Verify failed and healthy SPL/U-Boot/kernel logs, reset evidence, recovery health and server receipts. Early startup archive IDs and Linux `boot_id` are separate namespaces; correlate recovery boot, buffer/generation and timestamps. Retain raw logs, lengths, CRC/loss fields and pstore exports. Report build, staged-binary, installed-image and physical validation separately. Human timestamps use UTC+8; monotonic CSV timestamps and reproducible build timestamps have different meanings.
+
+## Firmware Release and Commit Workflow
+
+Keep firmware at `0.0.1` from `edk/VERSION` unless the user explicitly requests a version change. Distinguish builds with full content IDs; display eight hex characters in human logs, retaining full hashes for comparison, machine interfaces and audit. `fwctl status` reports stored A/B deployment IDs even in netboot; its `hash` is the kernel/rootfs release ID, not a bootloader or individual-partition checksum. See `edk/docs/device-manager/fwctl.md`.
+
+For device software changes:
+
+1. Build the complete native image; preserve matching sources, configurations, vmlinux, modules and symbols under `images/debug/` and the ignored validation archive.
+2. Publish the new v0.0.1 content ID and validate kernel/rootfs OTA in local A/B mode. Check the actually booted full ID and `/run/fwctl-boot-confirmed`; an inactive slot containing the new ID is insufficient.
+3. Wait for fwctld's real success report and server confirmation before restoring netboot. Local `mark-good` can precede the reporting poll; network mode disables production OTA/slot confirmation.
+4. While running local root, synchronize matched netboot/rootfs artifacts using `sadboard-external/scripts/sync-artifacts.sh`. Restore the saved network switches, reboot and verify NFS readiness, executable/module hashes, WDT, services and SOL/archive completion.
+5. Commit and immediately push changed submodules before committing/pushing workspace pointers. Pure documentation follows its checks and uses existing validation evidence.
+
+A `BSPNET1` ID identifies a reference build, not the integrity of a subsequently mutable NFS tree. Parse `FWOTA2`/`BSPNET1` by their contracts; do not substitute saved SD metadata for a running network image. Never flash factory images, alter the partition layout or bypass production bootloader-update restrictions for an exercise. Report separately whether U-Boot was built, its environment tested, or its binary installed. Keep source/configuration and experimental images matched throughout validation.
+
+Use focused `docs:`, `chore:`, `feat:` or `fix:` commits. Preserve unrelated work, review untracked files, and run `git diff --check`, `git diff --cached --check` and `git status --short`. PRs describe behavior, configuration, validation and limits. Verify actual branches with Git; ancestor tags from `git describe` do not define the branch or firmware version. Existing submodule licenses apply; the laboratory project's code license remains undecided.
