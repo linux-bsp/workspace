@@ -1258,3 +1258,12 @@ OTA 159 实机升级成功，kernel/rootfs B，服务端成功回执已确认。
 查询 main_mcu / satellite / dc_power、请求拒绝与互斥验证通过；未执行电源或复位动作。
 恢复 TFTP/NFS 参考 `b94add3b`，零失败服务、WDT active、SOL 五阶段日志与启动归档已确认；UART 已释放。
 详见 [EDK 调试模块验证](../edk/docs/reviews/device-manager-debug-2026-11-16.md)，原始记录在 `output/validation/dm-debug/`。
+
+
+## 2026-11-16：X01/X02/X04 运行边界修复
+
+- EDK 第一阶段修复记录：[配置、遥测生命周期及容量](../edk/docs/reviews/edk-cross-project-stage1-2026-11-16.md)。
+- 固件 v0.0.1 / `e6477438848c580d86bee2942c10cbc661a8c052d5509ff8916384944675d891`，OTA 审计记录 160；实际启动 deployment 0 / kernel A / rootfs A，本地健康及服务端 success=1。
+- 原生 CTest 17/17、ASan/UBSan、COMPAT y/n PDM 构建通过；AM625 遥测容量夹具、三个真实端点的身份/EFAULT/PDI/私有 ioctl 查询通过。无 COMPAT 内核及 32 位进程未作实机验证，未执行外设复位/电源控制。
+- 已恢复 TFTP/NFS，参考 ID `6cbf78b3f0a532d66616e4fde62235c5ea09c35e91fa81309c941568f0f33266`，启动 `dbdf2307-6511-4f83-a46f-9eb49cbbd9ef`；零失败服务、WDT active、时间同步及 SOL 五阶段日志/归档回执通过，串口释放。
+- 原始证据及完整镜像：`output/validation/cross-project-review/`。
