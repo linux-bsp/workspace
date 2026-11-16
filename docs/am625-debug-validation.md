@@ -1267,3 +1267,12 @@ OTA 159 实机升级成功，kernel/rootfs B，服务端成功回执已确认。
 - 原生 CTest 17/17、ASan/UBSan、COMPAT y/n PDM 构建通过；AM625 遥测容量夹具、三个真实端点的身份/EFAULT/PDI/私有 ioctl 查询通过。无 COMPAT 内核及 32 位进程未作实机验证，未执行外设复位/电源控制。
 - 已恢复 TFTP/NFS，参考 ID `6cbf78b3f0a532d66616e4fde62235c5ea09c35e91fa81309c941568f0f33266`，启动 `dbdf2307-6511-4f83-a46f-9eb49cbbd9ef`；零失败服务、WDT active、时间同步及 SOL 五阶段日志/归档回执通过，串口释放。
 - 原始证据及完整镜像：`output/validation/cross-project-review/`。
+
+## 2026-11-16：X03 遥测调度与 X02 在途操作预算
+
+- [EDK 第二阶段记录](../edk/docs/reviews/edk-cross-project-stage2-2026-11-16.md)：socket 非阻塞状态机、分接口连接配额、固定 deadline、每轮 IO 预算、collector 互斥及 fan-out 预分配。
+- 固件 v0.0.1 / `ee9d26a9d4243ababf9def3f0c9253e50338bfa87f7e716f66b28c52c5118b9e`，OTA 审计 161；deployment 1 / kernel B / rootfs B，本地 confirmed、服务端 success=1，失败和设备异常均为 0。
+- CTest 31 项在补齐独立构建的 host 依赖路径后全部通过；ASan/UBSan、AM625 engine/socket 及真实 daemon 隔离压力通过。安装后 288 次请求，最大查询 10 ms、心跳最大间隔 4996 ms、fd 峰值 15；真实 PDI 端点只读查询通过。
+- 已恢复 TFTP/NFS，参考 ID `c66acf91be9f1c3b25b2abe6f32c51e1807e20399d77100595a4f23d41c9e740`，最终 boot `fab0dbe6-e697-4c51-9195-c92bb90ee3cd`；零失败服务、WDT active、时间同步、SOL 五阶段日志及归档回执通过，UART 释放。
+- 外部异步动作取消、真实 MCU 持续采样、阻塞驱动 callback 和长期运行仍需后续验收。本阶段不更改 bootloader、分区或元数据格式。
+- 原始证据、源码差异、串口、OTA 回执和完整镜像：`output/validation/telemetry-budget/`。
