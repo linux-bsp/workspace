@@ -1324,3 +1324,10 @@ OTA 159 实机升级成功，kernel/rootfs B，服务端成功回执已确认。
 - OTA 167：v0.0.1 / `bd5b8fdd21e5b6994817137e57b4e25709a7df14479ec38a1692b883a79e6afd`，本地启动 `4e09aa43-6801-4512-9bbc-21c0cd89bb33`；健康及服务端成功回执确认。
 - TFTP/NFS 参考 `88b8c64cb1c3361d3d670241fa510b035fe2a3dea631c902a286a0ed16627e0a`，启动 `7f2a311b-8edb-4f41-9f1c-a96ccc1b896d`；服务、WDT、时间、安装摘要、五阶段 SOL 与归档正常，UART 释放。
 - 原始证据及镜像：`output/validation/device-activity/`。
+
+## 2026-11-16：R02 调试代理有限停止
+
+- [第九阶段记录](../edk/docs/reviews/edk-cross-project-stage9-2026-11-16.md)：工作槽采用 OSA、独立进程组和有限回收，保留远端操作结果未知边界。7 组管理回归通过。
+- OTA 168：v0.0.1 / `a125578ed16361f8a57e9f41702ef4c192cf1d29b32f235003a3ef7afe6e55f4`，本地启动 `f0bcf4b0-19b8-4a27-96bf-1ae26d5abed1`；健康及服务端成功回执、真实 GET/POST 只读调试通过。
+- TFTP/NFS 参考 `9c7699ed42d23dbe2e57b7e33528cbe2f634f97bfbd75ead78c4fc6e0526eb73`，启动 `a7090d7b-eeda-4bed-b97f-493f88b8330f`；服务、WDT、校时、安装摘要、五阶段 SOL 及归档回执正常。
+- 原始证据与匹配镜像：`output/validation/debug-worker/`。
