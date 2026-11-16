@@ -1331,3 +1331,11 @@ OTA 159 实机升级成功，kernel/rootfs B，服务端成功回执已确认。
 - OTA 168：v0.0.1 / `a125578ed16361f8a57e9f41702ef4c192cf1d29b32f235003a3ef7afe6e55f4`，本地启动 `f0bcf4b0-19b8-4a27-96bf-1ae26d5abed1`；健康及服务端成功回执、真实 GET/POST 只读调试通过。
 - TFTP/NFS 参考 `9c7699ed42d23dbe2e57b7e33528cbe2f634f97bfbd75ead78c4fc6e0526eb73`，启动 `a7090d7b-eeda-4bed-b97f-493f88b8330f`；服务、WDT、校时、安装摘要、五阶段 SOL 及归档回执正常。
 - 原始证据与匹配镜像：`output/validation/debug-worker/`。
+
+## 2026-11-16：R23 SOL 转发进程退出恢复
+
+- [第十阶段记录](../edk/docs/reviews/edk-cross-project-stage10-2026-11-16.md)：唯一工作槽、回收后重启、单调时钟退避、本地采集独立；24 项日志和 7 组关联回归通过。
+- OTA 169：v0.0.1 / `febebcf3cc68780d21c90c18a06e5938c8e65ccc6da9d715abf3bd2da68ee3b6`，本地启动 `87bbd3b9-30f1-47d7-b0f2-33770a94a7ac`；健康和服务端成功确认。
+- 实机连续三次 SIGKILL 转发子进程，替代进程在约 1.878、2.765、4.541 秒出现；采集器未重启，三个本地标记均送达 SOL server，服务和 WDT 正常。
+- TFTP/NFS 参考 `74d2bac063c64e9501fb17a4ed215589fe485a6523db1505ffb62fb1fd5f5480`，启动 `ec32753a-3369-419e-ab6b-81d0a7eb93a4`；安装摘要、校时、五阶段 SOL 和归档回执通过，串口已释放。
+- 证据及完整镜像：`output/validation/sol-supervision/`。测试预检中的设备 awk 缺失已改为 shell read 后重试；未对固件增加测试依赖。
