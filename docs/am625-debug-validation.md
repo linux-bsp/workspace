@@ -1276,3 +1276,11 @@ OTA 159 实机升级成功，kernel/rootfs B，服务端成功回执已确认。
 - 已恢复 TFTP/NFS，参考 ID `c66acf91be9f1c3b25b2abe6f32c51e1807e20399d77100595a4f23d41c9e740`，最终 boot `fab0dbe6-e697-4c51-9195-c92bb90ee3cd`；零失败服务、WDT active、时间同步、SOL 五阶段日志及归档回执通过，UART 释放。
 - 外部异步动作取消、真实 MCU 持续采样、阻塞驱动 callback 和长期运行仍需后续验收。本阶段不更改 bootloader、分区或元数据格式。
 - 原始证据、源码差异、串口、OTA 回执和完整镜像：`output/validation/telemetry-budget/`。
+
+## 2026-11-16：X09/R10 OTA 执行上下文
+
+- [第三阶段记录](../edk/docs/reviews/edk-cross-project-stage3-2026-11-16.md)：应用持有取消/执行状态和预算，共享文件库不再承担应用运行策略；保留旧 SDK ABI 适配。
+- SDK 32 项、管理端 55 项（HWID 补齐环境后复测）、ASan/UBSan、AM625 上下文隔离与 PDI 查询通过。
+- OTA 162，v0.0.1 / `769da8aedf24762008bd8485e3b3561482bd535d2a4907b87610e80027a2b3b3`，实际启动 `77817177-357f-4c1e-9cd2-3aba92c918ac`；本地健康和服务端成功回执通过。
+- 恢复 TFTP/NFS，参考 `34ce526bbf59b06dd94d13d206acca739d9f8b0170ca722b6dc7229d59251afe`，启动 `3102abb5-62e7-4db4-8cd4-31d8b5e8accb`；零失败服务、WDT、校时、SOL 五阶段日志和归档回执正常，UART 释放。
+- 原始证据及匹配镜像在 `output/validation/ota-context/`。安装日志子进程的有界回收紧接着单独实施。
