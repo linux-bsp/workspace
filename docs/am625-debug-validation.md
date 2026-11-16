@@ -1237,3 +1237,15 @@ SDK 25、管理 55、BMC 37 项主机回归及 18 项板上回归通过。
 发布 v0.0.1 / `a4a4bce18433717361119fe7ee1dbafc4b3d10aae4ff72c432617bfdfce7092d`，
 本地 B 槽健康确认，服务端事务 157 success；恢复 TFTP/NFS 后程序/库/模块匹配，
 WDT、时间、SOL 和归档回执通过。原始证据在 `output/validation/edk-pdi-integration/`。
+
+
+## 2026-11-16：协议和传输合并到 PDI
+
+完整记录见 [PDI 协议与传输验证](../edk/docs/reviews/edk-pdi-transport-2026-11-16.md)。
+用户态只保留 OSA/PDI/BMC 三个库目录；协议、HTTP 和文件续传统一由按需配置的 libpdi 提供。
+SDK 25、管理 55、恢复/initramfs 6 项验证及 18 项板上回归通过。
+发布 v0.0.1 / `fb31bdf992732bd2faf1b54b7b05ce5732169bbb4a9de7903d144ad76b227628`，
+本地 A 槽 confirmed，服务端事务 158 success；SOL、校时、HTTP 诊断和独立启停通过。
+恢复 TFTP/NFS，参考 ID `5a799f86f5472ca2485247a0b1d7f8632c08d61f86d5406b90f19e2ebaab56d8`，
+最终 boot `02d5c4b7-4e02-408f-9e0e-dc6c80f17b3a`，WDT active、失败服务 0、日志归档已回执。
+证据在 `output/validation/edk-pdi-transport/`。
