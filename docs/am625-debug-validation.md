@@ -1308,3 +1308,11 @@ OTA 159 实机升级成功，kernel/rootfs B，服务端成功回执已确认。
 - OTA 165，v0.0.1 / `d43167a3e24917a606917f7e1fed0aead42a73a0342b955908150be5d8014359`，本地启动 `45eee517-750c-40f8-963e-8f38b467e756`，本地健康和服务端成功确认。
 - TFTP/NFS 参考 `b7c43bfb473a8947acea14fe1d8849b1e75b0547befb1197adc57848a173917b`，启动 `fadaaab4-8562-4408-9cc5-c9707b942dc4`；服务、WDT、校时、安装摘要、五阶段 SOL 和归档通过，UART 释放。
 - 原始证据及匹配镜像：`output/validation/log-lifecycle/`。
+
+## 2026-11-16：R05 短请求正文与控制优先级
+
+- [第七阶段记录](../edk/docs/reviews/edk-cross-project-stage7-2026-11-16.md)：非阻塞正文、固定总期限、同轮控制优先级及只读调试验证。
+- 完整管理回归 55 组经调度修复和依赖路径补齐后通过；慢 SOL 正文下健康请求约 1 ms 返回。
+- OTA 166：v0.0.1 / `b95e745828512f54d421bb3fc5364c4024142a3fe5f053a5e0b0916a0eee964b`，本地启动 `60b4deec-01ef-45c3-9dc0-bb03e6570f5b`；健康与服务端成功回执通过。
+- TFTP/NFS 参考 `75a6aadfb99e32e8e63d80039fa7767a0d513697505267e3634642cbbf04fbb7`，启动 `e7e3f913-f289-44fb-beab-833dc1753d4c`；服务、WDT、时间、安装摘要、五阶段 SOL 和归档回执正常，UART 释放。
+- 原始证据及镜像：`output/validation/http-body/`。
