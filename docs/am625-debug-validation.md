@@ -1292,3 +1292,11 @@ OTA 159 实机升级成功，kernel/rootfs B，服务端成功回执已确认。
 - OTA 163，v0.0.1 / `bef73b2a0eaefa6090455a254319fc3f12fab12ff322476b84dd6a5ae48f58f1`，实际启动 `6b8b1459-91fd-4f22-986d-6f66fca0e350`；本地及服务端确认成功。
 - TFTP/NFS 已恢复，参考 `3c2fcb29fe2fc3b6efdafe25ca913c740b5ebffad812064ea60b1f9c861e385e`、启动 `2752e97c-2e81-40b3-8a27-e1e2ff32adac`；WDT、校时、五阶段 SOL/归档回执和安装摘要通过；UART 释放。
 - 原始证据与完整镜像：`output/validation/ota-process/`。
+
+## 2026-11-16：R02 SOL 归档进程与缓存所有权
+
+- [第五阶段记录](../edk/docs/reviews/edk-cross-project-stage5-2026-11-16.md)：OSA 输出重定向、有限回收、SOL/导出目标租约及 pending 缓存准入。
+- SDK 32 项、管理相关 7 组、ASan/UBSan 与 AM625 进程回归通过；板上 BusyBox 归档导出和五阶段内容检查通过。
+- OTA 164，v0.0.1 / `a5a1c617b1c2d997bf66abea9181e48a35c6f834cad5f7e9cc800e44358d95ae`，实际启动 `95556415-0064-4807-a017-56405fb3eb80`；由上一阶段新 fwctld 安装，本地和服务端均确认成功。
+- 恢复 TFTP/NFS：参考 `193ae0e491c3b555e566936333c2bed9b8dbea7dd38906569e4678d98a312c24`，启动 `d1fd445d-5cdc-42a7-9465-375c639fd445`；服务、WDT、校时、文件/模块摘要、SOL 及归档回执通过，UART 释放。
+- 原始证据与完整镜像：`output/validation/log-archive/`。
