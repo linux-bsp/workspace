@@ -1204,3 +1204,26 @@ boot为 `894d1fd7-d96a-438e-ac78-d1a82e9a9347`；新status输出与本地一致�
   未做真实掉电、破坏分区或实际外部 BMC 对端试验。串口已释放。
 
 证据保存在 ignored `output/validation/edk-style-unification/`。
+
+
+## 2026-11-16：EDK 文件名统一模块所有权
+
+完整记录见 [EDK 文件命名与交付验证](../edk/docs/reviews/edk-file-ownership-2026-11-16.md)。
+
+- C/H（含公开头与测试）统一 `{module}_{submodule}_{role}`，同步 include、CMake/Kbuild、
+  BSP 恢复测试与文档；命令、服务、公开函数和库 ABI 保持不变。外部 SDK 使用者需更新 include。
+- SDK 24、管理 54、BMC 37、BSP 恢复/FIT/存储身份 17 项软件回归通过；
+  Git 收录源码独立构建、452 个既有 C/H 实现 token 对比与三个共享库导出符号检查通过。
+  补齐曾被 output/ 与 *.hex 忽略规则隐藏的 BMC 输出源码、测试和协议向量。
+- 发布 `v0.0.1 / 5e02d9f1e7f9951adddd7baecdfd30284c11ceca6a3f641fff70f26ecc721fe5`，
+  本地 deployment 0 / A 槽 confirmed，服务端内部事务 156 success，失败/异常均 0。
+- 本地 boot `cdb8efb8-8db7-454e-b2ea-0aca06984580`；18 项 AArch64 回归通过，
+  诊断 HTTP、日志/校时独立启停、在线状态、SOL 标记和 SPL/U-Boot/kernel/services 日志通过。
+- 恢复 tftp_kernel=1、nfs_root=1；参考
+  `bc73e1b7e233f7c2f6f1592a0d39228d1bd8af8a5a45e0fe400d9bb7472e4dc6`，
+  最终 boot `2f0f2558-4896-423a-8226-9c466ea8bfa3`。WDT active、失败服务 0，
+  UTC+8 校时与日志回执正常、待归档 0；程序/库/模块摘要匹配，串口已释放。
+- 未更新 bootloader/布局、未做损坏注入或真实 BMC 对端测试；缺少 U-Boot sandbox 可执行文件的
+  identity 互操作脚本未计入通过项。
+
+证据位于 ignored `output/validation/edk-file-ownership/`。
