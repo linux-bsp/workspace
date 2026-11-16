@@ -1164,3 +1164,22 @@ lookup_linear约占本次自耗权重99.60%。保留原始perf.data、栈文本�
 boot为 `894d1fd7-d96a-438e-ac78-d1a82e9a9347`；新status输出与本地一致，fwctl可执行文件hash匹配构建，WDT active、服务失败0、SOL同步正常且归档待传0。
 未接管用户正在使用的tio或修改分区/bootloader。构建、原生测试、未剥离fwctl ELF、OTA回执和两种启动模式结果归档于ignored的
 `output/validation/fwctl-status-hash/`。
+
+
+## 2026-11-16：EDK/BMC 集成及目录、OSA 改动验收
+
+使用 USB/IP if02 串口和 SSH 在 AM625 上验证。完整记录见
+[EDK 实机验收](../edk/docs/reviews/edk-am625-validation-2026-11-16.md)。
+
+- 最终固件 `v0.0.1 / 7ce0511b482073c9957d40f172b51344a89a0ccfa8ec424c846c026848d0402e`；
+  本地 A 槽健康确认和服务端 OTA success 均通过。
+- 修复 libgpg-error 的 mawk 十六进制转换导致的锁 ABI 异常；修复 PDI 测试遗漏 open64 拦截。
+- 18 项不同的 AArch64 测试最终通过，旧 OSA ABI 与实际 BMC 程序启动通过；真实 BMC 对端尚未验证。
+- HTTP 诊断、日志/时间服务独立重启、UTC+8 同步、持久日志、各阶段 SOL 和在线状态通过。
+- 恢复 tftp_kernel=1、nfs_root=1；参考构建
+  `61673622f5fee5e15df2b204af796ec464b5bb4655c515c52b62810385e9ff9d`，
+  boot ID `52c5a964-7ab0-4af4-b1f3-9a01dddafe04`。
+- 最终 WDT active、失败服务为0、启动日志已回执、待归档为0；程序/库/模块摘要匹配。
+- 证据在 ignored `output/validation/edk-board-2026-11-16/`，含连续串口日志、两次发布与回执、修复复现及重测。
+
+保留的板级启动告警、RTC/复位原因限制及未验收范围见完整记录；未做真实断电或损坏分区注入。

@@ -85,7 +85,7 @@ BR2_EXTERNAL="../bsp-base-external ../sadboard-external" \
 主机测试、文档检查、可选串口验收工具及上游 binman 等主机依赖仍可使用 Python。
 固件打包职责见 [生成器说明](bsp-base-external/support/firmware/README.md)。
 
-在新克隆的工作区中，先运行 `git submodule update --init --recursive`。`libbmc` 使用 `git@github.com:wanguo99/libbmc.git` 的 `master` 分支。`make list-defconfigs` 可以查看本实验入口。可选工具链、独立输出目录和详细构建步骤见 [环境指南](obsidian-sadboard/附录A-实验实践与构建/附录A-实验实践与构建.md)。
+在新克隆的工作区中，先运行 `git submodule update --init --recursive`。BMC 库已整合到 EDK，见 [BMC 构建与接口说明](edk/docs/bmc/README.md)。`make list-defconfigs` 可以查看本实验入口。可选工具链、独立输出目录和详细构建步骤见 [环境指南](obsidian-sadboard/附录A-实验实践与构建/附录A-实验实践与构建.md)。
 
 `sadboard-external` 包含 AM6254 标准 defconfig、内核片段、原生构建 hooks、手动实验程序和目标端环境检查脚本，跟踪远端 `main` 分支。workspace 固定所有子模块的具体提交；复现实验时使用固定提交。`git submodule update --remote` 会尝试更新到跟踪分支的新提交。
 

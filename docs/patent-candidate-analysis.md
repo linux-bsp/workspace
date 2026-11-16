@@ -45,7 +45,7 @@ Linux、U-Boot 和 BSP 的具体修订以该 workspace 提交记录的子模块�
 5. 设备收到两个快照的归档确认后，向内核提交对应 capture ID；内核核对后先使两个头部失效，再清除缓存，拒绝不匹配的旧确认。
 6. 管理端结合恢复启动上下文、相邻代次和不同 bank 关联异常与恢复归档，并保存独立事故附件。
 
-依据：[双缓冲启动日志](../edk/docs/device-manager/startup-buffers.md)、[U-Boot 记录实现](../uboot/u-boot-2026.04/common/bsp_bootlog.c)、[内核冻结与确认实现](../linux/linux-7.0/drivers/firmware/bsp_bootlog.c)、[设备上传实现](../edk/user/apps/logctl/startup-forward.c)、[服务端事故关联](../edk/user/apps/device-manager/server/sol/sol-startup-evidence.c)。
+依据：[双缓冲启动日志](../edk/docs/device-manager/startup-buffers.md)、[U-Boot 记录实现](../uboot/u-boot-2026.04/common/bsp_bootlog.c)、[内核冻结与确认实现](../linux/linux-7.0/drivers/firmware/bsp_bootlog.c)、[设备上传实现](../edk/user/apps/logctl/forward/startup-forward.c)、[服务端事故关联](../edk/user/apps/device-manager/server/sol/sol-startup-evidence.c)。
 
 ### 候选贡献与现有技术
 

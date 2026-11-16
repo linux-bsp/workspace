@@ -18,10 +18,6 @@
 	path = uboot/u-boot-2026.04
 	url = git@github.com:linux-bsp/u-boot-2026.04.git
 	branch = master
-[submodule "libbmc"]
-	path = libbmc
-	url = git@github.com:wanguo99/libbmc.git
-	branch = master
 [submodule "sadboard-external"]
 	path = sadboard-external
 	url = git@github.com:linux-bsp/sadboard-external.git

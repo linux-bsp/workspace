@@ -12,7 +12,7 @@ The six curriculum batches are complete: 106 independent cases (35 basic, 24 adv
 - `sadboard-external/`: laboratory code, AM625 debug configuration, kernel fragments, native build hooks and deployment helpers; submodule branch `main`, external identifier `SADBOARD`.
 - `bsp-base-external/`: shared board support and general netboot functionality; preserve external identifier `LINUX_BSP`.
 - `edk/`: integrated management software on `master`. Firmware CLI, OTA daemon and initramfs entry belong to `user/apps/fwctl/`; logging/SOL to `user/apps/logctl/`; time to `user/apps/timectl/`; host `dmserver`/`dmcli` to `user/apps/device-manager/`. Shared OSA, HWID, transfer and protocol libraries live under `user/lib/`. Read `edk/AGENTS.md` before editing it; management architecture belongs in `edk/docs/`.
-- `buildroot/`, `linux/`, `uboot/`, `libbmc/`: existing source submodules; libbmc remains separate from EDK.
+- `buildroot/`, `linux/`, `uboot/`: existing source submodules. BMC source is integrated into `edk/user/lib/bmc`, with public ABI 2 and optional backends; it remains independent of PDI/PDM.
 - `README.md`: project entry and documentation index; keep new guide links reachable.
 - `docs/`: workspace instructions and board references, including `workspace-toolchain.md` and the validation archive. i.MX6ULL references do not establish a supported SadBoard profile. Generated builds and raw evidence belong in ignored `output/`.
 
