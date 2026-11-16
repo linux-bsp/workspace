@@ -1183,3 +1183,24 @@ boot为 `894d1fd7-d96a-438e-ac78-d1a82e9a9347`；新status输出与本地一致�
 - 证据在 ignored `output/validation/edk-board-2026-11-16/`，含连续串口日志、两次发布与回执、修复复现及重测。
 
 保留的板级启动告警、RTC/复位原因限制及未验收范围见完整记录；未做真实断电或损坏分区注入。
+
+
+## 2026-11-16：EDK Linux 风格统一与构建入口简化
+
+完整记录见 [EDK 风格统一与实机验证](../edk/docs/reviews/edk-linux-style-2026-11-16.md)。
+
+- 内核及用户态 C 统一 Linux Tab/8 列风格；整理私有文件/名称，保护公共 ABI 和持久化字段。
+- 移除 Ninja 预设，使用 Kconfig、GNU Make、CMake；SDK 24 项、管理 54 项、BMC 37 项、
+  initramfs 恢复 6 项主机验证通过，18 项 AArch64 回归在板上通过。
+- 发布 `v0.0.1 / bc54ac2791e3dedf415eee6203a49af87cf9a834a570ec1fa01b9c94e89eafd4`，
+  本地 deployment 1 / B 槽健康确认，服务端内部事务 155 收到 success。
+- 本地启动 ID `7e2bbbf4-56a2-4c2b-a908-70849ad1b081`；日志/校时独立启停、
+  HTTP 诊断、SOL 标记及五阶段启动日志、设备在线状态通过。
+- 已恢复两项 netboot 开关；参考 ID
+  `832fde300551dd7c61de8d026121420b6656a1b34c77984ab616d787cc70717d`，
+  最终启动 ID `ce249e83-3db5-4d67-8b28-632eab7fea5f`。
+- 最终 WDT active、失败服务 0、UTC+8 校时和日志回执正常、待归档 0，程序/库/模块摘要匹配。
+- 未更新设备 bootloader；仅同步 U-Boot 与 EDK 共用 HWID 头文件的源码排版，编码逻辑不变。
+  未做真实掉电、破坏分区或实际外部 BMC 对端试验。串口已释放。
+
+证据保存在 ignored `output/validation/edk-style-unification/`。
