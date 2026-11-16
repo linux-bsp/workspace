@@ -1284,3 +1284,11 @@ OTA 159 实机升级成功，kernel/rootfs B，服务端成功回执已确认。
 - OTA 162，v0.0.1 / `769da8aedf24762008bd8485e3b3561482bd535d2a4907b87610e80027a2b3b3`，实际启动 `77817177-357f-4c1e-9cd2-3aba92c918ac`；本地健康和服务端成功回执通过。
 - 恢复 TFTP/NFS，参考 `34ce526bbf59b06dd94d13d206acca739d9f8b0170ca722b6dc7229d59251afe`，启动 `3102abb5-62e7-4db4-8cd4-31d8b5e8accb`；零失败服务、WDT、校时、SOL 五阶段日志和归档回执正常，UART 释放。
 - 原始证据及匹配镜像在 `output/validation/ota-context/`。安装日志子进程的有界回收紧接着单独实施。
+
+## 2026-11-16：R02/R12 安装进程与未知结果协调
+
+- [第四阶段记录](../edk/docs/reviews/edk-cross-project-stage4-2026-11-16.md)：实时输出、有限等待/回收、缓存租约、未知写入结果核对。
+- SDK 32 项、相关管理 8 组、新增未知结果 2 项、ASan/UBSan 与 AM625 进程/PDI 回归通过。
+- OTA 163，v0.0.1 / `bef73b2a0eaefa6090455a254319fc3f12fab12ff322476b84dd6a5ae48f58f1`，实际启动 `6b8b1459-91fd-4f22-986d-6f66fca0e350`；本地及服务端确认成功。
+- TFTP/NFS 已恢复，参考 `3c2fcb29fe2fc3b6efdafe25ca913c740b5ebffad812064ea60b1f9c861e385e`、启动 `2752e97c-2e81-40b3-8a27-e1e2ff32adac`；WDT、校时、五阶段 SOL/归档回执和安装摘要通过；UART 释放。
+- 原始证据与完整镜像：`output/validation/ota-process/`。
