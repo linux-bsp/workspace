@@ -1227,3 +1227,13 @@ boot为 `894d1fd7-d96a-438e-ac78-d1a82e9a9347`；新status输出与本地一致�
   identity 互操作脚本未计入通过项。
 
 证据位于 ignored `output/validation/edk-file-ownership/`。
+
+
+## 2026-11-16：PDI 合并公共能力与去除 core 文件后缀
+
+完整记录见 [PDI 归并验证](../edk/docs/reviews/edk-pdi-integration-2026-11-16.md)。
+HWID、OTA 公共操作、健康通知合并为一个 libpdi，保持可选构建；核心文件去掉多余 core。
+SDK 25、管理 55、BMC 37 项主机回归及 18 项板上回归通过。
+发布 v0.0.1 / `a4a4bce18433717361119fe7ee1dbafc4b3d10aae4ff72c432617bfdfce7092d`，
+本地 B 槽健康确认，服务端事务 157 success；恢复 TFTP/NFS 后程序/库/模块匹配，
+WDT、时间、SOL 和归档回执通过。原始证据在 `output/validation/edk-pdi-integration/`。
