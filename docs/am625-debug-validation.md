@@ -1300,3 +1300,11 @@ OTA 159 实机升级成功，kernel/rootfs B，服务端成功回执已确认。
 - OTA 164，v0.0.1 / `a5a1c617b1c2d997bf66abea9181e48a35c6f834cad5f7e9cc800e44358d95ae`，实际启动 `95556415-0064-4807-a017-56405fb3eb80`；由上一阶段新 fwctld 安装，本地和服务端均确认成功。
 - 恢复 TFTP/NFS：参考 `193ae0e491c3b555e566936333c2bed9b8dbea7dd38906569e4678d98a312c24`，启动 `d1fd445d-5cdc-42a7-9465-375c639fd445`；服务、WDT、校时、文件/模块摘要、SOL 及归档回执通过，UART 释放。
 - 原始证据与完整镜像：`output/validation/log-archive/`。
+
+## 2026-11-16：R02 采集器子进程生命周期
+
+- [第六阶段记录](../edk/docs/reviews/edk-cross-project-stage6-2026-11-16.md)：OSA 有限停止、采集器查询预算及输出文件锁。
+- SDK 32 项、管理相关 4 组、最终故障 3 项、ASan/UBSan 及 AM625 夹具通过；实机日志服务重启 0.554 秒。
+- OTA 165，v0.0.1 / `d43167a3e24917a606917f7e1fed0aead42a73a0342b955908150be5d8014359`，本地启动 `45eee517-750c-40f8-963e-8f38b467e756`，本地健康和服务端成功确认。
+- TFTP/NFS 参考 `b7c43bfb473a8947acea14fe1d8849b1e75b0547befb1197adc57848a173917b`，启动 `fadaaab4-8562-4408-9cc5-c9707b942dc4`；服务、WDT、校时、安装摘要、五阶段 SOL 和归档通过，UART 释放。
+- 原始证据及匹配镜像：`output/validation/log-lifecycle/`。
