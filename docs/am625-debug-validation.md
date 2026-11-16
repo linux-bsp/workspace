@@ -1249,3 +1249,12 @@ SDK 25、管理 55、恢复/initramfs 6 项验证及 18 项板上回归通过。
 恢复 TFTP/NFS，参考 ID `5a799f86f5472ca2485247a0b1d7f8632c08d61f86d5406b90f19e2ebaab56d8`，
 最终 boot `02d5c4b7-4e02-408f-9e0e-dc6c80f17b3a`，WDT active、失败服务 0、日志归档已回执。
 证据在 `output/validation/edk-pdi-transport/`。
+
+## 2026-11-16：Device Manager 集成 PDI 设备调试
+
+独立 pdebug / pdebug-web 已迁入 Device Manager，Web 设备调试和 `dmcli debug` 直接复用 PDI 操作。
+固件 v0.0.1 / `bc9a2bca`，完整 ID `bc9a2bcae74f7ca6dfc272f4c0783adae11e95c7efbfae0f8c15229fc51d02a2`，
+OTA 159 实机升级成功，kernel/rootfs B，服务端成功回执已确认。
+查询 main_mcu / satellite / dc_power、请求拒绝与互斥验证通过；未执行电源或复位动作。
+恢复 TFTP/NFS 参考 `b94add3b`，零失败服务、WDT active、SOL 五阶段日志与启动归档已确认；UART 已释放。
+详见 [EDK 调试模块验证](../edk/docs/reviews/device-manager-debug-2026-11-16.md)，原始记录在 `output/validation/dm-debug/`。

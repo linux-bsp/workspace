@@ -11,7 +11,7 @@ The six curriculum batches are complete: 106 independent cases (35 basic, 24 adv
 - `obsidian-sadboard/`: independent Chinese handbook submodule on `master`. Its only root note is `README.md`. Chapters 01–06 cover hardware, OS, compilation/build systems, assembly, kernel subsystems, and system debugging/optimization. Indexes and preparation live under `06-系统调试与优化/00-实验准备与通用方法/`; unit `11-综合工程复盘/` contains the five review routes.
 - `sadboard-external/`: laboratory code, AM625 debug configuration, kernel fragments, native build hooks and deployment helpers; submodule branch `main`, external identifier `SADBOARD`.
 - `bsp-base-external/`: shared board support and general netboot functionality; preserve external identifier `LINUX_BSP`.
-- `edk/`: integrated management software on `master`. Firmware CLI, OTA daemon and initramfs entry belong to `user/apps/fwctl/`; logging/SOL to `user/apps/logctl/`; time to `user/apps/timectl/`; host `dmserver`/`dmcli` to `user/apps/device-manager/`. Shared OSA, PDI and BMC libraries live under `user/lib/`; PDI owns HWID, OTA file helpers, health notifications, protocols and transfer. Read `edk/AGENTS.md` before editing it; management architecture belongs in `edk/docs/`.
+- `edk/`: integrated management software on `master`. Firmware CLI, OTA daemon and initramfs entry belong to `user/apps/fwctl/`; logging/SOL to `user/apps/logctl/`; time to `user/apps/timectl/`; `dmserver`, host/device `dmcli`, and device PDI diagnostics belong to `user/apps/device-manager/`. Device debug uses `dmcli debug` and `dm-debug.socket`, with the web interface in Device Manager. Shared OSA, PDI and BMC libraries live under `user/lib/`; PDI owns HWID, OTA file helpers, health notifications, protocols and transfer. Read `edk/AGENTS.md` before editing it; management architecture belongs in `edk/docs/`.
 - `buildroot/`, `linux/`, `uboot/`: existing source submodules. BMC source is integrated into `edk/user/lib/bmc`, with public ABI 2 and optional backends; it remains independent of PDI/PDM.
 - `README.md`: project entry and documentation index; keep new guide links reachable.
 - `docs/`: workspace instructions and board references, including `workspace-toolchain.md` and the validation archive. i.MX6ULL references do not establish a supported SadBoard profile. Generated builds and raw evidence belong in ignored `output/`.
@@ -38,7 +38,7 @@ bash sadboard-external/scripts/verify-debug.sh output/am625-debug-systemd/images
 For EDK changes, use its native Buildroot configure/build path:
 
 ```sh
-make -C output/am625-debug-systemd edk-reconfigure BR2_PACKAGE_EDK_DEFCONFIG=ti_am62x_defconfig BR2_PACKAGE_EDK_WEB=y
+make -C output/am625-debug-systemd edk-reconfigure BR2_PACKAGE_EDK_DEFCONFIG=ti_am62x_defconfig BR2_PACKAGE_EDK_DEBUG=y
 ```
 
 Use separate output trees for toolchain changes. Maintain portable defconfigs through native menuconfig/savedefconfig. Shared `../dl/` is a download cache; `../toolchain/` holds manually extracted SDKs, not a shared `BR2_HOST_DIR`. Existing output trees contain absolute paths and require reconfiguration after relocation.
