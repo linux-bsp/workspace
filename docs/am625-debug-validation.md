@@ -1355,3 +1355,20 @@ AM625 隔离 vcan 软件链路通过，没有向实体载荷总线发送控制�
 `26dfae95ff99bbb5bf2db50e595a5bf50d48f1f0fd095e836525c5bb7320a083`，
 boot_id `66190277-9f64-4b45-81dd-aea6f20c9a91`。
 细节与未验收边界见 [EDK 验证记录](../edk/docs/reviews/edk-satellite-transfer-validation-2026-11-17.md)。
+
+## libnet 更名验证（2026-11-17）
+
+按用户要求将 libtransfer 及其头文件、符号、配置、SDK 目标统一更名为 libnet，
+保留 PDI 的 dm_transfer_* 文件传输接口。关键实现归一化比对一致，主机/BMC/
+管理 Debug 回归、独立 CAN SDK、真实包、完整镜像和 AM625 隔离 SocketCAN 通过。
+
+OTA 发布 #173，v0.0.1，完整内容 ID：
+`8fd5f0cae161737400a12f990af107f22223ddf9562d0d72c28e92cffb5a1381`。
+实际本地 deployment 1/kernel B/rootfs B，boot_id
+`1f287fea-7ad2-497b-9338-ffa3e434086a`，启动确认和服务器 success 回执已取得。
+
+本地根运行期间同步网络工件，恢复原 tftp_kernel=1、nfs_root=1；网络参考 ID：
+`72f8826ac2922e455474d512722bbef4dca00274058f453ac668f9648b039096`，
+boot_id `6c35cb35-4e1d-4a19-84f5-c29f159b2dc9`。
+零失败服务、WDT active、安装摘要匹配、旧库不存在，日志归档确认及时间同步通过。
+详见 [libnet 验证记录](../edk/docs/reviews/edk-libnet-rename-validation-2026-11-17.md)。
