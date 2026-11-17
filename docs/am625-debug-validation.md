@@ -1413,3 +1413,31 @@ OTA 发布 #176，v0.0.1，内容 ID
 `986cdd23-469a-47dc-af57-d0215dfc6e50`，BSPNET1 ID
 `6e117e5138e2e43153bc9569daf33422e0ad1f59e39f0c4b87cc1ca422878b0b`。
 14 项摘要再次匹配，临时测试资源消失，WDT、日志确认、时间同步和服务正常。
+
+## 2026-11-18：EDK OTA 版本与内容身份收敛
+
+OTA 的目录、通道、下载、报告、缓存、历史、事故附件与 Web 改为实际 version 和完整
+hash ID，不再分配发布编号；多 HWID 共享包，重复发布与回退复用既有内容。
+旧数据通过独立目录导入并保留原件，原始 SOL/启动字节核对一致。设备先校验旧事务
+内的完整身份与 CRC 再迁移。默认 PDI ABI 2 不变；可选 OTA SDK 使用独立载荷文件的
+ABI 3，需重编译对应消费者。118 项原生回归全部通过，包括最终真实板级包；
+Chromium 上传发布、详情/完整 ID 搜索、下载和桌面/移动端检查通过。
+
+从旧协议迁移后已实际启动并确认 v0.0.1 /
+`76ba17cfd18a444f056f51936591a6f0cc635cda8258dedc4f906dbbaa10ac04`。
+连续升级暴露旧缓存占满 /data，失败按实保留，设备继续运行健康固件。
+补齐旧缓存清单/大小/SHA256 校验后的安全回收、空下载目录清理和目录游标隔离，
+未知文件、损坏包和部分下载受到保护；正常停止日志转发的取消不再误报断连。
+
+最终由正式代理完成正常 OTA：v0.0.1 /
+`0dea4b532c117dab89afb0f6552cb4fd2b4829e040f39eba65a813536d60b559`，
+实际 deployment 0/kernel A/rootfs A，boot_id `2ce9d863-76db-486d-8ac3-c0485ddbb210`。
+确认标记、FWOTA2 confirmed 状态及同 boot_id 的真实 server success 已核对；
+代理自动清理旧包与四个空目录，/data 可用约 107 MiB，缓存只剩完整 hash 目录。
+
+本地根运行时同步配套 NFS/TFTP，再恢复 tftp_kernel=1、nfs_root=1。
+网络 boot_id 为 `3547c3cf-24ed-47f8-8bb7-bdab5eb24592`，参考 ID
+`8b15c9c4c199c0970ad24f226074a6330eba8f3c5c199008d87e4904c2b5c9f5`。
+14 项摘要匹配、WDT 60 秒、零失败服务、日志同步正常、启动缓存已确认、归档待传为 0。
+详见 [EDK 后续 OTA 验证](../edk/docs/reviews/edk-runtime-validation-2026-11-17.md#后续-ota-身份与迁移)，
+原始证据在 `output/validation/ota-content-id-20261117/`。未操作实体 BMC/MCU 电源或复位。
