@@ -1339,3 +1339,19 @@ OTA 159 实机升级成功，kernel/rootfs B，服务端成功回执已确认。
 - 实机连续三次 SIGKILL 转发子进程，替代进程在约 1.878、2.765、4.541 秒出现；采集器未重启，三个本地标记均送达 SOL server，服务和 WDT 正常。
 - TFTP/NFS 参考 `74d2bac063c64e9501fb17a4ed215589fe485a6523db1505ffb62fb1fd5f5480`，启动 `ec32753a-3369-419e-ab6b-81d0a7eb93a4`；安装摘要、校时、五阶段 SOL 和归档回执通过，串口已释放。
 - 证据及完整镜像：`output/validation/sol-supervision/`。测试预检中的设备 awk 缺失已改为 shell read 后重试；未对固件增加测试依赖。
+
+## EDK Satellite 用户态拆分与共享传输（2026-11-17）
+
+Satellite 独立为 libsatellite，CAN/HTTP 机制归 libtransfer；PDM Satellite 驱动和
+板级 DT 实例移除，MCU/PDM 保留。完整镜像、原生回归、独立 SDK、ASan/UBSan 和
+AM625 隔离 vcan 软件链路通过，没有向实体载荷总线发送控制。
+
+本地 A/B OTA 发布 #172，版本 v0.0.1，完整内容 ID：
+`8fceac6c0a9b1814846dbf01c976d94255954d257573cc969db6019f81ed5b91`。
+实际运行 deployment 0/kernel A/rootfs A，boot_id
+`fc8ec51b-1ecc-4ffc-8f2a-895dfbaf29dc`，启动确认标记和服务器 success 回执均已取得。
+
+本地运行期间同步网络工件并恢复原 tftp_kernel=1、nfs_root=1；网络参考 ID：
+`26dfae95ff99bbb5bf2db50e595a5bf50d48f1f0fd095e836525c5bb7320a083`，
+boot_id `66190277-9f64-4b45-81dd-aea6f20c9a91`。
+细节与未验收边界见 [EDK 验证记录](../edk/docs/reviews/edk-satellite-transfer-validation-2026-11-17.md)。
