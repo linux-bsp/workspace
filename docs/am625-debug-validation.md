@@ -1376,3 +1376,23 @@ boot_id `6c35cb35-4e1d-4a19-84f5-c29f159b2dc9`。
 随后删除未启用的旧 user/lib/http 兼容组件及其构建/SDK 入口。35 项主机回归、
 生产配置 ARM64 库构建通过；活跃配置宏和五库导出列表一致，生产实现源码未变。
 本次未刷写设备，继续使用上述已验证固件；详情见 EDK libnet 验证记录的后续清理。
+
+## EDK 日志与运行时契约优化（2026-11-17）
+
+OSA 增加模块/事件策略及源统计，logctl 控制输出/采集及 PDM 级别，继续使用
+journald。遥测引擎增加唯一命令处理者、共享设备互斥、样本质量/年龄、固定周期
+调度和 SIGHUP 候选配置激活；公共库仍为五个，不增加 ko 或后台代理。
+
+原生 39 项基础、42 项 BMC、117 项管理回归无失败（管理真实包原生测试跳过，
+随后以实际 OTA 验证）；AM625 私有 OSA、OS-only 遥测和隔离 vcan 验证通过。
+
+OTA 发布 #175，v0.0.1，完整内容 ID
+`fe542e8c0cb62dcb7fd1aa9fe52db2195cf49faa8d34ff60f0cdafafa12a7025`；
+实际 deployment 1/kernel B/rootfs B，boot_id
+`aa216350-1791-4621-9021-c61e07443325`，本地确认与服务器 success 均已取得。
+
+本地运行期间同步 NFS/TFTP，恢复 tftp_kernel=1、nfs_root=1；网络参考 ID
+`ce08dd1551430b0487482ef65c718da2363524d5a5a36b9cbd2a35b146a5b990`，
+boot_id `f65782ea-214f-40e6-abec-1b42ae2e2329`。14 项关键文件摘要匹配，WDT 60 秒、
+零失败服务、日志同步/归档确认和时间同步通过。仅停止自有 8090 服务，保留原 8091。
+详情与边界见 [EDK 运行时验证](../edk/docs/reviews/edk-runtime-validation-2026-11-17.md)。
