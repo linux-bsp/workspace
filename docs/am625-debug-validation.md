@@ -1372,3 +1372,7 @@ OTA 发布 #173，v0.0.1，完整内容 ID：
 boot_id `6c35cb35-4e1d-4a19-84f5-c29f159b2dc9`。
 零失败服务、WDT active、安装摘要匹配、旧库不存在，日志归档确认及时间同步通过。
 详见 [libnet 验证记录](../edk/docs/reviews/edk-libnet-rename-validation-2026-11-17.md)。
+
+随后删除未启用的旧 user/lib/http 兼容组件及其构建/SDK 入口。35 项主机回归、
+生产配置 ARM64 库构建通过；活跃配置宏和五库导出列表一致，生产实现源码未变。
+本次未刷写设备，继续使用上述已验证固件；详情见 EDK libnet 验证记录的后续清理。
