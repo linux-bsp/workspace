@@ -1187,7 +1187,7 @@ boot为 `894d1fd7-d96a-438e-ac78-d1a82e9a9347`；新status输出与本地一致�
 
 ## 2026-11-16：EDK Linux 风格统一与构建入口简化
 
-完整记录见 [EDK 风格统一与实机验证](../edk/docs/reviews/edk-linux-style-2026-11-16.md)。
+完整记录见 [EDK 风格统一与实机验证](https://github.com/linux-bsp/EDK/blob/092242d20e3589f3bc05e66664c071801735e787/docs/reviews/edk-linux-style-2026-11-16.md)。
 
 - 内核及用户态 C 统一 Linux Tab/8 列风格；整理私有文件/名称，保护公共 ABI 和持久化字段。
 - 移除 Ninja 预设，使用 Kconfig、GNU Make、CMake；SDK 24 项、管理 54 项、BMC 37 项、
@@ -1208,7 +1208,7 @@ boot为 `894d1fd7-d96a-438e-ac78-d1a82e9a9347`；新status输出与本地一致�
 
 ## 2026-11-16：EDK 文件名统一模块所有权
 
-完整记录见 [EDK 文件命名与交付验证](../edk/docs/reviews/edk-file-ownership-2026-11-16.md)。
+完整记录见 [EDK 文件命名与交付验证](https://github.com/linux-bsp/EDK/blob/092242d20e3589f3bc05e66664c071801735e787/docs/reviews/edk-file-ownership-2026-11-16.md)。
 
 - C/H（含公开头与测试）统一 `{module}_{submodule}_{role}`，同步 include、CMake/Kbuild、
   BSP 恢复测试与文档；命令、服务、公开函数和库 ABI 保持不变。外部 SDK 使用者需更新 include。
@@ -1231,7 +1231,7 @@ boot为 `894d1fd7-d96a-438e-ac78-d1a82e9a9347`；新status输出与本地一致�
 
 ## 2026-11-16：PDI 合并公共能力与去除 core 文件后缀
 
-完整记录见 [PDI 归并验证](../edk/docs/reviews/edk-pdi-integration-2026-11-16.md)。
+完整记录见 [PDI 归并验证](https://github.com/linux-bsp/EDK/blob/092242d20e3589f3bc05e66664c071801735e787/docs/reviews/edk-pdi-integration-2026-11-16.md)。
 HWID、OTA 公共操作、健康通知合并为一个 libpdi，保持可选构建；核心文件去掉多余 core。
 SDK 25、管理 55、BMC 37 项主机回归及 18 项板上回归通过。
 发布 v0.0.1 / `a4a4bce18433717361119fe7ee1dbafc4b3d10aae4ff72c432617bfdfce7092d`，
@@ -1241,7 +1241,7 @@ WDT、时间、SOL 和归档回执通过。原始证据在 `output/validation/ed
 
 ## 2026-11-16：协议和传输合并到 PDI
 
-完整记录见 [PDI 协议与传输验证](../edk/docs/reviews/edk-pdi-transport-2026-11-16.md)。
+完整记录见 [PDI 协议与传输验证](https://github.com/linux-bsp/EDK/blob/092242d20e3589f3bc05e66664c071801735e787/docs/reviews/edk-pdi-transport-2026-11-16.md)。
 用户态只保留 OSA/PDI/BMC 三个库目录；协议、HTTP 和文件续传统一由按需配置的 libpdi 提供。
 SDK 25、管理 55、恢复/initramfs 6 项验证及 18 项板上回归通过。
 发布 v0.0.1 / `fb31bdf992732bd2faf1b54b7b05ce5732169bbb4a9de7903d144ad76b227628`，
@@ -1257,12 +1257,12 @@ SDK 25、管理 55、恢复/initramfs 6 项验证及 18 项板上回归通过。
 OTA 159 实机升级成功，kernel/rootfs B，服务端成功回执已确认。
 查询 main_mcu / satellite / dc_power、请求拒绝与互斥验证通过；未执行电源或复位动作。
 恢复 TFTP/NFS 参考 `b94add3b`，零失败服务、WDT active、SOL 五阶段日志与启动归档已确认；UART 已释放。
-详见 [EDK 调试模块验证](../edk/docs/reviews/device-manager-debug-2026-11-16.md)，原始记录在 `output/validation/dm-debug/`。
+详见 [EDK 调试模块验证](https://github.com/linux-bsp/EDK/blob/092242d20e3589f3bc05e66664c071801735e787/docs/reviews/device-manager-debug-2026-11-16.md)，原始记录在 `output/validation/dm-debug/`。
 
 
 ## 2026-11-16：X01/X02/X04 运行边界修复
 
-- EDK 第一阶段修复记录：[配置、遥测生命周期及容量](../edk/docs/reviews/edk-cross-project-stage1-2026-11-16.md)。
+- EDK 第一阶段修复记录：[配置、遥测生命周期及容量](https://github.com/linux-bsp/EDK/blob/092242d20e3589f3bc05e66664c071801735e787/docs/reviews/edk-cross-project-stage1-2026-11-16.md)。
 - 固件 v0.0.1 / `e6477438848c580d86bee2942c10cbc661a8c052d5509ff8916384944675d891`，OTA 审计记录 160；实际启动 deployment 0 / kernel A / rootfs A，本地健康及服务端 success=1。
 - 原生 CTest 17/17、ASan/UBSan、COMPAT y/n PDM 构建通过；AM625 遥测容量夹具、三个真实端点的身份/EFAULT/PDI/私有 ioctl 查询通过。无 COMPAT 内核及 32 位进程未作实机验证，未执行外设复位/电源控制。
 - 已恢复 TFTP/NFS，参考 ID `6cbf78b3f0a532d66616e4fde62235c5ea09c35e91fa81309c941568f0f33266`，启动 `dbdf2307-6511-4f83-a46f-9eb49cbbd9ef`；零失败服务、WDT active、时间同步及 SOL 五阶段日志/归档回执通过，串口释放。
@@ -1270,7 +1270,7 @@ OTA 159 实机升级成功，kernel/rootfs B，服务端成功回执已确认。
 
 ## 2026-11-16：X03 遥测调度与 X02 在途操作预算
 
-- [EDK 第二阶段记录](../edk/docs/reviews/edk-cross-project-stage2-2026-11-16.md)：socket 非阻塞状态机、分接口连接配额、固定 deadline、每轮 IO 预算、collector 互斥及 fan-out 预分配。
+- [EDK 第二阶段记录](https://github.com/linux-bsp/EDK/blob/092242d20e3589f3bc05e66664c071801735e787/docs/reviews/edk-cross-project-stage2-2026-11-16.md)：socket 非阻塞状态机、分接口连接配额、固定 deadline、每轮 IO 预算、collector 互斥及 fan-out 预分配。
 - 固件 v0.0.1 / `ee9d26a9d4243ababf9def3f0c9253e50338bfa87f7e716f66b28c52c5118b9e`，OTA 审计 161；deployment 1 / kernel B / rootfs B，本地 confirmed、服务端 success=1，失败和设备异常均为 0。
 - CTest 31 项在补齐独立构建的 host 依赖路径后全部通过；ASan/UBSan、AM625 engine/socket 及真实 daemon 隔离压力通过。安装后 288 次请求，最大查询 10 ms、心跳最大间隔 4996 ms、fd 峰值 15；真实 PDI 端点只读查询通过。
 - 已恢复 TFTP/NFS，参考 ID `c66acf91be9f1c3b25b2abe6f32c51e1807e20399d77100595a4f23d41c9e740`，最终 boot `fab0dbe6-e697-4c51-9195-c92bb90ee3cd`；零失败服务、WDT active、时间同步、SOL 五阶段日志及归档回执通过，UART 释放。
@@ -1279,7 +1279,7 @@ OTA 159 实机升级成功，kernel/rootfs B，服务端成功回执已确认。
 
 ## 2026-11-16：X09/R10 OTA 执行上下文
 
-- [第三阶段记录](../edk/docs/reviews/edk-cross-project-stage3-2026-11-16.md)：应用持有取消/执行状态和预算，共享文件库不再承担应用运行策略；保留旧 SDK ABI 适配。
+- [第三阶段记录](https://github.com/linux-bsp/EDK/blob/092242d20e3589f3bc05e66664c071801735e787/docs/reviews/edk-cross-project-stage3-2026-11-16.md)：应用持有取消/执行状态和预算，共享文件库不再承担应用运行策略；保留旧 SDK ABI 适配。
 - SDK 32 项、管理端 55 项（HWID 补齐环境后复测）、ASan/UBSan、AM625 上下文隔离与 PDI 查询通过。
 - OTA 162，v0.0.1 / `769da8aedf24762008bd8485e3b3561482bd535d2a4907b87610e80027a2b3b3`，实际启动 `77817177-357f-4c1e-9cd2-3aba92c918ac`；本地健康和服务端成功回执通过。
 - 恢复 TFTP/NFS，参考 `34ce526bbf59b06dd94d13d206acca739d9f8b0170ca722b6dc7229d59251afe`，启动 `3102abb5-62e7-4db4-8cd4-31d8b5e8accb`；零失败服务、WDT、校时、SOL 五阶段日志和归档回执正常，UART 释放。
@@ -1287,7 +1287,7 @@ OTA 159 实机升级成功，kernel/rootfs B，服务端成功回执已确认。
 
 ## 2026-11-16：R02/R12 安装进程与未知结果协调
 
-- [第四阶段记录](../edk/docs/reviews/edk-cross-project-stage4-2026-11-16.md)：实时输出、有限等待/回收、缓存租约、未知写入结果核对。
+- [第四阶段记录](https://github.com/linux-bsp/EDK/blob/092242d20e3589f3bc05e66664c071801735e787/docs/reviews/edk-cross-project-stage4-2026-11-16.md)：实时输出、有限等待/回收、缓存租约、未知写入结果核对。
 - SDK 32 项、相关管理 8 组、新增未知结果 2 项、ASan/UBSan 与 AM625 进程/PDI 回归通过。
 - OTA 163，v0.0.1 / `bef73b2a0eaefa6090455a254319fc3f12fab12ff322476b84dd6a5ae48f58f1`，实际启动 `6b8b1459-91fd-4f22-986d-6f66fca0e350`；本地及服务端确认成功。
 - TFTP/NFS 已恢复，参考 `3c2fcb29fe2fc3b6efdafe25ca913c740b5ebffad812064ea60b1f9c861e385e`、启动 `2752e97c-2e81-40b3-8a27-e1e2ff32adac`；WDT、校时、五阶段 SOL/归档回执和安装摘要通过；UART 释放。
@@ -1295,7 +1295,7 @@ OTA 159 实机升级成功，kernel/rootfs B，服务端成功回执已确认。
 
 ## 2026-11-16：R02 SOL 归档进程与缓存所有权
 
-- [第五阶段记录](../edk/docs/reviews/edk-cross-project-stage5-2026-11-16.md)：OSA 输出重定向、有限回收、SOL/导出目标租约及 pending 缓存准入。
+- [第五阶段记录](https://github.com/linux-bsp/EDK/blob/092242d20e3589f3bc05e66664c071801735e787/docs/reviews/edk-cross-project-stage5-2026-11-16.md)：OSA 输出重定向、有限回收、SOL/导出目标租约及 pending 缓存准入。
 - SDK 32 项、管理相关 7 组、ASan/UBSan 与 AM625 进程回归通过；板上 BusyBox 归档导出和五阶段内容检查通过。
 - OTA 164，v0.0.1 / `a5a1c617b1c2d997bf66abea9181e48a35c6f834cad5f7e9cc800e44358d95ae`，实际启动 `95556415-0064-4807-a017-56405fb3eb80`；由上一阶段新 fwctld 安装，本地和服务端均确认成功。
 - 恢复 TFTP/NFS：参考 `193ae0e491c3b555e566936333c2bed9b8dbea7dd38906569e4678d98a312c24`，启动 `d1fd445d-5cdc-42a7-9465-375c639fd445`；服务、WDT、校时、文件/模块摘要、SOL 及归档回执通过，UART 释放。
@@ -1303,7 +1303,7 @@ OTA 159 实机升级成功，kernel/rootfs B，服务端成功回执已确认。
 
 ## 2026-11-16：R02 采集器子进程生命周期
 
-- [第六阶段记录](../edk/docs/reviews/edk-cross-project-stage6-2026-11-16.md)：OSA 有限停止、采集器查询预算及输出文件锁。
+- [第六阶段记录](https://github.com/linux-bsp/EDK/blob/092242d20e3589f3bc05e66664c071801735e787/docs/reviews/edk-cross-project-stage6-2026-11-16.md)：OSA 有限停止、采集器查询预算及输出文件锁。
 - SDK 32 项、管理相关 4 组、最终故障 3 项、ASan/UBSan 及 AM625 夹具通过；实机日志服务重启 0.554 秒。
 - OTA 165，v0.0.1 / `d43167a3e24917a606917f7e1fed0aead42a73a0342b955908150be5d8014359`，本地启动 `45eee517-750c-40f8-963e-8f38b467e756`，本地健康和服务端成功确认。
 - TFTP/NFS 参考 `b7c43bfb473a8947acea14fe1d8849b1e75b0547befb1197adc57848a173917b`，启动 `fadaaab4-8562-4408-9cc5-c9707b942dc4`；服务、WDT、校时、安装摘要、五阶段 SOL 和归档通过，UART 释放。
@@ -1311,7 +1311,7 @@ OTA 159 实机升级成功，kernel/rootfs B，服务端成功回执已确认。
 
 ## 2026-11-16：R05 短请求正文与控制优先级
 
-- [第七阶段记录](../edk/docs/reviews/edk-cross-project-stage7-2026-11-16.md)：非阻塞正文、固定总期限、同轮控制优先级及只读调试验证。
+- [第七阶段记录](https://github.com/linux-bsp/EDK/blob/092242d20e3589f3bc05e66664c071801735e787/docs/reviews/edk-cross-project-stage7-2026-11-16.md)：非阻塞正文、固定总期限、同轮控制优先级及只读调试验证。
 - 完整管理回归 55 组经调度修复和依赖路径补齐后通过；慢 SOL 正文下健康请求约 1 ms 返回。
 - OTA 166：v0.0.1 / `b95e745828512f54d421bb3fc5364c4024142a3fe5f053a5e0b0916a0eee964b`，本地启动 `60b4deec-01ef-45c3-9dc0-bb03e6570f5b`；健康与服务端成功回执通过。
 - TFTP/NFS 参考 `75a6aadfb99e32e8e63d80039fa7767a0d513697505267e3634642cbbf04fbb7`，启动 `e7e3f913-f289-44fb-beab-833dc1753d4c`；服务、WDT、时间、安装摘要、五阶段 SOL 和归档回执正常，UART 释放。
@@ -1319,7 +1319,7 @@ OTA 159 实机升级成功，kernel/rootfs B，服务端成功回执已确认。
 
 ## 2026-11-16：R06 在线状态领域查询
 
-- [第八阶段记录](../edk/docs/reviews/edk-cross-project-stage8-2026-11-16.md)：各领域只读接口、typed 聚合及独立 HTTP 展示。
+- [第八阶段记录](https://github.com/linux-bsp/EDK/blob/092242d20e3589f3bc05e66664c071801735e787/docs/reviews/edk-cross-project-stage8-2026-11-16.md)：各领域只读接口、typed 聚合及独立 HTTP 展示。
 - 8 组管理回归、独立聚合模型和两个 ASan/UBSan 夹具通过；实机在线 IP 与 GET/POST 只读调试查询正常。
 - OTA 167：v0.0.1 / `bd5b8fdd21e5b6994817137e57b4e25709a7df14479ec38a1692b883a79e6afd`，本地启动 `4e09aa43-6801-4512-9bbc-21c0cd89bb33`；健康及服务端成功回执确认。
 - TFTP/NFS 参考 `88b8c64cb1c3361d3d670241fa510b035fe2a3dea631c902a286a0ed16627e0a`，启动 `7f2a311b-8edb-4f41-9f1c-a96ccc1b896d`；服务、WDT、时间、安装摘要、五阶段 SOL 与归档正常，UART 释放。
@@ -1327,14 +1327,14 @@ OTA 159 实机升级成功，kernel/rootfs B，服务端成功回执已确认。
 
 ## 2026-11-16：R02 调试代理有限停止
 
-- [第九阶段记录](../edk/docs/reviews/edk-cross-project-stage9-2026-11-16.md)：工作槽采用 OSA、独立进程组和有限回收，保留远端操作结果未知边界。7 组管理回归通过。
+- [第九阶段记录](https://github.com/linux-bsp/EDK/blob/092242d20e3589f3bc05e66664c071801735e787/docs/reviews/edk-cross-project-stage9-2026-11-16.md)：工作槽采用 OSA、独立进程组和有限回收，保留远端操作结果未知边界。7 组管理回归通过。
 - OTA 168：v0.0.1 / `a125578ed16361f8a57e9f41702ef4c192cf1d29b32f235003a3ef7afe6e55f4`，本地启动 `f0bcf4b0-19b8-4a27-96bf-1ae26d5abed1`；健康及服务端成功回执、真实 GET/POST 只读调试通过。
 - TFTP/NFS 参考 `9c7699ed42d23dbe2e57b7e33528cbe2f634f97bfbd75ead78c4fc6e0526eb73`，启动 `a7090d7b-eeda-4bed-b97f-493f88b8330f`；服务、WDT、校时、安装摘要、五阶段 SOL 及归档回执正常。
 - 原始证据与匹配镜像：`output/validation/debug-worker/`。
 
 ## 2026-11-16：R23 SOL 转发进程退出恢复
 
-- [第十阶段记录](../edk/docs/reviews/edk-cross-project-stage10-2026-11-16.md)：唯一工作槽、回收后重启、单调时钟退避、本地采集独立；24 项日志和 7 组关联回归通过。
+- [第十阶段记录](https://github.com/linux-bsp/EDK/blob/092242d20e3589f3bc05e66664c071801735e787/docs/reviews/edk-cross-project-stage10-2026-11-16.md)：唯一工作槽、回收后重启、单调时钟退避、本地采集独立；24 项日志和 7 组关联回归通过。
 - OTA 169：v0.0.1 / `febebcf3cc68780d21c90c18a06e5938c8e65ccc6da9d715abf3bd2da68ee3b6`，本地启动 `87bbd3b9-30f1-47d7-b0f2-33770a94a7ac`；健康和服务端成功确认。
 - 实机连续三次 SIGKILL 转发子进程，替代进程在约 1.878、2.765、4.541 秒出现；采集器未重启，三个本地标记均送达 SOL server，服务和 WDT 正常。
 - TFTP/NFS 参考 `74d2bac063c64e9501fb17a4ed215589fe485a6523db1505ffb62fb1fd5f5480`，启动 `ec32753a-3369-419e-ab6b-81d0a7eb93a4`；安装摘要、校时、五阶段 SOL 和归档回执通过，串口已释放。
@@ -1396,3 +1396,20 @@ OTA 发布 #175，v0.0.1，完整内容 ID
 boot_id `f65782ea-214f-40e6-abec-1b42ae2e2329`。14 项关键文件摘要匹配，WDT 60 秒、
 零失败服务、日志同步/归档确认和时间同步通过。仅停止自有 8090 服务，保留原 8091。
 详情与边界见 [EDK 运行时验证](../edk/docs/reviews/edk-runtime-validation-2026-11-17.md)。
+
+## EDK 文档与旧兼容路径清理（2026-11-17）
+
+移除 26 份重复计划/阶段审查、未使用的内核 sysfs shim，以及遥测 CONTROL 广播兼容路径；
+更新源码目录说明和历史证据链接，保留许可证、协议、公共 SDK 与必要内核版本适配。
+39 项主机回归、完整镜像/debug 校验及 AM625 私有日志/OS 遥测/vcan 回归通过。
+
+OTA 发布 #176，v0.0.1，内容 ID
+`b7f3bc3a7953882aa50af78431692c281167750cdbd19652dc9d388f2fb0c49a`，
+实际 deployment 0/kernel A/rootfs A，boot_id `62c5873f-e0f0-480e-8485-1b0a431abf4b`；
+确认标记、同 boot_id 的服务器 success 与 14 项运行文件摘要均已核对。
+验证细节见 [运行时验证的清理记录](../edk/docs/reviews/edk-runtime-validation-2026-11-17.md#后续清理与回归)。
+
+本地运行时同步 NFS/TFTP 并恢复两个网络启动开关为 1；网络 boot_id
+`986cdd23-469a-47dc-af57-d0215dfc6e50`，BSPNET1 ID
+`6e117e5138e2e43153bc9569daf33422e0ad1f59e39f0c4b87cc1ca422878b0b`。
+14 项摘要再次匹配，临时测试资源消失，WDT、日志确认、时间同步和服务正常。
