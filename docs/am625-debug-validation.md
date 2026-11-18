@@ -1462,3 +1462,23 @@ deployment 1/kernel B/rootfs B，boot_id `fc09f000-7909-4c7a-9909-f3cf00535a87`�
 日志同步正常、启动日志已确认、归档待传为 0。
 详见 [EDK 清理验证](../edk/docs/reviews/edk-runtime-validation-2026-11-17.md#后续冗余文件与内核别名清理)，
 原始证据和归档索引在 `output/validation/edk-cleanup-20261118/`。
+
+## 2026-11-18 应用执行入口与编译依赖收敛
+
+MCU 手动采样和周期采样及控制命令共用执行槽。Satellite 在线诊断从 psatellited
+查询持有链路的实例。管理声明归 user/common，PDI SDK 保留原路径转接，dmserver
+收窄审计、设备联系记录和 SOL 的编译依赖。
+
+39 项主机回归、118 项管理回归（含实际固件包）、格式检查与完整镜像调试工件校验通过。
+实机 OTA v0.0.1 /
+`f44ad8b3e0cded0ba37e6df125a3ccc10078c9ccb1691e9034ade46c38eac0be`，
+deployment 0/kernel A/rootfs A，boot_id `3ce0b93d-fee3-4752-97eb-81afc51de3ef`。
+启动确认、FWOTA2 confirmed 状态和同 boot_id 的 server success 已核对。实机上
+psatellited 运行时能力与统计可读，私有 MCU 配置验证手动采样走同一 collector。
+
+本地根下同步 NFS/TFTP，恢复两个网络启动开关为 1。网络 boot_id 为
+`7ed50e8e-84d4-4982-9f8c-a463f70f56dc`，BSPNET1 参考 ID 为
+`b0c0b2f2de22e977a8d61000682d71d29764ef2239c9c5564b2a40bd54cfd6c9`。
+两次启动的 14 项运行文件摘要均匹配构建 target。服务、60 秒 WDT、时间同步与日志
+回执正常。原始证据及调试工件已保存至 `output/validation/edk-boundaries-20261118/`。
+详见 [EDK 验证记录](../edk/docs/reviews/edk-runtime-validation-2026-11-17.md#应用执行入口与编译依赖收敛)。
