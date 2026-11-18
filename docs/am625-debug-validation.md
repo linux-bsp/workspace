@@ -1519,3 +1519,19 @@ BSPNET1 为 `61e4791470f7d56792439c9e33534bf9aa068db944eb5b9e247879f1c69b706e`�
 本地和网络启动的 14 项运行文件摘要均与构建一致，服务、60 秒 WDT、校时和日志回执正常。
 证据在 `output/validation/edk-satellite-executors-20261118/`。
 [EDK 验证详情](../edk/docs/reviews/edk-runtime-validation-2026-11-17.md#021bmc-快照与跨主机执行)
+
+## 2026-11-18 EDK 配置收敛
+
+AM625 的 `/etc/edk/` 安装 `bmc.conf`、`satellite.conf` 和 `system.conf`。根文件系统与两次实机启动
+均核对了这些文件和旧路径清理结果。initramfs 中的 `/etc/edk/system.conf` 包含 `[firmware]` 和
+`[recovery]`。整镜像和调试工件校验通过。同时通过 41 项主机回归、41 项 BMC 回归、118 项管理回归，
+以及实机隔离 vcan 的共用星务配置和 T5000 上下行验证。
+
+OTA v0.0.1 / `7c7d1b736f5760bdefe3c2329373d30e3f3248c8bd4317389be6a01a6926550a`
+启动至 deployment 1、kernel B、rootfs B，boot_id `0e1e7e94-f3d5-459b-96b1-7756ec10cafb`。
+本地启动和服务端 OTA 回执均已确认。随后恢复 NFS/TFTP，boot_id 为
+`047aed2e-c477-4d3e-a978-c60f0198aab6`，BSPNET1 为
+`48deb62aa0b041758e38abe91b7a6eb7237ed2a5d0340cf99b7993d276520254`。
+两次启动的 21 项文件摘要均与构建一致，服务、60 秒 WDT、校时与日志回执正常。
+记录和调试工件位于 `output/validation/edk-config-consolidation-20261118/`。
+[EDK 验证详情](../edk/docs/reviews/edk-runtime-validation-2026-11-17.md#2026-11-18-统一配置)
