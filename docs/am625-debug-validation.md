@@ -1581,3 +1581,18 @@ OTA v0.0.1 / `2c7e232c3ab424885b953bf3e64d2e53a135f8ce3fbae34c16cd23e235ca6359`
 两次启动的 20 项文件摘要与构建一致，服务、60 秒 WDT、校时和日志回执正常。
 记录和调试工件位于 `output/validation/edk-native-http-20261118/`。
 [EDK 验证详情](../edk/docs/reviews/edk-runtime-validation-2026-11-17.md#2026-11-18-原生-http-与-tftp)
+
+## 2026-11-18 EDK 原生 FIT 与 OTA 导出
+
+整镜像和调试工件验证通过。空 `PATH` 下的 `dmserver` 完成上传、发布和 OTA 导出，
+三个 ITB 与构建产物逐字节一致。41 项主机、42 项 BMC、118 项管理回归和 17 项 BSP
+恢复、FIT 完整性及存储身份检查通过。
+
+OTA v0.0.1 / `d96482151f08c9dc2f8f05b2068c64a8955ebc77cafcd0922a96b6f08439cbc2`
+启动至 deployment 1、kernel B、rootfs B，boot_id `f2a64c06-63f2-4f60-8762-8bc827f14b80`。
+本地启动确认和 OTA 服务端回执均通过。恢复 NFS/TFTP 后，boot_id 为
+`33f9285b-e6b8-49ec-b7c5-1c6d6270cb82`，BSPNET1 为
+`ea0453a2a841e11f43d9931bdc325e78a94b2cf240db80ca9d891cafd8479bd6`。
+两次启动的 20 项文件摘要均与构建一致，服务、60 秒 WDT、校时和日志回执正常。
+记录和调试工件位于 `output/validation/edk-native-fit-20261118/`。
+[EDK 验证详情](../edk/docs/reviews/edk-runtime-validation-2026-11-17.md#2026-11-18-原生-fit-读取与-ota-导出)
