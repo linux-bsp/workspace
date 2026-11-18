@@ -1565,3 +1565,19 @@ OTA v0.0.1 / `e6a38cae368c0d8e5b88eb6ece76bc84014c891bfed2d8e4032d09a6671c7265`
 两次启动的 20 项文件摘要与构建一致，服务、60 秒 WDT、校时和日志回执正常。
 记录和调试工件位于 `output/validation/edk-bsl-transport-20261118/`。
 [EDK 验证详情](../edk/docs/reviews/edk-runtime-validation-2026-11-17.md#2026-11-18-通信机制并入-bsl)
+
+## 2026-11-18 EDK 原生 HTTP 与 TFTP
+
+EDK 主机、目标应用和 initramfs 改用原生 HTTP/1.1、只读 TFTP 与可选的 OpenSSL TLS。
+Alientek 生产配置未启用 libcurl。SadBoard 调试配置显式选择课程使用的 `curl` 命令。
+41 项主机、42 项 BMC、118 项管理回归和 6 项恢复检查通过。实机验证了 HTTPS 信任校验和
+TFTP 文件摘要。完整镜像及调试工件通过验证。
+
+OTA v0.0.1 / `2c7e232c3ab424885b953bf3e64d2e53a135f8ce3fbae34c16cd23e235ca6359`
+启动至 deployment 0、kernel A、rootfs A，boot_id `f309bd4f-9d30-419f-9946-de2b638df090`。
+本地启动确认与 OTA 服务端回执均通过。随后恢复 NFS/TFTP，boot_id 为
+`ea470410-ec28-413e-8d24-9d6d300549c2`，BSPNET1 为
+`d1a920eaaaf7ab1c510f664944e4b1b821032162577378673d2823dd410b1ad2`。
+两次启动的 20 项文件摘要与构建一致，服务、60 秒 WDT、校时和日志回执正常。
+记录和调试工件位于 `output/validation/edk-native-http-20261118/`。
+[EDK 验证详情](../edk/docs/reviews/edk-runtime-validation-2026-11-17.md#2026-11-18-原生-http-与-tftp)
