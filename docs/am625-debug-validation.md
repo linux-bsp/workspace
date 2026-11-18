@@ -1535,3 +1535,18 @@ OTA v0.0.1 / `7c7d1b736f5760bdefe3c2329373d30e3f3248c8bd4317389be6a01a6926550a`
 两次启动的 21 项文件摘要均与构建一致，服务、60 秒 WDT、校时与日志回执正常。
 记录和调试工件位于 `output/validation/edk-config-consolidation-20261118/`。
 [EDK 验证详情](../edk/docs/reviews/edk-runtime-validation-2026-11-17.md#2026-11-18-统一配置)
+
+## 2026-11-18 EDK BSL SDK 迁移
+
+主机工具、开发 SDK、目标根文件系统和 initramfs 已迁到 `libbsl.so.2`。核对了增量安装、
+ELF 依赖以及外部工程使用 `EDK::bsl` 和 `bsl.pc` 的构建和运行结果。
+41 项主机回归、42 项 BMC 回归、118 项管理回归和 6 项 BSP 恢复检查通过。
+
+OTA v0.0.1 / `f62e9d19a9837c3312aca4f8f384e7004c52089f6bdd71dec84734203e6e9a97`
+启动至 deployment 0、kernel A、rootfs A，boot_id `b22ecaf6-d763-4b9f-b6b6-928a8972c6ce`。
+本地启动确认与服务端 OTA 回执均通过。恢复 NFS/TFTP 后，boot_id 为
+`f9dbcaac-cc62-49b0-b719-7f488cf27a6d`，BSPNET1 为
+`f80a8a920aedfbb7c76fe075f3f0f3b0d8f8934d94e64ce4a436edf2ee21338c`。
+两次启动的 21 项摘要与构建一致，服务、60 秒 WDT、校时和日志回执正常。
+记录和调试工件位于 `output/validation/edk-bsl-20261118/`。
+[EDK 验证详情](../edk/docs/reviews/edk-runtime-validation-2026-11-17.md#2026-11-18-bsl-sdk-迁移)
