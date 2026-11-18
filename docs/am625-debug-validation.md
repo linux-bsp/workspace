@@ -1482,3 +1482,22 @@ psatellited 运行时能力与统计可读，私有 MCU 配置验证手动采样
 两次启动的 14 项运行文件摘要均匹配构建 target。服务、60 秒 WDT、时间同步与日志
 回执正常。原始证据及调试工件已保存至 `output/validation/edk-boundaries-20261118/`。
 详见 [EDK 验证记录](../edk/docs/reviews/edk-runtime-validation-2026-11-17.md#应用执行入口与编译依赖收敛)。
+
+## 2026-11-18 星务接口抽象层第一阶段
+
+T5000 适配器归 psatellited。ptelemetryd 通过 OSA IPC 提供内部命令受理、结果查询
+和遥测快照。39 项主机回归、118 项管理回归（含真实固件包）及完整镜像校验通过。
+
+实际 OTA v0.0.1 /
+`77bc783e1e4fe93b40ce6a17825b7b5ce73058af00d2bddeec57ec0d0f1b2ea9`，
+deployment 1/kernel B/rootfs B，boot_id `496d9b52-529a-42ba-8350-03e6b75e7d78`。
+本地启动确认和服务器 success 已核对。虚拟 CAN 上的 T5000 快慢遥测 TLV
+与私有 IPC 快照匹配，校验和、失败应答及缺失 MCU 时的快照压力测试通过。
+
+同步 NFS/TFTP 并恢复网络启动后，boot_id 为
+`ffab3316-b870-4566-aef9-409b60984ee3`，BSPNET1 参考 ID 为
+`c39e6c2f401959c2c5793b927fc17778b0cfc11c910d963f209e0c345ccd0ac1`。
+两次启动分别核对 14 项运行文件摘要。原始证据及配套调试工件保存在
+`output/validation/edk-satellite-interface-20261118/`。
+详见 [EDK 星务接口验证](../edk/docs/reviews/edk-runtime-validation-2026-11-17.md#星务接口抽象层第一阶段)。
+网络启动后服务、60 秒 WDT、时间同步与日志回执正常，待传归档为 0。
