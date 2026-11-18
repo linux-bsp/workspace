@@ -1441,3 +1441,24 @@ Chromium 上传发布、详情/完整 ID 搜索、下载和桌面/移动端检�
 14 项摘要匹配、WDT 60 秒、零失败服务、日志同步正常、启动缓存已确认、归档待传为 0。
 详见 [EDK 后续 OTA 验证](../edk/docs/reviews/edk-runtime-validation-2026-11-17.md#后续-ota-身份与迁移)，
 原始证据在 `output/validation/ota-content-id-20261117/`。未操作实体 BMC/MCU 电源或复位。
+
+## 2026-11-18：EDK 冗余文件与内核别名清理
+
+删除未使用的 PDM 匹配表别名和重复 Redfish 手册副本，修正 SDK 组件、ABI、HWID
+路径和 HTTP 归属说明。公开可选 SDK 接口仍有消费者契约，保留其导出与回归。
+7 个临时验证目录在日志/元数据归档、载荷大小和 SHA256 去重核对后回收，净释放约
+2.7 GiB；保留正式 feed、旧数据原件、固件、调试文件与原始证据。
+
+39 项主机回归、真实包往返、BMC profile/手册、130 个本地文档文件链接及完整
+镜像/debug 校验通过。实际 OTA v0.0.1 /
+`363868381a6e4ce9b66c5f9d3439c2fb42658de21fdb3a9233730cd3528e22a1`，
+deployment 1/kernel B/rootfs B，boot_id `fc09f000-7909-4c7a-9909-f3cf00535a87`；
+启动确认、FWOTA2 confirmed 状态和同 boot_id 的 server success 均已核对。
+
+本地根下同步匹配 NFS/TFTP，恢复两个网络启动开关为 1。网络 boot_id 为
+`bff58f43-0ded-48a1-81c7-0b60a02ef539`，BSPNET1 参考 ID 为
+`245dcec71d0b01e208d2220dd7b03c028001ac035f52c89dca1a9cd1e106d6b0`。
+14 项运行文件摘要与 target 一致，服务、时间同步与 60 秒 WDT 正常；
+日志同步正常、启动日志已确认、归档待传为 0。
+详见 [EDK 清理验证](../edk/docs/reviews/edk-runtime-validation-2026-11-17.md#后续冗余文件与内核别名清理)，
+原始证据和归档索引在 `output/validation/edk-cleanup-20261118/`。
