@@ -1550,3 +1550,18 @@ OTA v0.0.1 / `f62e9d19a9837c3312aca4f8f384e7004c52089f6bdd71dec84734203e6e9a97`
 两次启动的 21 项摘要与构建一致，服务、60 秒 WDT、校时和日志回执正常。
 记录和调试工件位于 `output/validation/edk-bsl-20261118/`。
 [EDK 验证详情](../edk/docs/reviews/edk-runtime-validation-2026-11-17.md#2026-11-18-bsl-sdk-迁移)
+
+## 2026-11-18 BSL 合并通信机制
+
+SocketCAN 已并入 `libbsl.so.2`，HTTP 作为内部目标由需要它的调用方链接。验证了无 libcurl
+的 CAN SDK、AM625 整镜像和 initramfs、隔离 vcan 上的 T5000 遥测，以及增量安装清理。
+41 项主机、42 项 BMC、118 项管理回归和 6 项恢复检查均通过。
+
+OTA v0.0.1 / `e6a38cae368c0d8e5b88eb6ece76bc84014c891bfed2d8e4032d09a6671c7265`
+启动至 deployment 1、kernel B、rootfs B，boot_id `ce98b7ea-3cd4-4d7d-a68a-8fc4d1426bda`。
+本地启动和服务端回执均已确认。恢复 NFS/TFTP 后，boot_id 为
+`eb20c4d6-9b8f-4402-b9ac-421338e567f2`，BSPNET1 为
+`ddba7c5939996f41b7c29773439af592d2cdbdf9a7ba717d33f8e7205d2cfc7f`。
+两次启动的 20 项文件摘要与构建一致，服务、60 秒 WDT、校时和日志回执正常。
+记录和调试工件位于 `output/validation/edk-bsl-transport-20261118/`。
+[EDK 验证详情](../edk/docs/reviews/edk-runtime-validation-2026-11-17.md#2026-11-18-通信机制并入-bsl)
