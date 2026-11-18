@@ -1501,3 +1501,21 @@ deployment 1/kernel B/rootfs B，boot_id `496d9b52-529a-42ba-8350-03e6b75e7d78`�
 `output/validation/edk-satellite-interface-20261118/`。
 详见 [EDK 星务接口验证](../edk/docs/reviews/edk-runtime-validation-2026-11-17.md#星务接口抽象层第一阶段)。
 网络启动后服务、60 秒 WDT、时间同步与日志回执正常，待传归档为 0。
+
+## 2026-11-18 021、BMC 快照与跨主机执行
+
+40 项主机回归、118 项管理回归、完整镜像和调试工件校验通过。启用 021、BMC 来源和
+跨主机执行的 ARM64 私有实例保留在验证目录，双虚拟 CAN 上核对 021 识别、重组、去重、
+两类遥测和故障切换。AM625 通过双向 TLS 连接另一台主机，读取 OS 快照。
+BMC 点位接入由现有 Redfish 模拟服务验证。
+
+常规镜像 v0.0.1 /
+`5bac672a98761d15445ad274a68ca199c1d6d2937cb4b1c7b8aae1f7a40124b5`，
+deployment 0/kernel A/rootfs A，boot_id `8d44c66a-f08c-4ad2-be18-0dbef5d26829`。
+本地启动确认与服务端 OTA success 已核对。
+
+恢复 NFS/TFTP 后 boot_id 为 `4d89903f-b26e-4e23-898d-1c57bd32f3f1`，
+BSPNET1 为 `61e4791470f7d56792439c9e33534bf9aa068db944eb5b9e247879f1c69b706e`。
+本地和网络启动的 14 项运行文件摘要均与构建一致，服务、60 秒 WDT、校时和日志回执正常。
+证据在 `output/validation/edk-satellite-executors-20261118/`。
+[EDK 验证详情](../edk/docs/reviews/edk-runtime-validation-2026-11-17.md#021bmc-快照与跨主机执行)
