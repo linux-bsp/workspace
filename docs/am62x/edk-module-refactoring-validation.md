@@ -29,6 +29,15 @@
 
 本地证据位于 `output/edk-framework-stage1.HCBtnV9Y/`。
 
+### 公司级重构阶段 2 · 采集与遥控注册
+
+- 公共业务类型和星历编解码归入 `user/lib/telemetry`，沿用现有 SDK 头文件和线上值。
+- 执行器按完整描述符一次注册采集和遥控。原生回归 84 项通过，覆盖注册失败回滚、同资源串行、跨来源样本一致、优先级与控制期限。
+- AM625 的 EDK 与 PDM 交叉构建通过。隔离验证真实 HWID 选表、v1.0 入口和 4 个测点、3 条命令。
+- Phytium 的 Redfish、IPMI 只读检查和 PMC 采样通过。单节点、全部节点结果均保留节点 3 来源。FPGA 和 MCU 的节点来源替换由测试夹具验证。
+
+本地证据位于 `output/edk-framework-stage2.RksS0tPA/`。
+
 ## 阶段 1：Kconfig 完整依赖图
 
 - EDK 使用 Kconfig 生成的 source 依赖图，替代固定目录层级扫描。
