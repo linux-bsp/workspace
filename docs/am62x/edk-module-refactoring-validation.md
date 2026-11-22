@@ -586,3 +586,46 @@ OTA 成功记录、串口验收及提交记录。
 
 每阶段均先构建、发布并完成实机健康确认，再提交与推送子仓库，最后更新
 workspace gitlink。最新使用方法见 [EDK README](../../edk/README.md)。
+
+## 框架计划第 6–7 阶段与 SD 启动（2026-11-22）
+
+- AM625 `192.168.10.211` 上的 SD A 槽内核和根文件系统哈希均匹配已确认固件。
+  保留原启动环境后先试启一次，再将 `tftp_kernel` 和 `nfs_root` 持久设为
+  `0` 并重启。两次均从 SD 启动。第二次启动 ID 为
+  `cf1ef7c6-237c-49b6-a174-12e7cfb124f7`，根挂载为 `/dev/fw-root`
+  上的只读 SquashFS。dm-verity、`fwctl health-check` 和 A 槽确认通过。
+  基线为 `v0.0.1`，内容 ID 为
+  `419a1f8ee6ec1c06a394459d6f5cd24eb222bd1dece4bc1def3724dcb230260a`。
+- AM625 新版 `timectld` 以 Phytium S5000C 上的候选 PMC 为 HTTP 时间源。
+  指定 `/dev/rtc0` 返回 `rtc-state=written`，指定 `none` 仍完成校时并
+  返回 `rtc-state=disabled`。飞腾服务器常驻 `pmcd` 更新后通过健康检查和
+  HTTP 时间响应检查，鉴权后返回有效 CPU、内存和样本新鲜度。部署保留上一版
+  运行目录及数据库快照。
+- 阶段 6 原生回归 125 项通过，包含真实 OTA 包、板级启动归档、旧归档读取和
+  构建边界。AM625 Buildroot 全镜像和 ARM64 initramfs 加载验证通过。
+  阶段 7 的联合原生回归 86 项通过，另验证独立 CAN SDK、Redfish-only、
+  PMC-only 构建及 RK3588 用户态 ARM64 交叉构建。实体星务与 RK3588 BSP
+  测试待设备和链路接入。
+- 首个候选固件 `v0.0.1` 内容 ID 为
+  `05de7ba6b10fe2880fd15cbeaaf50a792a04747893452bfec0aabf3ab4ccd7d2`。
+  OTA 服务记录一次设备下载及 `installing` 上报，随后 AM625 的 SSH 和
+  ARP 均无响应。发布包和服务端 FIT 文件的哈希一致，提取的 rootfs 通过全量
+  dm-verity 校验。USB/IP 串口确认 B 槽进入 initramfs 救援，读取 A/B 状态的
+  `fwctl` 子进程触发栈保护。Buildroot 增量目录残留旧的私有头文件，导致不同
+  编译单元采用不同大小的布局结构。PID 1 仍续喂看门狗，B 槽剩余尝试未耗尽。
+  通过串口执行 U-Boot `fwctl rollback` 回到 A 槽，保留 SD 启动设置，恢复网络
+  和健康检查。原候选随后补报 `rolled-back`。
+- 修复通过显式引用各私有头文件归属目录、清理 EDK 包构建目录、运行打包后的
+  ARM64 `fwctl` A/B 状态读操作来覆盖混编故障。initramfs 在 A/B 状态子进程
+  异常终止时重启，交由 U-Boot 执行后续试启动选择。真实栈保护故障和子进程信号
+  分支分别在 QEMU 与原生回归中覆盖。板上验证了手动回退，未引入第二次实机故障。
+- 修复固件 `v0.0.1` 内容 ID 为
+  `ab46d4e1bf65f5758294f5bf0db2290806a17c1b6a0dd2263d6b47bf0e7febd7`。
+  AM625 从 SD B 槽启动，启动 ID `21ccba63-fc63-4703-99ef-52bfbdbb0aa9`，
+  dm-verity、健康确认和 OTA `success` 均通过。A 槽仍保留已确认的 `419a1f8e`。
+  实际 B 槽 `fwctl` 与打包产物哈希一致。飞腾节点的电源、CPU、内存和负载快照
+  在显式 index 3 及 ALL 查询中均有效。当前板载配置的三台服务器均出现在 ALL
+  响应中，节点归属分明。
+
+证据见 `output/edk-framework-stage6.q6wkSrGs/`（复测在 `rebuild/`）与
+`output/edk-framework-stage7-product.uYPVnL/`。

@@ -1,7 +1,8 @@
 # AM625 固件升级与恢复操作
 
 当前使用 `fwctl` 作为 U-Boot 和 Linux 的统一入口。设备守护进程 `fwctld`
-负责发现、下载、安装和结果补报；服务器由 `dmserver` 与 `dmcli ota` 管理。
+负责发现、下载、安装和结果补报。算力服务器上的 `pmcd` 提供发布服务，
+`dmcli ota` 用于管理发布。
 版本固定为 `v0.0.1`，完整 SHA256 决定内容身份，人工日志只显示前八位。
 
 ## 先识别运行环境与槽位
@@ -16,6 +17,10 @@ fwctl status
 
 Linux 额外使用 `fwctl version` 查看实际启动的版本、内容 ID、kernel/rootfs 槽位和
 确认状态。`capabilities` 不访问固件存储，区分 `runtime=uboot` 与 `runtime=linux`。
+
+AM625 从 SD 启动后，`fw_printenv tftp_kernel nfs_root` 的两个值均为 `0`。
+同时核对 `/proc/cmdline` 中的 `fw.deployment` 和 `fw.rootdev`、
+`/run/fw-init.verified`、实际根挂载以及 `fwctl health-check`。
 
 deployment 0/1 是一组组件选择，A/B 是每个组件的物理槽。它们不能互相替代：
 某个 deployment 可以使用 bootloader B、kernel A、rootfs A。以状态输出为准，
