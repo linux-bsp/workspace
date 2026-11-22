@@ -46,6 +46,15 @@
 
 本地证据位于 `output/edk-framework-stage3.PExEveMX/`。
 
+### 公司级重构阶段 4 · 星务收发与查询
+
+- 原生回归 85 项通过。沿用 IPC v3，类型化查询覆盖本地、指定节点和全部节点。
+- AM625 EDK 与 PDM 交叉构建通过。四项新构建的 ARM64 协议夹具在板上隔离运行通过，包含 v1.0 单接收链、八节点最大应答、v2.0 双路切换和队列满时仍可收帧。
+- 完整报文的接收时间纳入控制启动期限。夹具覆盖排队到期后未提交、提交确认丢失后查询原结果。
+- Phytium Redfish 和 IPMI 只读连接通过。通过 CCM 读取 PMC 与 BMC 的 4 项样本，单节点及全部节点均保留来源。
+
+本地证据位于 `output/edk-framework-stage4.k5Sj1jL5/`。
+
 ## 阶段 1：Kconfig 完整依赖图
 
 - EDK 使用 Kconfig 生成的 source 依赖图，替代固定目录层级扫描。
