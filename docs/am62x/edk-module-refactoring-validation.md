@@ -38,6 +38,14 @@
 
 本地证据位于 `output/edk-framework-stage2.RksS0tPA/`。
 
+### 公司级重构阶段 3 · 服务器端点
+
+- 执行器在同一节点快照中按需绑定 BMC 和 PMC。原生回归 85 项通过，含坏端点隔离、PMC 超时和取消、BMC 原采样时间复用。
+- AM625 EDK 与 PDM 交叉构建通过。板上隔离候选程序重新匹配 `phytium-s5000c` 与 v1.0。
+- Phytium Redfish、IPMI 只读连接和 PMC 采样均通过。单节点和全部节点返回同一正确来源，8 次缓存查询最大观测值为 1 ms。
+
+本地证据位于 `output/edk-framework-stage3.PExEveMX/`。
+
 ## 阶段 1：Kconfig 完整依赖图
 
 - EDK 使用 Kconfig 生成的 source 依赖图，替代固定目录层级扫描。
