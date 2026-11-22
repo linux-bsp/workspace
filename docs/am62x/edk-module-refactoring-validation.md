@@ -55,6 +55,16 @@
 
 本地证据位于 `output/edk-framework-stage4.k5Sj1jL5/`。
 
+### 公司级重构阶段 5 · BSP 与 PDM
+
+- AM625 的星务主链路由 BSP 指定为 `can0`。错误的主备角色在执行器能力查询前被拒绝。BSP 的 Classic CAN、CAN FD 和必需/可选接口用例通过。
+- 原生回归 86 项通过。AM625 Buildroot 与独立 Kbuild 均成功构建 ARM64 `pdm.ko`。
+- 板上隔离程序通过新的 CAN 角色读取路径启动。Phytium Redfish、IPMI 和 PMC 只读测试通过。PDI 清单验证已运行内核中的 MCU CAN 和电源 RS485 设备。
+- I²C 原生 probe 的直绑修改通过交叉构建；当前 AM625 没有 I²C MCU，物理绑定和解绑待验。
+- RK3588 预设完成 ARM64 用户态构建，ELF 依赖检查确认无 PDI/PDM 与服务器库。此次使用 AM625 ARM64 工具链，RK3588 目标 sysroot、内核和实机验收保持待办。
+
+本地证据位于 `output/edk-framework-stage5.mgX6iFW9/`。
+
 ## 阶段 1：Kconfig 完整依赖图
 
 - EDK 使用 Kconfig 生成的 source 依赖图，替代固定目录层级扫描。
