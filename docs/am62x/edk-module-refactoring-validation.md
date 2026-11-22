@@ -19,6 +19,16 @@
 
 本地构建日志和源码快照位于 `output/edk-framework-stage0.slXQ1QWK/`。
 
+### 公司级重构阶段 1 · 产品装配
+
+- 产品目录为 `projects/phytium-s5000c/`。AM625 的真实 HWID 匹配该项目，星务侧继续使用 v1.0。
+- 两个进程通过本机固定 IPC 地址完成能力校验，报告 4 个测点、3 条命令。未知 HWID 和错误 IPC 地址均被拒绝。
+- 原生回归 84 项通过，AM625 的 EDK 与 PDM 交叉构建通过。
+- Phytium Redfish、IPMI 分别通过只读连接检查。节点 3 和全部节点查询均返回节点 3 的电源、CPU、内存和综合利用率。8 次缓存查询的最大观测值为 2 ms。
+- 候选程序通过隔离运行验证。真实星务对端仍按计划另行验收。
+
+本地证据位于 `output/edk-framework-stage1.HCBtnV9Y/`。
+
 ## 阶段 1：Kconfig 完整依赖图
 
 - EDK 使用 Kconfig 生成的 source 依赖图，替代固定目录层级扫描。
