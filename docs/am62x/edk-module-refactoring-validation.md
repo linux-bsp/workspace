@@ -645,3 +645,13 @@ workspace gitlink。最新使用方法见 [EDK README](../../edk/README.md)。
   综合利用率和主机电源状态通过显式 index 3 及 ALL 读回。实机业务验证限只读请求。
 
 证据见 `output/edk-satellite-domain.4a1R6sm6/`。
+
+## CCM HWID 定义集中管理（2026-11-23）
+
+EDK 项目表通过 `projects/ccm_hwids.h` 引用板型和 PCB 版本对应的 HWID。宏展开值、
+U-Boot 出厂值、FIT 白名单及 AM625 实机身份一致。86 项原生回归通过，三个相关
+用户态交付二进制与上一版相同。AM625 从 SD B 槽启动 `v0.0.1`，
+内容 ID `a2505fecab4071e23a791f583f26706c0a79b767f666af97e684eaf3fa98e22b`，
+启动 ID `7004e707-9ce7-42b1-a3d3-88ecf35b7890`。健康确认和 OTA `success`
+通过，两个业务进程仍匹配 `phytium-s5000c` 和星务 v1.0。
+证据见 `output/edk-ccm-hwids.SHMwILxt/`。
