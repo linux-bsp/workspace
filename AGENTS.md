@@ -46,6 +46,12 @@ Use the existing concise commit convention: `type: imperative summary` (for exam
 
 Pull requests should include a short description, the reason for the change, and notes about validation performed. If the change affects user-visible behavior, include example output or screenshots where relevant.
 
+### Staged development
+
+Complete one plan stage at a time. Before committing, run its required checks and record the commands, environment and results. If a required check fails or its equipment is unavailable, keep the stage open and work on that stage until the check passes. Track hardware tests explicitly deferred by the plan under their assigned milestone.
+
+After validation passes, commit and push all project changes for the stage, including new files, deletions, configuration, tests, documentation and validation records. Commit and push affected submodules first, then commit their exact gitlinks and any workspace changes and push the workspace branch. Verify that each commit is reachable from its intended remote branch and that all changes from the stage have been committed. Resolve any push failure and verify again. Begin the next stage only after these checks succeed. Report the stage results and commit IDs by repository.
+
 ## Firmware Release Workflow
 
 For firmware changes, complete the applicable tests and AM625 image validation, then publish the new OTA release automatically. The user has authorized this workflow; a separate publication confirmation is unnecessary.
