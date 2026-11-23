@@ -629,3 +629,19 @@ workspace gitlink。最新使用方法见 [EDK README](../../edk/README.md)。
 
 证据见 `output/edk-framework-stage6.q6wkSrGs/`（复测在 `rebuild/`）与
 `output/edk-framework-stage7-product.uYPVnL/`。
+
+## 星务业务契约与服务器维护接口（2026-11-23）
+
+- 从星务映射、遥控项目表和调度器中移除了控制器自检和复位。主机强制下电沿用
+  已有操作号和权限。控制器维护仍由 `libserver` 提供。星务适配只使用业务测点、
+  操作和服务器 index，C 表在 CCM 内绑定 BMC 或 PMC 端点。
+- 86 项原生回归全部通过，覆盖两种星务协议、退役配置拒绝、主机控制权限和
+  节点寻址。AM625 Buildroot 全镜像和 ARM64 initramfs 实际加载测试通过。
+- AM625 从 SD A 槽启动 `v0.0.1`，内容 ID
+  `4e3e47cb3cdaaea6ec9f4b089d154bfa6f9585d5bc7e1cbfe173f72322e0c2d7`，
+  启动 ID `9a2f7575-5bbc-40c0-beab-6178091ff02f`。dm-verity、健康确认及
+  OTA `success` 在板端和服务端均已核对。B 槽保留 `ab46d4e1`。
+- 读取实机能力表确认已退役的四个控制器操作缺席。Phytium 节点的 CPU、内存、
+  综合利用率和主机电源状态通过显式 index 3 及 ALL 读回。实机业务验证限只读请求。
+
+证据见 `output/edk-satellite-domain.4a1R6sm6/`。
