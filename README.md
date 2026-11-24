@@ -42,9 +42,9 @@ dmserver --root "$PWD/output/device-feed" \
   --bind 0.0.0.0 --port 8090 --sol-debug-no-auth
 ```
 
-使用 [Device Manager](edk/user/apps/device-manager/README.md) 管理固件上传、发布、设备升级结果及审计。OTA/SOL 位于侧栏；SOL 支持只读网络日志查看和回放，当前调试环境免凭据自动连接，配置见 [SOL 指南](edk/docs/device-manager/sol.md)。端口 8090 避开本机 GitLab 的 8080。
+使用 [Device Manager](edk/user/apps/pmcd/README.md) 管理固件上传、发布、设备升级结果及审计。OTA/SOL 位于侧栏；SOL 支持只读网络日志查看和回放，当前调试环境免凭据自动连接，配置见 [SOL 指南](edk/user/apps/pmcd/README.md#启动日志与异常证据)。端口 8090 避开本机 GitLab 的 8080。
 
-OTA 自动按固件包声明的全部 HWID 发布，页面产品信息从 HWID 解析。身份字段与配置见 [HWID 说明](edk/docs/device-manager/hwid.md)，操作与验证见 [固件 HWID 自动发布](docs/am62x/firmware-hwid-publication.md)。
+OTA 自动按固件包声明的全部 HWID 发布，页面产品信息从 HWID 解析。身份字段与配置见 [HWID 说明](edk/user/apps/fwctl/README.md#hwid)，操作与验证见 [固件 HWID 自动发布](docs/am62x/firmware-hwid-publication.md)。
 
 跨 U-Boot/Linux 的命令、槽位含义、手动维护及恢复边界见 [固件升级操作指南](docs/am62x/firmware-upgrade-guide.md)；逐阶段实机结果见 [优化验收记录](docs/am62x/firmware-upgrade-optimization-validation.md)。
 

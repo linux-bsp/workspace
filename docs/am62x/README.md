@@ -24,7 +24,7 @@
 - [OTA 启动失败日志实机验证](ota-boot-failure-log-validation.md)
 - [历史功能验收](validation-history.md)
 - [板级历史发布](../../bsp-base-external/board/ti/am625/releases/README.md)
-- [管理功能历史发布](../../edk/docs/device-manager/releases/README.md)
+- [管理服务与固件发布](../../edk/user/apps/pmcd/README.md#固件包与发布)
 
 历史文档保留原始固件身份、启动记录和验证限制，命令可能反映旧目录。
 当前使用以上述操作指南与源码配置为准。原始测试、串口及固件产物位于

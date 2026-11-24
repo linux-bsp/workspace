@@ -28,8 +28,8 @@ RAM 双缓冲和 ramoops 的保留依赖复位类型，不能当作物理掉电�
 把恢复后的日志当作失败启动，也不能将零值复位寄存器直接认定为上电。
 时间未同步时不把设备时间视为可信事件顺序；界面同时保留服务器接收时间和启动身份。
 时间服务独立运行，显示 UTC+8。详见 EDK 的
-[启动证据](../../edk/docs/device-manager/boot-evidence.md) 与
-[时间管理](../../edk/docs/device-manager/time-sync.md)。
+[启动证据](../../edk/user/apps/pmcd/README.md#启动日志与异常证据) 与
+[时间管理](../../edk/user/apps/pmcd/README.md#时间与在线状态)。
 
 ## 验证范围
 

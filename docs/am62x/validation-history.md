@@ -73,7 +73,7 @@
 
 每段验证长度与 CRC，并保存上一份已提交前缀以恢复被复位打断的追加。满缓存记录 dropped；损坏、缺失和恢复前缀分别标识。设备健康确认后冻结快照，上传进程按偏移重试；服务器独立 SQLite 归档检查全部有限清单并提交，设备才核对两个 capture ID、先使头部失效再清空两组。实时 SOL 轮转不会删除此归档，ACK 丢失可跨恢复启动重试。
 
-清除的是已确认的 DDR 启动缓存；服务器历史和现有普通本地日志保留。SOL 启动下拉框可以选择正常启动和上次未确认启动归档，正文、阶段筛选和导出继续使用原始串口格式。接口与边界见 [组件说明](../../edk/docs/device-manager/startup-buffers.md)。
+清除的是已确认的 DDR 启动缓存；服务器历史和现有普通本地日志保留。SOL 启动下拉框可以选择正常启动和上次未确认启动归档，正文、阶段筛选和导出继续使用原始串口格式。接口与边界见 [组件说明](../../edk/user/apps/pmcd/README.md#启动日志与异常证据)。
 
 ### 实机验证
 
@@ -110,7 +110,7 @@ U-Boot 实际生产代码 ABI/轮换/损坏/满缓存/前缀恢复测试 4 项�
 
 ### 方案与当前身份
 
-HWID 直接保存为 U-Boot 的 `hwid` 环境变量，复用现有环境的 CRC、冗余副本和存储驱动。编码规则见 [HWID 编码规范](hwid-specification.md)，工具说明见 [Device Manager HWID 文档](../../edk/docs/device-manager/hwid.md)。
+HWID 直接保存为 U-Boot 的 `hwid` 环境变量，复用现有环境的 CRC、冗余副本和存储驱动。编码规则见 [HWID 编码规范](hwid-specification.md)，工具说明见 [Device Manager HWID 文档](../../edk/user/apps/fwctl/README.md#hwid)。
 
 当前板卡：`1-01-0001-0001-10-000`，规范文本 `1010001000110000`，PCB V1.0。
 
@@ -150,7 +150,7 @@ Linux 修改仅更新该变量，并读回检查；同值设置不重复写盘�
 - SPL 在存储控制器可用后，通过原生环境后端加载身份。
 - 完整 U-Boot 打印身份，并写入传给 Linux 的 `/chosen/dm,hwid`。
 - initramfs 与 fwctl 使用 libubootenv 读取相同环境；两份 CRC 都无效时不自动重建环境。
-- AM625 的 release、bootloader、kernel 和 rootfs FIT 声明完整 `fw,hwids` 列表。U-Boot 与 Linux 更新、恢复校验要求精确匹配，该阶段保留了原有兼容性字段；后续已在 HWID 独立发布阶段移除，当前接口以 [Device Manager HWID 文档](../../edk/docs/device-manager/hwid.md) 为准。
+- AM625 的 release、bootloader、kernel 和 rootfs FIT 声明完整 `fw,hwids` 列表。U-Boot 与 Linux 更新、恢复校验要求精确匹配，该阶段保留了原有兼容性字段；后续已在 HWID 独立发布阶段移除，当前接口以 [Device Manager HWID 文档](../../edk/user/apps/fwctl/README.md#hwid) 为准。
 
 固件内容 ID、软件 tag、设备 HWID 和实物序列号分别管理；HWID 不随软件升级改变。
 
@@ -204,7 +204,7 @@ OTA 发布记录为 48，tag 保持 `v0.0.1`，内容 ID：
 
 OTA API、设备上报、运行配置和新生成的 FIT 已移除独立的 `product`、`layout` 身份字段。页面产品列、固件详情和设备详情只从 HWID 解析产品信息；不维护第二套产品身份。物理分区偏移和容量仍由 BSP 指定。
 
-规范见 [HWID 使用说明](../../edk/docs/device-manager/hwid.md)。普通 OTA 不修改环境变量中的 HWID。
+规范见 [HWID 使用说明](../../edk/user/apps/fwctl/README.md#hwid)。普通 OTA 不修改环境变量中的 HWID。
 
 ### 发布与校验
 
@@ -427,7 +427,7 @@ stopped /usr/sbin/logctld (pid 144)
 
 ### 证据与边界
 
-工件、串口、数据库查询快照、测试及构建日志、浏览器截图、源码与编译包快照位于 `output/ota-validation/0.0.1-failure-evidence-v2/`，生成物不提交 Git。接口与原因定义见 [组件说明](../../edk/docs/device-manager/incident-evidence.md)。
+工件、串口、数据库查询快照、测试及构建日志、浏览器截图、源码与编译包快照位于 `output/ota-validation/0.0.1-failure-evidence-v2/`，生成物不提交 Git。接口与原因定义见 [组件说明](../../edk/user/apps/pmcd/README.md#启动日志与异常证据)。
 
 本轮实机只验证正常 OTA、自然低空间观察及持久采集恢复；Linux panic、回滚与数据异常失败分支由主机和隔离服务验证，没有宣称实机全部故障通过。Linux 无法运行时由恢复后代理补报；已收到片段始终标记 complete=false。离线日志保护、自动缓存配额和完整分段归档尚待实现。M1.2/M2/M4 的其余工作并未全部完成。
 
@@ -468,7 +468,7 @@ SOL 链接携带设备、capture、publication 和 source boot，直接选择对
 
 自动关联只在恢复上下文唯一、相邻缓存对存在且归档可验证时进行；不按短哈希、接近的时间戳或同一版本号推断。四阶段的 complete 状态不等于整个物理 UART 无遗漏。没有充分关系的数据继续保留在 SOL，并明确显示未关联。
 
-服务升级前 SQLite 备份、回填结果、字节核验及源码快照在 `output/incident-link-validation/`。生成物不提交 Git。实现与 API 说明见 [SOL 文档](../../edk/docs/device-manager/sol.md)。
+服务升级前 SQLite 备份、回填结果、字节核验及源码快照在 `output/incident-link-validation/`。生成物不提交 Git。实现与 API 说明见 [SOL 文档](../../edk/user/apps/pmcd/README.md#启动日志与异常证据)。
 
 
 <a id="sol-record-deletion-validation"></a>
@@ -492,7 +492,7 @@ SOL 链接携带设备、capture、publication 和 source boot，直接选择对
 - 生产环境只读验证真实 OTA panic/恢复归档的查看与导出，仍可取得之前保存的全部原始字节。未用生产历史做删除测试。
 - 管理服务已重载；设备 OTA 结果仍为 success，原故障包仍被隔离。
 
-工件：`output/sol-delete-browser/` 的浏览器脚本、结果和桌面/移动截图，以及 `output/sol-delete-*-regression.log`、`output/sol-delete-tests.log`。操作说明见 [SOL 文档](../../edk/docs/device-manager/sol.md)。本次实际故障日志见 [OTA 启动失败验收](ota-boot-failure-log-validation.md)。
+工件：`output/sol-delete-browser/` 的浏览器脚本、结果和桌面/移动截图，以及 `output/sol-delete-*-regression.log`、`output/sol-delete-tests.log`。操作说明见 [SOL 文档](../../edk/user/apps/pmcd/README.md#启动日志与异常证据)。本次实际故障日志见 [OTA 启动失败验收](ota-boot-failure-log-validation.md)。
 
 
 <a id="time-source-web-validation"></a>
@@ -541,7 +541,7 @@ SOL 链接携带设备、capture、publication 和 source boot，直接选择对
 - 既有 time endpoint 3 项、logging 9 项、SOL 10 项、启动双缓冲 8 项、控制台与归档命名 15 项通过；真实三 ITB 发布/下载字节对比通过。
 - 浏览器验证桌面/移动布局、两种源设置、期望/生效源区分、失败提示、刷新路由、未保存编辑、陈旧上报；在生产页面实操并记录设备确认。
 
-构建目录 `output/am625-time-ui/`。源快照、构建源对比、完整身份和镜像 SHA256、上传/发布回执、设备状态、重启前后记录及测试日志保存在 `output/ota-validation/0.0.1-time-ui/`；截图与浏览器检查在 `output/time-ui-browser/`。生成物不提交 Git。使用细节见 [设备校时文档](../../edk/docs/device-manager/time-sync.md)。
+构建目录 `output/am625-time-ui/`。源快照、构建源对比、完整身份和镜像 SHA256、上传/发布回执、设备状态、重启前后记录及测试日志保存在 `output/ota-validation/0.0.1-time-ui/`；截图与浏览器检查在 `output/time-ui-browser/`。生成物不提交 Git。使用细节见 [设备校时文档](../../edk/user/apps/pmcd/README.md#时间与在线状态)。
 
 
 <a id="time-sync-and-archive-names-validation"></a>
@@ -573,7 +573,7 @@ Web 归档列表显示北京时间和记录类型，导出文件示例为 `2026-
 
 `GET /api/time/<nonce>` 返回管理服务器的 Unix 秒和纳秒。logctld 上传进程在 eth0 link UP 且有 IP 后独立校时，采样三次选择最低 RTT，检查 nonce、范围和返回格式，估算半程延迟。失败不阻塞采集和健康检查，30 秒后重试；正常每小时重校，发现系统时间相对 CLOCK_BOOTTIME 跳变超过两秒则提前重校。
 
-新设备配置默认 `time-sync=1`。`logctl sync-time` 支持手工校时，`logctl status` 提供时间来源、最近成功时间、偏差、延迟估计和 RTC 写入状态。具体接口和配置见 [组件文档](../../edk/docs/device-manager/time-sync.md)。
+新设备配置默认 `time-sync=1`。`logctl sync-time` 支持手工校时，`logctl status` 提供时间来源、最近成功时间、偏差、延迟估计和 RTC 写入状态。具体接口和配置见 [组件文档](../../edk/user/apps/pmcd/README.md#时间与在线状态)。
 
 首次实机启动，内核读取片内 RTC 为 `1970-01-01T00:00:08 UTC`；网络就绪后自动校准至 `2026-11-04T00:56:20Z`，RTC 写入成功，设备系统时间和读取出的 RTC 时间相差不超过约一秒。OTA 启动健康确认成功，服务器报告 success，data/persistent、日志 sync-state=ok，启动缓存归档确认后正常清空。
 
@@ -687,7 +687,7 @@ EDK 增加 `manager-host`、`manager-device`、`manager-test` 构建入口。
 Buildroot 保留可分别选择的外设、设备工具、主机工具包，从同一 EDK 仓库取源码。
 修正测试和文档中的旧路径，并排除源目录内已生成的二进制和对象文件。
 
-模块说明见 [EDK 集成文档](../../edk/docs/device-manager/architecture.md)。
+模块说明见 [EDK 集成文档](../../edk/docs/architecture.md)。
 
 ### 验证
 

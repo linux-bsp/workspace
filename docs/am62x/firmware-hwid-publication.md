@@ -48,7 +48,7 @@ AM625 统一修改 [firmware.json](../../bsp-base-external/board/ti/am625/firmwa
 
 页面从 HWID 解析产品线、项目、产品型号和 PCB 版本，通过 [名称字典](../../edk/user/apps/pmcd/data/hwid-registry.json) 显示和查询中文名称。
 项目使用 `PP/JJJJ`、型号使用 `PP/JJJJ/MMMM` 查找，未登记时保留原始编码；维护方法见
-[HWID 名称字典说明](../../edk/docs/device-manager/hwid.md#名称字典)。字典不决定固件适配范围，也不能替代包内 HWID 校验。
+[HWID 名称字典说明](../../edk/user/apps/fwctl/README.md#hwid)。字典不决定固件适配范围，也不能替代包内 HWID 校验。
 
 ## 2026-11-04 验证
 

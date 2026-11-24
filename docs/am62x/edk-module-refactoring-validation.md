@@ -494,7 +494,7 @@ OTA 成功记录、串口验收及提交记录。
 证据：`output/ota-validation/0.0.1-last-failed-startup/`。本轮正常 OTA 验证并只读
 复核已有实机故障归档，未再次注入三次 panic，也未更新 SPL/U-Boot。DDR 不保留的
 复位、掉电和采集启动前的故障仍不保证保存，详见
-[双缓冲设计](../../edk/docs/device-manager/startup-buffers.md)。
+[双缓冲设计](../../edk/user/apps/pmcd/README.md#启动日志与异常证据)。
 
 ## 星务协议与设备适配分层（2026-11-19）
 
