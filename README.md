@@ -11,13 +11,13 @@
 | `linux/linux-7.0/` | Linux 内核及板级驱动 |
 | `uboot/u-boot-2026.04/` | R5/A53 SPL 和 U-Boot |
 | `edk/` | PDM/PDI 外设管理及业务服务 |
-| `edk/user/`、`edk/user/apps/device-manager/` | 管理 Web、OTA、fwctl/fwctld、logctl/logctld |
-| `libbmc/` | 独立 BMC SDK |
+| `edk/user/apps/` | 遥控遥测、PMC 管理 Web、OTA、设备日志及授时 |
+| `libbmc/` | 独立 BMC SDK 源码快照 |
 | `docs/` | 硬件资料与设计文档 |
 | `output/` | 本地构建、测试与发布产物，Git 忽略 |
 
-Device Manager 已拆为 EDK 子模块；设备工具、主机服务与共享协议统一构建，libbmc 继续独立。
-当前模块与构建基线见 [EDK 架构](edk/docs/architecture.md) 和 [实机验收](docs/am62x/edk-module-refactoring-validation.md)。
+EDK 子仓提供设备工具、PMC 主机服务和共享协议。载荷服务器的 BMC 和 PMC 客户端统一由 `libserver` 提供。
+当前模块与构建基线见 [EDK 架构](edk/docs/architecture.md)、[软件架构框图](edk/docs/软件架构设计.drawio) 和 [实机验收](docs/am62x/edk-module-refactoring-validation.md)。
 
 ## 拉取与构建
 
