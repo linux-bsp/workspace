@@ -2,7 +2,7 @@
 
 ## 唯一来源
 
-适用设备在构建时写入 FIT 的 `fw,hwids` 字符串列表，属于固件包的一部分。上传后 Device Manager 校验并解析声明，将其保存在数据库中；页面只读展示，发布接口和 dmcli ota 不接受人工指定 HWID。
+适用设备在构建时写入 FIT 的 `fw,hwids` 字符串列表，属于固件包的一部分。上传后 Device Manager 校验并解析声明，将其保存在数据库中；页面只读展示，发布目标由固件包声明。
 
 例如本板固件声明：
 
@@ -38,18 +38,15 @@ AM625 统一修改 [firmware.json](../../bsp-base-external/board/ti/am625/firmwa
 3. 点击“发布到设备”，自动发布到包内声明的全部 HWID。
 4. 每个 HWID 同时只有一个当前发布版本；包外的其他硬件通道不变。
 
-```sh
-dmcli ota --server http://127.0.0.1:8090 upload firmware.tar.gz
-dmcli ota --server http://127.0.0.1:8090 publish draft-XXXXXX
-```
+自动化使用 [pmcd 的查询、上传与发布接口](../../edk/user/apps/pmcd/README.md#http-api-上传与发布)。
 
-`POST /api/publish/draft-XXXXXX` 不接受 HWID 参数。旧的手选目标路径和 CLI 参数会被拒绝；请求头也不能覆盖固件声明。重复发布全部通道已使用的同一内容会返回已有记录。
+`POST /api/publish/draft-XXXXXX` 不接受 HWID 参数。旧的手选目标路径会被拒绝，发布目标始终使用固件声明。重复发布全部通道已使用的同一内容会返回已有记录。
 
 每个适用 HWID 保留独立发布快照，供设备上报、审计及健康版本回退。多 HWID 的新快照共享此次新建的不可变载荷，避免重复占用固件存储；历史已发布载荷保持原状。准备全部文件及数据库身份后，通过 Linux 原子目录交换一起切换通道；准备或切换失败不产生部分通道已更新的状态。
 
 ## 产品名称
 
-页面从 HWID 解析产品线、项目、产品型号和 PCB 版本，通过 [名称字典](../../edk/user/apps/device-manager/data/hwid-registry.json) 显示和查询中文名称。
+页面从 HWID 解析产品线、项目、产品型号和 PCB 版本，通过 [名称字典](../../edk/user/apps/pmcd/data/hwid-registry.json) 显示和查询中文名称。
 项目使用 `PP/JJJJ`、型号使用 `PP/JJJJ/MMMM` 查找，未登记时保留原始编码；维护方法见
 [HWID 名称字典说明](../../edk/docs/device-manager/hwid.md#名称字典)。字典不决定固件适配范围，也不能替代包内 HWID 校验。
 
