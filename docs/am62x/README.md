@@ -13,7 +13,7 @@
 固件生成和板级布局见 BSP 的
 [板级说明](../../bsp-base-external/board/ti/am625/README.md)、
 [initramfs 与 A/B 恢复](../../bsp-base-external/board/ti/am625/verified-boot.md)。
-设备管理命令、SOL 和时间功能见 [EDK 文档索引](../../edk/docs/README.md)。
+设备管理命令、SOL 和时间功能见 [EDK 构建与运维入口](../../edk/README.md)。
 
 ## 验证与溯源
 

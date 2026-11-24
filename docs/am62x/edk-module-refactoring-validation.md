@@ -6,7 +6,7 @@
 ## 公司级框架重构基线
 
 本轮基线的原生回归 84 项通过，AM625 Buildroot 目标包和 PDM 模块构建通过。
-[当前板级接入与验收](../../edk/docs/ccm-bsp-porting.md)
+[当前交付架构](../../edk/docs/architecture.md)
 
 - AM625 在私有运行目录中加载候选程序。真实 HWID `1010001000110000` 匹配
   `h200_ccm` 和星务协议 v1.0，启动校验发现 4 个测点和 3 条命令。
@@ -521,7 +521,7 @@ OTA 成功记录、串口验收及提交记录。
   `2ab9c3dc-2882-42ca-b413-38676a6a8c93`，原 NFS 根路径和参考固件 ID 已核对。
 
 证据目录为 `output/edk-adapter-refactor.4lYyiI/`。适配器与执行器边界见
-[遥测服务架构](../../edk/docs/ptelemetryd.md)。
+[星务与执行器协议](../../edk/docs/satellite-protocol.md)。
 
 ## 适配边界与部署收尾（2026-11-19）
 
@@ -555,7 +555,7 @@ OTA 成功记录、串口验收及提交记录。
   `4980c92a-bf0e-4bb6-8a9a-9c63102c45d1`，参考构建和服务状态与验证前一致。
 
 证据目录为 `output/edk-layer-completion.KJqFMy/`，包括两份实机包、原始回执、
-源码快照和运行日志。[遥测接口与部署说明](../../edk/docs/ptelemetryd.md)
+源码快照和运行日志。[星务与执行器协议](../../edk/docs/satellite-protocol.md)
 
 ## 完成状态
 
