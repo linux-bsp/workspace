@@ -5,8 +5,8 @@
 
 ## 公司级框架重构基线
 
-本轮基线将现有架构改动和新计划纳入 Git。原生回归 84 项通过，AM625 Buildroot
-目标包和 PDM 模块构建通过。[后续重构计划](../../edk/docs/framework-refactoring-plan.md)
+本轮基线的原生回归 84 项通过，AM625 Buildroot 目标包和 PDM 模块构建通过。
+[当前板级接入与验收](../../edk/docs/ccm-bsp-porting.md)
 
 - AM625 在私有运行目录中加载候选程序。真实 HWID `1010001000110000` 匹配
   `h200_ccm` 和星务协议 v1.0，启动校验发现 4 个测点和 3 条命令。
