@@ -10,38 +10,35 @@
 | bsp-data | 挂载已有 data，检查可写性；不自动格式化，失败时日志/下载可降级到 RAM |
 | systemd-networkd | 配置 lo、eth0；不把载波或远端在线作为本地启动前提 |
 | bsp-can / pdm | 板级 CAN、PDM 装载及停止顺序 |
-| psatellited | 前台业务，READY/WATCHDOG 与有界重启 |
-| pdebug-web | 前台 lighttpd；遥测 ptelemetryd 是否启用由 preset 配置 |
+| psatellited / ptelemetryd | 星务接入与遥测执行，向 systemd 报告就绪与心跳 |
 | fwctld | OTA 轮询、安装协调及结果上报，网络未就绪时等待 |
 | logctld / logctl-journal | 启动证据、journal MESSAGE、持久归档与 SOL |
 | timectld | 独立时间源、校准及 RTC，不依赖日志服务生命周期 |
-| fw-health / fw-confirm | 本地健康观察与部署确认 |
+| fw-health | 通过 `fwctl boot-health` 监测本地健康并确认部署 |
 | fw-health-failure | 记录关键失败、拒绝未确认候选并请求受控重启 |
-| device-shutdown-intent | 在服务停止前记录软件重启意图 |
+| bsp-netboot-confirm | 单独确认 NFS 启动及其构建标识 |
+| device-shutdown-intent | BSP 在关机前设置标记，保留 PDM 和 CAN 到复位，并在日志工具可用时记录关机事件 |
 
-AM625 不启动可选的旧 system_manager。硬件 watchdog、服务心跳和端到端业务健康
-各有不同边界，不能用一个进程存活替代实际业务验证。
+systemd 负责硬件 watchdog、服务启动与重启。`fwctl` 负责板级健康策略和 A/B 确认。
 
 ## 配置位置
 
 - 板级 unit、preset、网络、journal 和 watchdog：BSP board/ti/am625/rootfs-overlay。
-- 管理服务模板和前台脚本：EDK user/integration/systemd。
-- /etc/device-manager/health.conf：当前要求 networkd、lo、eth0 本地配置正常；
-  不要求 carrier、BMC 或 OTA server 可达。
-- /etc/default/fwctld、/data/fwctld.conf：OTA 默认值与持久覆盖。
-- /etc/device-manager/time.conf、/data/timectl/source.conf：出厂与已持久化时间源。
+- EDK 服务模板位于 `user/integration/systemd/`。
+- `/etc/edk/system.conf` 的 `[health]` 段要求 networkd、遥测和星务单元就绪，以及 lo、eth0 在本机已启用。外部链路状态独立观察。
+- OTA、日志和时间的板级默认配置分别位于 `/etc/edk/system.conf` 的 `[ota]`、`[logging]`、`[time]` 段。
 - journal 使用有上限 RAM 存储，logctld 负责持久归档；不启用另一个服务抢先搬走 pstore。
 
-fw-confirm 连续六次健康检查通过才确认部署；等待或锁争用会重置连续计数。
-观察和子进程查询都有期限。控制操作和故障注入必须按明确维护流程进行。
+`fwctl boot-health` 启动时读取一次配置，每轮对必需单元执行一次限时批量查询。
+本地健康持续通过 30 秒后确认部署。服务重启、检查未通过或元数据锁忙会重置观察窗口。
 
 ## 板端检查
 
 ```sh
 cat /proc/1/comm
 systemctl --failed
-systemctl status fw-health fw-confirm fwctld logctld timectld pdm
-journalctl -b -u fw-health -u fw-confirm -u fwctld -o cat
+systemctl status fw-health fwctld psatellited ptelemetryd logctld timectld pdm
+journalctl -b -u fw-health -u fw-health-failure -u fwctld -o cat
 fwctl version
 fwctl health-check
 logctl status
