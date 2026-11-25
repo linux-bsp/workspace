@@ -655,3 +655,45 @@ U-Boot 出厂值、FIT 白名单及 AM625 实机身份一致。86 项原生回�
 启动 ID `7004e707-9ce7-42b1-a3d3-88ecf35b7890`。健康确认和 OTA `success`
 通过，两个业务进程仍匹配 `phytium-s5000c` 和星务 v1.0。
 证据见 `output/edk-ccm-hwids.SHMwILxt/`。
+
+## EDK 子系统重构 M0：基线确认（2026-11-25）
+
+- EDK `85ea958fa058b68c65593194568ba690e34a1a00`、BSP `05a047237b8f5f4b87d864cf32ca38c238113305`、
+  workspace `fde9168ffdb9e2551b485d35e27b42b02d173146` 为起始源码。仅文档、接口所有者索引和
+  基线验收记录变更；公开 API、生产代码、包配置及 `VERSION=0.0.1` 不变，未发布新固件。
+- V1 文档检查通过；V2 42/42、V3 124/124、V4 79/79；两角色正式 Buildroot 包及 PDM
+  诊断开/关 AArch64 Kbuild 成功，两个独立安装 SDK 消费者通过。详见 EDK
+  [M0 基线](../../edk/docs/edk-subsystem-m0-baseline.md)。原始证据根 `output/edk-subsystem-m0-20261125/`。
+- 指定 AM625 `192.168.10.211`、MAC `1c:63:49:22:c4:f7`、HWID `1010001000110000`。
+  Dropbear 主机密钥因 `/run/dropbear` 启动生成而变化，用户在板端串口查询 ED25519 指纹
+  确认与网络一致；本次使用临时固定 known-hosts，不改主机原信任库。
+- V6 前发现板时钟为 2026-03-04、节点 3 Redfish 证书在 2026-11-19 至 2027-02-17 有效；
+  板端 CA 与 BSP SHA256 一致，主机按当前时间、CA、IP 验证证书通过。
+  OTA 与时钟源 `192.168.10.246:8090` 的上一轮临时通道已关闭。复制 11-24 成功发布的
+  本地 catalog 至独立 `board-management-feed/`，不改原 catalog、不发布新内容；PMCD
+  loopback 18090，通过 socat 只允许 `192.168.10.211` 访问 `192.168.10.246:8090`。
+  `timectl sync` 2026-11-25 17:33:45+08:00 成功，offset 1ms，RTC written。观测至 V6
+  无新增 TLS peer certificate/OTA manifest download 错误；catalog 已记录当前 boot ID
+  连续至少 6 次同内容 requested，未触发重启。节点 2/3 Redfish 及节点 3 PMC 样本 fresh、
+  last_status=0。节点 1 `192.168.50.201` 独立连接超时（-110），不在 M0 设备基线关闭范围，
+  不改变其他真实服务器状态或配置。所有测试控制用例均在隔离网络 namespace 本地夹具执行。
+- **当次 V6，2026-11-25 17:35:44+08:00**：`fwctl hwid value`、`fwctl version`、
+  `fwctl ota-status` 证实 B 槽已确认、版本 1、完整内容 ID 为
+  `4412d622c6b0b709fe1a0a61051a5857a6fa0bc5ad2cd394ad0cb8687175044e`；启动 ID
+  `fc6b77f0-9ed6-4717-b9dd-efb26b0fffc7`。`fwctl ota-check` 对历史已确认镜像的实际长度、
+  kernel/rootfs SHA256 返回 `FWCHECK1 match`；rootfs 是 `/dev/fw-root` 只读 SquashFS。
+  从 `output/validation/edk-app-src-include.QLDKwqoC/artifacts/release/rootfs.itb` 提取
+  并校验 payload SHA256，8/8 运行制品（4 库、pdm.ko、两个遥测进程、fwctl）匹配，
+  `/proc/<pid>/maps` 证实实际加载相应库；`fwctl health-check` 返回 0，pdm、CAN、遥测、星务、
+  固件健康、OTA、日志、时间八个服务 active，零失败单元。实际目标 SDK 安装头和库编译
+  只读探针，经本机临时目录运行并自动清理，SHA256
+  `56a18426a7ce969da101dd4fe213ffd0c6772165cd53ce837434dec47d72ec3e`，加载板上库：
+  BSL HWID 选 `phytium-s5000c`、Satellite v1.0（2000ms）、PDI 读取 PDM 代数 15，
+  main_mcu/CAN 和 dc_power/UART 两个已绑定设备（健康 unknown，未发送设备动作）。通过。
+- 证据：`board-v6-readonly.sh`、`board-v6-readonly.log`、`board-artifact-compare.log`、
+  `board-probe-live.log`、`board-time-before.log`、`board-time-sync.log`、
+  `board-after-sync-runtime.log`、`ota-recovery-requests.log`、`start-board-management.sh`。
+  运行制品的既往成功发布记录 `output/validation/edk-app-src-include.QLDKwqoC/ota-success.json`；
+  本次不把旧 success 冒称新 OTA，也不验证未安装的 bootloader。
+  EDK 阶段验收提交：`c866c97693992437d7ad0f9decb48b0ae061bee5`（master）；工作区
+  使用其准确 gitlink，最终工作区和远端核验 SHA 见阶段完成报告。
