@@ -740,3 +740,33 @@ U-Boot 出厂值、FIT 白名单及 AM625 实机身份一致。86 项原生回�
   未对其他真实服务器写入或控制。证据根 `output/edk-subsystem-m2-20261125/`，文件
   `board-v6.log`、`board-hwmon-candidate.log`、`board-after-candidate.log`、`hwmon-v6-remote-command.sh`。
   EDK 验收提交：`b5310a8b016aeac7955ad6dfc793d268e1a4b900`（master）；工作区记录准确 gitlink。
+
+## EDK 子系统重构 M3：PDM 驱动与公共诊断（2026-11-25）
+
+- 起始 EDK `b5310a8b016aeac7955ad6dfc793d268e1a4b900`、workspace `400aa0a39193592e1cdfcf887598357c220c7b04`。
+  LED、MCU 诊断关闭桩移归各驱动，公共桩只依赖 log，移除两全局 driver include 路径。
+  V2 45/45、V3 127/127，两组实际 Kbuild 开/关 37/35 个对象，旧私有头反例拒绝；
+  Buildroot 增量和干净构建的实际 `.cmd`/模块/SDK 一致。独立 full image、镜像专项检查和
+  真实候选包往返通过。详见 [M3 验收](../../edk/docs/edk-subsystem-m3-validation.md)。
+- 本机管理端采用 systemd user transient unit `edk-am625-local-manager.service` 监督恢复，
+  原独立 catalog、loopback 18090、只允许指定 AM625 的 8090 转发保持。发布前健康、身份、
+  版本 B 槽、单一 active channel 核对通过。包 SHA256
+  `7f966a3feaa8ff5265c89abe15e64f916568f4dacf94e855cf90e5084169559a`，
+  draft `draft-xXRxnz`，发布 2026-11-25 20:23:54+08:00，`v0.0.1`、packed version 1、完整 ID
+  `386c56dff2d6505b7d6b3d0ab7af084a0394b115171c6e227569c88b50bdb7f2`。板 `192.168.10.211`
+  MAC `1c:63:49:22:c4:f7`、HWID `1010001000110000` 经 installing、boot-testing，
+  20:25:31 服务端观测最终 success、running=1，未隔离；新 boot ID
+  `6d78605c-27f3-47dc-936d-ef6e35a3c775`。证据 `ota-success.json`，不把中间状态当成功。
+- **当次 V6，20:27:25+08:00**：用户在物理板串口确认新 ED25519 指纹后 SSH 固定临时密钥。
+  `fwctl version` / `ota-status` 显示 A 槽确认 `386c56df`，`ota-check` 对同候选长度和哈希
+  返回 `FWCHECK1 match`，`health-check` 0，八单元 active、零失败，Linux 7.0.0、PDM 已加载。
+  包中 `pdm.ko` 与实机 SHA256 `e4570586f40ebb9a99dc02e42900063a0eb35b7a84f7c4b1c68f1ef0ab283409`，
+  内核日志内容 ID、EDK revision 及配置匹配；八个运行制品与实际新 FIT rootfs 逐项一致。
+  只读枚举 sysfs、proc `led/mcu/log_level` 与 debugfs `led_control/mcu_control`，日志级别 info；
+  PDI SDK 探针代数 15、main_mcu、dc_power 已绑定，项目 `phytium-s5000c`、v1.0。
+  其他真实服务器仅只读遥测，节点 2/3 Redfish、节点 3 PMC fresh/0，校时与 RTC 正常。
+  没有真实设备动作或外部服务器写入；未安装引导程序，不能验证 SPL/U-Boot。
+  原始证据 `output/edk-subsystem-m3-20261125/final/` 中 `board-v6.log`、`board-probe-live.log`、
+  `board-artifact-compare.log`、`ota-timeline.log`、`ota-success.json`、`publication.json`、
+  `source.patch`、`untracked-source.tar.gz` 与 `images/release/build-manifest.json`。
+  EDK 验收提交：`9aad7b8e6896b0ded47d397110c4c040d7a6fff2`（master）；工作区记录准确 gitlink。
