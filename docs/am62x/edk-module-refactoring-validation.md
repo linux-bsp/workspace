@@ -841,3 +841,35 @@ U-Boot 出厂值、FIT 白名单及 AM625 实机身份一致。86 项原生回�
   ota-success.json、serial-board-key.log、board-v6.log、board-artifact-compare.log、
   board-project-probe-live.log、board-baseline-probe-live.log。
   BSP 验收提交：`e9cd0ad22ebe737acf349584085e88ca40777785`；EDK 验收提交：`d392a20d845aa01d4b71a0b7d66b9cefd58d828e`（master）；工作区记录准确 gitlink。
+
+## EDK 子系统重构 M7：最终回归及维护交接（2026-11-25）
+
+- 起始 EDK `d392a20d845aa01d4b71a0b7d66b9cefd58d828e`、BSP
+  `e9cd0ad22ebe737acf349584085e88ca40777785`、workspace
+  `e5a0dbf1e76f9fe2d08cd17c1afe0f5e77fbb926`。回查 M0–M6 各次实机日志、远端提交和准确 gitlink。
+  最终 CI host 45/45、management 127/127、telemetry 82/82（254/254），900 用户态实际对象、Kbuild
+  diag on/off 37/35；三临时例外均已关闭、现有历史格式基线 832 条无逐文件增加。
+  正式 target/host 配置和 M0 ABI 保持，增量/干净 SDK、旧消费者加载新 SDK、
+  正式镜像/loader/新 OTA 包往返通过；两次 AI 首次接手实际修改/测试及最终指南复走通过。
+  [M7 总体验收及各阶段 SHA](../../edk/docs/edk-subsystem-m7-validation.md)。
+- 正式配置未变，重新生成的 PDM 构建标识形成新固件内容，按全量正式镜像验证/OTA 流程。
+  只向指定 AM625 192.168.10.211、MAC 1c:63:49:22:c4:f7、HWID 1010001000110000 发布；
+  draft `draft-sYt2Hs`，22:21:39+08:00 发布 v0.0.1 / packed 1，
+  full ID `2870bc37f4024106b3782b57293bc36fce0d897b56c35173e924d61195496982`，
+  包 SHA256 `48f54ef3e1790254e3c07b5af424a7448a0f3ec248ddca0bc1e1e430083af868`。
+  重启健康确认后 22:23:24+08:00 最终 success（22:23:26 轮询确认）、running=1、无 quarantine，
+  新 boot `3a2bf0c8-60a6-4fa0-bc8f-b566f9813761`。
+- **当次 V6 22:25:11–22:26:04+08:00**：USB/IP ACM2 串口核对身份、boot、ED25519
+  `SHA256:738GcHE6jEBhHAEbbnOgGCYZ50AjS3jnTKeIO6n7JaY` 与 SSH scan 一致，严格固定密钥；
+  B 槽 confirmed、FWCHECK1 match、8 服务 active、0 failed、4 libs+PDM KO+两 daemon+fwctl
+  的 8 全摘要与打包镜像相符，候选夹具后再次相同。选表 4 点、合法未登记 HWID -ENODEV/NULL；
+  M0 原 board probe v1.0/2000ms、PDM gen15、main_mcu/dc_power 被动枚举；
+  node3 Redfish power on、PMC CPU/memory status0，collector off -95；node2/3 Redfish 正常、
+  node1 既有外部 -110。校时 synchronized、RTC written，log sync ok。
+  AArch64 HTTP receiver socketpair 正/反例及隔离 hwmon SDK /tmp fixture -12000mC、错误保持输出
+  都通过且清理，未称正式配置启用 hwmon 或使用真实 hwmon 外设。未写入/控制其他真实服务器，
+  未部署第二产品/新外设/bootloader。
+  证据 `output/edk-subsystem-m7-20261125/`：ci.log、prior-stage-remote-audit.log、
+  prior-v6-audit.log、ota-success.json、serial-board-key-retry.log、board-v6.sh/log、
+  board-probes.sh、board-artifact-compare.log、board-*-live.log、git-verification.log。
+  EDK 验收提交：`489673305d6c862870f7c8fe4c309755d84def24`；BSP 沿用 `e9cd0ad22ebe737acf349584085e88ca40777785`，均已核对 origin/master；工作区提交准确 gitlink。
