@@ -873,3 +873,93 @@ U-Boot 出厂值、FIT 白名单及 AM625 实机身份一致。86 项原生回�
   prior-v6-audit.log、ota-success.json、serial-board-key-retry.log、board-v6.sh/log、
   board-probes.sh、board-artifact-compare.log、board-*-live.log、git-verification.log。
   EDK 验收提交：`489673305d6c862870f7c8fe4c309755d84def24`；BSP 沿用 `e9cd0ad22ebe737acf349584085e88ca40777785`，均已核对 origin/master；工作区提交准确 gitlink。
+
+## EDK 子系统整改结果与最终关闭确认（2026-11-25）
+
+本节是 M0–M7 已关闭后的交接索引与复核记录，不开启新实施阶段，也不变更
+已验收固件、子仓版本或产品配置。按 [整改计划](../../edk/docs/edk-subsystem-refactoring-plan.md)
+第 6、9 节，八个阶段均在完成适用 V1–V5、当次指定 AM625 V6 和适用的正式 OTA 验收后，
+依次提交、推送并确认远端可达；正式固件未变化的阶段使用当时已确认的运行制品及隔离候选。
+
+### 整改目标落实情况
+
+| 阶段 | 整改结果 | 当次 AM625 V6（北京时间） | 详细记录 |
+| --- | --- | --- | --- |
+| M0 | 建立实际运行架构、正式 target/host 安装 SDK、公开接口与 ABI 基线 | 17:35:44，通过 | [M0](../../edk/docs/edk-subsystem-m0-baseline.md) |
+| M1 | 建立模块接口所有者与实际编译依赖检查；正反例可验证，临时例外明确归属 | 17:51:10，通过 | [M1](../../edk/docs/edk-subsystem-m1-validation.md) |
+| M2 | hwmon 通过模块 API 与独立 SDK 使用；真实首次接手 AI 维护者完成修改、局部测试和补正，正式关闭配置保持兼容 | 18:02:40，通过 | [M2](../../edk/docs/edk-subsystem-m2-validation.md) |
+| M3 | PDM 公共诊断与 LED/MCU 私有实现隔离，真实 Kbuild 开关两态通过并删除相应临时例外 | 20:27:25，通过 | [M3](../../edk/docs/edk-subsystem-m3-validation.md) |
+| M4 | BSL 共用机制、Server/BMC 业务接口及 collector 关闭兼容界定；保留已有公共库及接口 | 21:21:02，通过 | [M4](../../edk/docs/edk-subsystem-m4-validation.md) |
+| M5 | HTTP 接收、下载、断点、采样及路由责任分离；真实首次接手 AI 维护者与局部增量回归通过，关闭两条 HTTP 临时例外 | 21:36:16–35，通过 | [M5](../../edk/docs/edk-subsystem-m5-validation.md)、[维护练习](../../edk/docs/edk-subsystem-m5-maintainer.md) |
+| M6 | 独立项目表装配、功能裁剪与配置冲突提前拒绝；A/B 与双 HWID SDK、干净/复用安装及真实 Buildroot staging 验证 | 21:59:34，通过 | [M6](../../edk/docs/edk-subsystem-m6-validation.md) |
+| M7 | 最终依赖回归、架构图、接口需求手册、新人指南、复用 CI 与交接完成；三条 M1 临时例外全部关闭 | 22:25:11–22:26:04，通过 | [M7](../../edk/docs/edk-subsystem-m7-validation.md) |
+
+最终 host 45/45、management 127/127、telemetry 82/82，共 **254/254**；
+900 个真实用户态对象及 PDM 37/35 个开、关诊断 Kbuild 对象的依赖检查通过。
+目标与 host 正式有效配置、公开 SONAME/NEEDED/导出符号与 M0 对应基线兼容，
+跨版本旧消费者及最终安装 SDK 运行通过；正式镜像、initramfs loader 和真实 OTA 包往返通过。
+两次独立首次接手 AI 分别为 `/root/hwmon_new_maintainer` 与
+`/root/http_receive_new_maintainer`，按授权无父轮开发上下文接手，实际修改和测试；
+最终指南复走通过。不将 AI 练习表述为人类维护者验收。
+
+后续开发以 [模块契约](../../edk/docs/module-contracts.md) 的接口所有者和直接依赖为边界，
+按 [新人维护指南](../../edk/docs/maintainer-guide.md) 执行局部测试，
+通过 [项目装配指南](../../edk/docs/project-assembly.md) 扩展项目表或裁剪功能。
+[架构图](../../edk/docs/软件架构设计.drawio)、[架构说明](../../edk/docs/architecture.md)、
+[接口与需求手册](../../edk/docs/EDK_接口与需求手册.xlsx) 已同步。
+
+### 原板端报错的整改与复验
+
+| 原现象 | 核实原因及处理 | 验收结论 |
+| --- | --- | --- |
+| Redfish TLS peer certificate verification failed | 板时钟停在 2026-03-04，早于节点 3 证书有效期；板端 CA 与 BSP 一致，按当前时间核验证书成功；恢复时钟源并执行 `timectl sync`，保持证书校验 | 节点 2/3 Redfish 样本状态 0；未绕过 TLS |
+| OTA Download failed (network)、Cannot fetch a valid firmware manifest | 原本机临时管理通道关闭；恢复独立本机 PMCD catalog 与仅允许指定板访问的转发，未改历史 catalog | M3/M4/M6/M7 正式 OTA 均收到指定设备最终 success，且与各次运行版本和制品一致 |
+| 板上缺少 ssh-keygen，重启后 Dropbear key 变化 | USB/IP 串口 ACM2 使用板端 `dropbearkey -y` 独立核对 hostname、MAC、HWID、新 boot 和 ED25519 指纹，再与主机 keyscan 比对 | 使用严格 SSH 固定密钥，未关闭主机密钥校验 |
+
+最终板运行 v0.0.1、B 槽、完整身份
+`2870bc37f4024106b3782b57293bc36fce0d897b56c35173e924d61195496982`，
+22:23:24 上报 success，`FWCHECK1 match`，八服务 active、零失败、8/8 运行制品与镜像匹配。
+22:30:51 使用固定 SSH 密钥查询 `fwctl version`、`fwctl ota-status`、`timectl status`，
+检查当次启动 `journalctl -b -u fwctld.service -u ptelemetryd.service --no-pager`，
+未匹配上述三条原报错。证据
+`output/edk-subsystem-m7-20261125/board-final-error-check.log`。
+22:34:08 为本补充文档再次使用同一严格固定密钥执行 M7 `board-v6.sh` 的只读检查，
+身份、boot、B 槽、完整性、8 个制品摘要、8 个服务、时钟与日志同步仍通过；
+证据 `output/edk-subsystem-m7-20261125/board-documentation-followup.log`，
+未重启、更新、安装任何制品或写入其他服务器。
+
+### 各阶段提交与远端核验
+
+| 阶段 | EDK SHA | Workspace SHA |
+| --- | --- | --- |
+| M0 | `c866c97693992437d7ad0f9decb48b0ae061bee5` | `8a528185be4de4bdce4c91c0406ccec690c8bff4` |
+| M1 | `a7a78c7c26fbd6094387e5f856465afc8c500155` | `6b8894af59d5fdf4edcb7e7a734a2dcab257c8b4` |
+| M2 | `b5310a8b016aeac7955ad6dfc793d268e1a4b900` | `400aa0a39193592e1cdfcf887598357c220c7b04` |
+| M3 | `9aad7b8e6896b0ded47d397110c4c040d7a6fff2` | `0cb4199c6134d8d3b3b3be4536ba443c3f0ef39b` |
+| M4 | `a6fb8efaa2c9216fc6aa477ac22eb2d0abced6dd` | `6ff91c570c4be14194635bcadb30f5b146b90b11` |
+| M5 | `e77465985e273f6206d2a9b0d86fcfe0f9f59551` | `b4079f539dc800b339ffb8653bc327aeaa039a69` |
+| M6 | `d392a20d845aa01d4b71a0b7d66b9cefd58d828e` | `e5a0dbf1e76f9fe2d08cd17c1afe0f5e77fbb926` |
+| M7 | `489673305d6c862870f7c8fe4c309755d84def24` | `d214bccc15597003da9e924fe838f8fdc4353c5f` |
+
+BSP M0–M5 为 `05a047237b8f5f4b87d864cf32ca38c238113305`，
+M6–M7 为 `e9cd0ad22ebe737acf349584085e88ca40777785`。
+M7 关闭时 `git ls-remote --heads origin master` 核对三个仓库的远端提交与本地一致，
+`git ls-tree HEAD edk bsp-base-external` 核对准确 gitlinks，
+`git merge-base --is-ancestor` 核对全部历史阶段提交可达；工作树干净，
+证据 `output/edk-subsystem-m7-20261125/git-verification.log`。
+上述 SHA 为各阶段关闭提交，不随本次纯文档追记改变。
+
+### 范围与保留事项
+
+- 节点 1（192.168.50.201）BMC 仍有既有外部连接超时 -110；节点 2/3 Redfish 和节点 3
+  PMC 可用。其他真实服务器整个过程中仅做只读查询，状态变更测试只使用隔离夹具。
+- 已验证运行时校时有效，RTC 状态 written；M7 重启后仍发生较大系统时间偏差并由
+  timectld 自动校正。未独立验证断电后 RTC 持续精确走时，不将当前同步等同于 RTC 硬件修复。
+- 严格全树格式检查仍有既有 832 条/90 文件诊断；CI 按文件数量检查无增加，
+  不代表全部历史格式债务已清除。
+- 架构图通过 XML 和本机几何预览，未使用缺失的 diagrams.net 原生渲染器；
+  XLSX 通过 ZIP/XML 与 LibreOffice 实际加载检查。
+- 第二产品和新外设未在真实设备部署。正式 PDI_HWMON 为关闭，相关板上结果来自隔离属性夹具；
+  本次正式 kernel/rootfs OTA 没有安装或验证新 SPL/U-Boot。后续具体产品/硬件需求独立实施。
+
+**结论：M0–M7 已全部关闭，整改目标、适用的自动化测试、各阶段实板 V6、正式固件发布成功和远端提交均有实际验收证据。**
