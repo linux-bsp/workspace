@@ -770,3 +770,27 @@ U-Boot 出厂值、FIT 白名单及 AM625 实机身份一致。86 项原生回�
   `board-artifact-compare.log`、`ota-timeline.log`、`ota-success.json`、`publication.json`、
   `source.patch`、`untracked-source.tar.gz` 与 `images/release/build-manifest.json`。
   EDK 验收提交：`9aad7b8e6896b0ded47d397110c4c040d7a6fff2`（master）；工作区记录准确 gitlink。
+
+## EDK 子系统重构 M4：大型 SDK 内部职责治理（2026-11-25）
+
+- 起始 EDK `9aad7b8e6896b0ded47d397110c4c040d7a6fff2`、workspace `0cb4199c6134d8d3b3b3be4536ba443c3f0ef39b`。
+  transfer 共用回调窄头，节点目录访问 BMC 扩展 key 的窄查询，BSL 项目及 Satellite 维护说明。
+  V2 45/45、V3 127/127、V4 82/82，collector 两态白盒/符号及同一安装消费者通过。
+  正式 target/host 增量和干净包 SDK、实际依赖一致，四库 ABI 保持；完整镜像、专项及候选真实包往返通过。
+  [M4 验收](../../edk/docs/edk-subsystem-m4-validation.md)。
+- 唯一设备 `192.168.10.211`、MAC `1c:63:49:22:c4:f7`、HWID `1010001000110000`；
+  OTA 包 SHA256 `5d7b60df1e75c1b68e16c1467e8cd597fb6155241002c9ed71cbec6ea4f44d55`，
+  draft `draft-0vUaam`，21:10:49+08:00 发布，v0.0.1、packed version 1、full ID
+  `c683da78ac59336ab613a32f30b715ad591d792e68057c52226f96d81c136acc`，
+  21:12:43 服务端最终 success、running=1、未隔离，新 boot ID `242e59ae-9b71-4fc9-bb3d-b3bb9f808ca0`。
+- **V6 21:21:02+08:00**：用户 attach USB/IP 双串口、授权 ACL，ACM2 读取物理板 MAC/HWID/boot ID
+  和 ED25519 指纹与扫描值一致。固定新密钥，B 槽 confirmed、`FWCHECK1 match`、八服务 active、零失败。
+  四库/PDM/两个遥测进程/fwctl 八摘要与实际打包 rootfs 一致，libserver
+  `3e8a58a7063e7883cc5fc03f90d6dc2b6d51cee8c6de749ccb8336e929d5a1a7`。
+  AArch64 安装 SDK 探针加载板端 libserver，collector start=-95，节点 3 Redfish power=on/status=0、
+  PMC cpu=443 bp/memory=370 bp/status=0；其他真实服务器仅查询，节点 2/3 Redfish、节点 3 PMC
+  正常，节点 1 为既有外部连接超时。校时/RTC 正常。未写入或控制任何其他服务器；
+  未安装引导程序，不验证 SPL/U-Boot。
+  证据根 `output/edk-subsystem-m4-20261125/`：`serial-board-identity.log`、`board-v6.log`、
+  `board-artifact-compare.log`、`board-server-probe-live.log`、`ota-success.json`、`ota-timeline.log`。
+  EDK 验收提交：`a6fb8efaa2c9216fc6aa477ac22eb2d0abced6dd`（master）；工作区记录准确 gitlink。
