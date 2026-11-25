@@ -717,3 +717,26 @@ U-Boot 出厂值、FIT 白名单及 AM625 实机身份一致。86 项原生回�
   实机证据 `output/edk-subsystem-m1-20261125/board-v6-final.log`、`board-probe-final.log`、
   `board-artifact-compare.log`、`board-recovery-observation.log`，当次 V6 通过。
   EDK 验收提交：`a7a78c7c26fbd6094387e5f856465afc8c500155`（master）；工作区记录准确 gitlink。
+
+## EDK 子系统重构 M2：PDI/BSL 试点（2026-11-25）
+
+- 起始 EDK `a7a78c7c26fbd6094387e5f856465afc8c500155`、workspace `6b8894af59d5fdf4edcb7e7a734a2dcab257c8b4`。
+  PDI hwmon API/错误文档、可选模块内 fd 清理、两套安装 SDK、BSL 基础功能说明与模块依赖
+  回归；V2 45/45、V3 127/127、V4 82/82、BSL 局部 2/2。正式 AM625 hwmon 关闭，
+  Buildroot edk-reconfigure 及新安装 SDK 四库和头与 M0 字节相同，原有跨版本消费者通过。
+  用户授权无上下文独立 AI 维护者实际修正局部实现和非普通属性回归；发现并修订指南
+  的证据位置后，由同一维护者复测成功。详见 EDK [M2 验收](../../edk/docs/edk-subsystem-m2-validation.md)。
+- **当次 AM625 V6，2026-11-25 18:02:40+08:00**：板 `192.168.10.211`、MAC
+  `1c:63:49:22:c4:f7`、HWID `1010001000110000`；现行 B 槽 `v0.0.1`、内容 ID
+  `4412d622c6b0b709fe1a0a61051a5857a6fa0bc5ad2cd394ad0cb8687175044e`、boot ID
+  `fc6b77f0-9ed6-4717-b9dd-efb26b0fffc7`，`ota-check` match、健康正常、8 服务 active、零失败。
+  使用同工具链独立 PDI_HWMON=y / PDM=n ARM64 SDK，在板 tmpfs 临时目录核对 probe
+  SHA256 `f1c7b0b71cf61125cc93d251abee8a00768e7d06a3402b5b6a1d49446adfb758`、
+  libpdi `683c40c54f5a0b0c7262a3d88825fff03cdc25801c76ca6a081be83a0643fd05`、
+  libbsl `3b257199b65fe0989ace91ada808085de5d8c6b3522d4cd1970f2f7f6dbef584`；`LD_DEBUG=libs`
+  确认加载候选两库。普通文件 -12000 mC、相对/畸形/非普通 -EINVAL、溢出 -ERANGE、
+  缺失 -ENOENT、失败不改输出全部通过。清理 tmpfs，18:02:45 复验健康与版本未变。
+  仅隔离属性文件，非真实 hwmon 传感器；正式配置未启用该能力、正式库不变，未发布新 OTA，
+  未对其他真实服务器写入或控制。证据根 `output/edk-subsystem-m2-20261125/`，文件
+  `board-v6.log`、`board-hwmon-candidate.log`、`board-after-candidate.log`、`hwmon-v6-remote-command.sh`。
+  EDK 验收提交：`b5310a8b016aeac7955ad6dfc793d268e1a4b900`（master）；工作区记录准确 gitlink。
