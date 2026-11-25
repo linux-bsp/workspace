@@ -794,3 +794,25 @@ U-Boot 出厂值、FIT 白名单及 AM625 实机身份一致。86 项原生回�
   证据根 `output/edk-subsystem-m4-20261125/`：`serial-board-identity.log`、`board-v6.log`、
   `board-artifact-compare.log`、`board-server-probe-live.log`、`ota-success.json`、`ota-timeline.log`。
   EDK 验收提交：`a6fb8efaa2c9216fc6aa477ac22eb2d0abced6dd`（master）；工作区记录准确 gitlink。
+
+## EDK 子系统重构 M5：应用模块与共享契约（2026-11-25）
+
+- 起始 EDK `a6fb8efaa2c9216fc6aa477ac22eb2d0abced6dd`，workspace `6ff91c570c4be14194635bcadb30f5b146b90b11`。
+  PMC 采样只依赖 directory，请求路由保留 context；HTTP 接收只读取 common，两个旧宽头例外关闭。
+  首次接手/补正复走由独立 fresh-context AI 实改及测试；V2 45/45、V3 127/127、V4 82/82，
+  四组实际增量依赖、正式 host 增量/干净 SDK 与安装 pmcd 一致，PMC 固定向量和两端进程检查通过。
+  正式 AM625 未选 CONFIG_PMCD，四库与 M4 完全一致，本阶段主机代码不发布新 OTA。
+  [M5 验收](../../edk/docs/edk-subsystem-m5-validation.md)。
+- **当次 V6，21:36:16–21:36:35+08:00**：ACM2 串口核对板 MAC/HWID/boot/key，固定 SSH，
+  板 B 槽 M4 full ID `c683da78ac59336ab613a32f30b715ad591d792e68057c52226f96d81c136acc`，
+  FWCHECK1 match，八服务 active、零失败，八运行制品与 M4 打包摘要一致。
+  logctl sync ok、synced=observed=390、archive pending 0、persistent；timectl synchronized、RTC written。
+  用 AM625 交叉工具链直接编译最终接收/BSL file_io 候选，SHA256
+  `8ac00b63fe3b118a0d374005f4a5b76ca579cd240df1654118b116338eecd270`，
+  板上 /tmp tmpfs、Unix socketpair（无外部网络连接），限额 -EFBIG、取消 -ECANCELED、零写入、
+  成功完整接收 6 字节与 progress、清理。非板上正式 pmcd。
+  只读节点 3 BMC Redfish power=on、PMC utilization cpu=432 bp memory=371 bp 状态均 0，
+  节点 2/3 正常、节点 1 仍既有外部连接超时。不向其他服务器写入/控制。
+  证据 `output/edk-subsystem-m5-20261125/`：serial-board-identity.log、board-v6.log、
+  board-artifact-compare.log、board-http-probe-live.log、board-pmc-probe-live.log、final/。
+  EDK 验收提交：`e77465985e273f6206d2a9b0d86fcfe0f9f59551`（master）；工作区记录准确 gitlink。
