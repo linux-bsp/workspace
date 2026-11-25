@@ -697,3 +697,23 @@ U-Boot 出厂值、FIT 白名单及 AM625 实机身份一致。86 项原生回�
   本次不把旧 success 冒称新 OTA，也不验证未安装的 bootloader。
   EDK 阶段验收提交：`c866c97693992437d7ad0f9decb48b0ae061bee5`（master）；工作区
   使用其准确 gitlink，最终工作区和远端核验 SHA 见阶段完成报告。
+
+## EDK 子系统重构 M1：统一模块接口约束（2026-11-25）
+
+- 起始 EDK `c866c97693992437d7ad0f9decb48b0ae061bee5`，workspace `8a528185be4de4bdce4c91c0406ccec690c8bff4`。
+  文档、规则和原生 CMake/CTest 变更，无板端生产源码、配置、协议、公开 ABI 或版本变更。
+  V2 45/45，最终新检查 3/3；真实管理 289、联合 392 个编译依赖及诊断关闭 PDM Kbuild，
+  预期依赖命中与拒绝/缺失反例全部通过。详见 EDK [M1 验收](../../edk/docs/edk-subsystem-m1-validation.md)。
+- **当次 AM625 V6，2026-11-25 17:51:10+08:00**：指定板卡 `192.168.10.211`、MAC
+  `1c:63:49:22:c4:f7`、HWID `1010001000110000`、boot ID `fc6b77f0-9ed6-4717-b9dd-efb26b0fffc7`。
+  `fwctl ota-status` 完整 ID `4412d622c6b0b709fe1a0a61051a5857a6fa0bc5ad2cd394ad0cb8687175044e`，
+  B 槽确认版本 1；`ota-check` 返回 `FWCHECK1 match`，`health-check` 成功，八单元 active，
+  零失败单元。读取实际加载的 4 SDK 库、pdm.ko 和三个应用 SHA256，8/8 与已经核验的
+  正式 rootfs 相同；只读 SDK 探针哈希匹配 M0、实际库加载路径 `/usr/lib`，项目
+  `phytium-s5000c`、Satellite v1.0、PDM 代数 15、设备 2 个已绑定。真实板端未启用 hwmon，
+  不将无 PDM 主机夹具冒称实体 hwmon 验收。无新 OTA 发布或其他真实服务器写操作。
+- 此时 M0 恢复的管理端仍提供同一已确认内容，时钟同步、TLS/OTA 报错无复发。节点 2/3
+  Redfish 和节点 3 PMC 只读新鲜采样；节点 1 的独立外部连接超时保留观察。
+  实机证据 `output/edk-subsystem-m1-20261125/board-v6-final.log`、`board-probe-final.log`、
+  `board-artifact-compare.log`、`board-recovery-observation.log`，当次 V6 通过。
+  EDK 验收提交：`a7a78c7c26fbd6094387e5f856465afc8c500155`（master）；工作区记录准确 gitlink。
