@@ -816,3 +816,28 @@ U-Boot 出厂值、FIT 白名单及 AM625 实机身份一致。86 项原生回�
   证据 `output/edk-subsystem-m5-20261125/`：serial-board-identity.log、board-v6.log、
   board-artifact-compare.log、board-http-probe-live.log、board-pmc-probe-live.log、final/。
   EDK 验收提交：`e77465985e273f6206d2a9b0d86fcfe0f9f59551`（master）；工作区记录准确 gitlink。
+
+## EDK 子系统重构 M6：项目装配、裁剪与交付（2026-11-25）
+
+- 起始 EDK `e77465985e273f6206d2a9b0d86fcfe0f9f59551`、BSP `05a047237b8f5f4b87d864cf32ca38c238113305`、
+  workspace `b4079f539dc800b339ffb8653bc327aeaa039a69`。正式项目+执行器缺两 BMC 后端早期配置错误，
+  BSP package pre-configure hook 使用同一 Kconfig normalizer；项目 A/B 与双表安装 SDK；
+  本机和隔离真实 Buildroot staging 的 hwmon 开→关 ownership 清理与 clean off 对照通过。
+  V2 45/45、V3 127/127、V4 82/82，正式 target/host 配置与增量/干净 SDK 一致，
+  实际完整镜像、initramfs libbsl/firmware loader、候选包往返通过。
+  [M6 验收](../../edk/docs/edk-subsystem-m6-validation.md)。
+- OTA 仅指定板 `192.168.10.211`、MAC `1c:63:49:22:c4:f7`、HWID `1010001000110000`。
+  包 SHA256 `7afaa244e26209ee081d775405e4dc03fcfd131254d2c192abf57a6674cb4197`，
+  draft `draft-aqdPxH`，21:57:13+08:00 发布，v0.0.1、packed version 1、
+  full ID `05b8646146cb42143df1cd1d1b4f119f8956a856698b3f0b41c4af2dbdc5e61e`，
+  21:59:01 服务端最终 success、running=1、无 quarantine，新 boot
+  `ddc2c27a-8fd0-47f7-95b2-340bfac67bac`。
+- **当次 V6 21:59:34+08:00**：ACM2 串口独立核对板、事务 boot、新 ED25519，与扫描一致；
+  SSH 固定密钥，A 槽 confirmed、FWCHECK1 match、八服务 active、零失败、八个制品与新 FIT rootfs
+  全摘要一致。板端新安装 SDK probe 实际加载 libbsl，HWID 命中 phytium-s5000c 4 点，
+  未登记合法 HWID -ENODEV/NULL；基线探针 v1.0 2000ms、PDM gen15、main_mcu/dc_power 只读绑定。
+  节点 2/3 Redfish、节点 3 PMC 正常、节点 1 既有外部超时；校时同步。未写入/控制其他真实服务器，
+  未部署新产品、新外设或引导程序。证据 `output/edk-subsystem-m6-20261125/` 中
+  ota-success.json、serial-board-key.log、board-v6.log、board-artifact-compare.log、
+  board-project-probe-live.log、board-baseline-probe-live.log。
+  BSP 验收提交：`e9cd0ad22ebe737acf349584085e88ca40777785`；EDK 验收提交：`d392a20d845aa01d4b71a0b7d66b9cefd58d828e`（master）；工作区记录准确 gitlink。
