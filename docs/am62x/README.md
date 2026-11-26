@@ -2,6 +2,8 @@
 
 ## 当前使用
 
+- 本轮 A4：[Kconfig 正常候选及最终实板验收](edk-convergence-a4-validation.md) · [四阶段收尾审计](../../edk/docs/edk-convergence-a4-validation.md)
+
 - 本轮 A3：[EDK 包来源、清单与实板 OTA 验收](edk-convergence-a3-validation.md) · [工程回归](../../edk/docs/edk-convergence-a3-validation.md)
 
 - 本轮 A2：[DTB 依赖与活动设备树实板验收](edk-convergence-a2-validation.md) · [BSP 回归](../../edk/docs/edk-convergence-a2-validation.md)
