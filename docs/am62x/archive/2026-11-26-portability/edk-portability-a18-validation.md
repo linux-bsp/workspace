@@ -1,7 +1,7 @@
 # A18：AM625 实际构建、最终 FIT 与活动设备树验收
 
 2026-11-26 16:57:12+08:00 V6 PASS，E=`output/edk-portability-a18-20261126-164352-VGEQDO/`，F=E/final/。
-[EDK/BSP A18 工程](../../edk/docs/edk-portability-a18-validation.md)。
+[EDK/BSP A18 工程](../../../../edk/docs/archive/2026-11-26-portability/edk-portability-a18-validation.md)。
 
 本次只读复验指定设备，固定 A16 经串口核实的 SSH key。
 MAC 1c:63:49:22:c4:f7、HWID 1010001000110000、boot ID 727e44b9-d1b1-47f8-b992-5be7ca25d7f3、

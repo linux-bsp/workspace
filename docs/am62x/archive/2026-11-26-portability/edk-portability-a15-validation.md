@@ -1,7 +1,7 @@
 # A15：AM625 独立包测试与板级测试分离验收
 
 2026-11-26 16:04:47+08:00 V6 PASS，E=`output/edk-portability-a15-20261126-160151-yidZQY/`。
-[EDK A15 工程](../../edk/docs/edk-portability-a15-validation.md)。
+[EDK A15 工程](../../../../edk/docs/archive/2026-11-26-portability/edk-portability-a15-validation.md)。
 
 使用 A7 串口核实的 SSH key，MAC 1c:63:49:22:c4:f7、HWID 1010001000110000，
 boot ID 8fb95921-66b5-431b-b5b5-1074e58148c3，kernel/rootfs A 槽 confirmed successful=1、v0.0.1 packed 1。

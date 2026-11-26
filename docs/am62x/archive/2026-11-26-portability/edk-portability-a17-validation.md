@@ -1,7 +1,7 @@
 # A17：AM625 HWID 固定协议向量与设备身份验收
 
 2026-11-26 16:36:53+08:00 V6 PASS，E=`output/edk-portability-a17-20261126-163128-TbpKJm/`。
-[EDK A17 工程](../../edk/docs/edk-portability-a17-validation.md)。
+[EDK A17 工程](../../../../edk/docs/archive/2026-11-26-portability/edk-portability-a17-validation.md)。
 
 使用 A16 串口核实的 SSH key，MAC 1c:63:49:22:c4:f7，
 boot ID 727e44b9-d1b1-47f8-b992-5be7ca25d7f3，kernel/rootfs B 槽 confirmed successful=1、

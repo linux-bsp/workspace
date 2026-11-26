@@ -1,7 +1,7 @@
 # A16：AM625 统一启动日志消费及正式 OTA 验收
 
 2026-11-26，E=`output/edk-portability-a16-20261126-161345-corPeB/`，F=E/final/。
-[EDK A16 工程](../../edk/docs/edk-portability-a16-validation.md)。
+[EDK A16 工程](../../../../edk/docs/archive/2026-11-26-portability/edk-portability-a16-validation.md)。
 
 - 预检 A7 严格 SSH key、MAC 1c:63:49:22:c4:f7、HWID 1010001000110000、
   A 槽 v0.0.1 confirmed/healthy、完整 ID 16f44b78e3915e830ae7bdcf2293ebc06738b1a187edead8d74aab3359b81730，

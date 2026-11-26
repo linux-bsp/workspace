@@ -2,7 +2,7 @@
 
 2026-11-26 17:38:19+08:00，实板验收 PASS。
 E=`output/edk-portability-remediation-20261126-171855-c5SbY4/`，F=E/final/。
-[EDK/BSP 工程及回归记录](../../edk/docs/edk-portability-remediation-validation.md)。
+[EDK/BSP 工程及回归记录](../../../../edk/docs/archive/2026-11-26-portability/edk-portability-remediation-validation.md)。
 
 ## 正式制品和 OTA 事务
 

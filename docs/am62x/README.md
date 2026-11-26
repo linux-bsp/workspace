@@ -9,6 +9,8 @@
 - [systemd 服务与健康检查](system-services.md)
 - [可靠性与验证边界](reliability-boundaries.md)
 - [TFTP 配置](tftp-server.md)、[电源串口连接](power-control.md)
+- [A19–A21 修复计划](../../edk/docs/edk-portability-repair-plan.md) · [可复制的开发提示词](../../edk/docs/edk-portability-repair-prompt.md)
+- [A19 依赖记录完整性实板验收](edk-portability-a19-repair-validation.md) · [工程记录](../../edk/docs/edk-portability-a19-repair-validation.md)
 
 固件生成和板级布局见 BSP 的
 [板级说明](../../bsp-base-external/board/ti/am625/README.md)、
@@ -21,9 +23,10 @@
 
 - [EDK 历次板级验收](edk-module-refactoring-validation.md) · [2026-11-25 子系统重构 M0–M7 实机记录](archive/2026-11-25-edk-subsystem-validation.md)
 - [A1–A12 板级验收归档](archive/2026-11-26-module-audit/README.md) · [对应 EDK 开发记录](../../edk/docs/archive/2026-11-26-module-audit/README.md)
-- [A13–A18 多项目移植与修改边界优化计划](../../edk/docs/edk-portability-boundary-plan.md) · [A13](edk-portability-a13-validation.md) · [A14](edk-portability-a14-validation.md) · [A15](edk-portability-a15-validation.md) · [A16](edk-portability-a16-validation.md) · [A17](edk-portability-a17-validation.md) · [A18](edk-portability-a18-validation.md)
-- [A14–A18 复查修复及正式 AM625 OTA 验收](edk-portability-remediation-validation.md) · [EDK/BSP 回归记录](../../edk/docs/edk-portability-remediation-validation.md)
-- [A16/A18 二次复查修复及 AM625 实机验收](edk-portability-followup-validation.md) · [EDK/BSP 回归记录](../../edk/docs/edk-portability-followup-validation.md)
+- A13–A18 多项目移植与修改边界优化、两轮复查修复及 OTA 验收 · [AM625 实机记录归档](archive/2026-11-26-portability/README.md) · [原计划与 EDK/BSP 回归记录](../../edk/docs/archive/2026-11-26-portability/README.md)
+  - [原优化计划](../../edk/docs/archive/2026-11-26-portability/edk-portability-boundary-plan.md) · [A13](archive/2026-11-26-portability/edk-portability-a13-validation.md) · [A14](archive/2026-11-26-portability/edk-portability-a14-validation.md) · [A15](archive/2026-11-26-portability/edk-portability-a15-validation.md) · [A16](archive/2026-11-26-portability/edk-portability-a16-validation.md) · [A17](archive/2026-11-26-portability/edk-portability-a17-validation.md) · [A18](archive/2026-11-26-portability/edk-portability-a18-validation.md)
+  - [A14–A18 复查修复及正式 AM625 OTA 验收](archive/2026-11-26-portability/edk-portability-remediation-validation.md) · [EDK/BSP 回归记录](../../edk/docs/archive/2026-11-26-portability/edk-portability-remediation-validation.md)
+  - [A16/A18 二次复查修复及 AM625 实机验收](archive/2026-11-26-portability/edk-portability-followup-validation.md) · [EDK/BSP 回归记录](../../edk/docs/archive/2026-11-26-portability/edk-portability-followup-validation.md)
 - [固件下载、事务与恢复优化验证](firmware-upgrade-optimization-validation.md)
 - [OTA 启动失败日志实机验证](ota-boot-failure-log-validation.md)
 - [历史功能验收](validation-history.md)

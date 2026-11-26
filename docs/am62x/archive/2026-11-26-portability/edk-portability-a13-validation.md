@@ -1,7 +1,7 @@
 # A13：AM625 旧 PDI 升级后候选与正式运行布局验证
 
 2026-11-26 15:30:45+08:00 V6 结束，E=`output/edk-portability-a13-20261126-152019-XjZwsW/`。
-[EDK A13 工程验收](../../edk/docs/edk-portability-a13-validation.md)。
+[EDK A13 工程验收](../../../../edk/docs/archive/2026-11-26-portability/edk-portability-a13-validation.md)。
 
 固定使用 A7 串口确认的 SSH ED25519 主机密钥，先断言 am625/aarch64、
 MAC `1c:63:49:22:c4:f7`、HWID `1010001000110000`。

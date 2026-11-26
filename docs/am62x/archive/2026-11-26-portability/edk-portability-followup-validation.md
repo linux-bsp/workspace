@@ -1,7 +1,7 @@
 # A16/A18 二次复查修复：AM625 正式制品与实板验收
 
 2026-11-26 18:05:37+08:00，正式镜像及板验 PASS。E=`output/edk-portability-followup-20261126-175112-8j2Mvf/`，F=E/final/。
-[EDK/BSP 工程及回归记录](../../edk/docs/edk-portability-followup-validation.md)。
+[EDK/BSP 工程及回归记录](../../../../edk/docs/archive/2026-11-26-portability/edk-portability-followup-validation.md)。
 
 ## 发布与运行身份
 

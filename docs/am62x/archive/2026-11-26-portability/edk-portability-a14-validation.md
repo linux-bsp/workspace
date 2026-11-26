@@ -1,7 +1,7 @@
 # A14：AM625 受管 SDK 拒绝保留和完整更新探针
 
 2026-11-26 15:57:49+08:00 当次 V6 PASS，E=`output/edk-portability-a14-20261126-154907-HqiZnC/`。
-[EDK A14 工程](../../edk/docs/edk-portability-a14-validation.md)。
+[EDK A14 工程](../../../../edk/docs/archive/2026-11-26-portability/edk-portability-a14-validation.md)。
 
 严格固定 A7 串口核实的 SSH key，先确认 MAC 1c:63:49:22:c4:f7、HWID 1010001000110000，
 boot ID 8fb95921-66b5-431b-b5b5-1074e58148c3、kernel/rootfs A 槽 confirmed successful=1、v0.0.1 packed 1。
