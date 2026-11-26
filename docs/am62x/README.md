@@ -12,6 +12,7 @@
 - [A19–A21 修复计划](../../edk/docs/edk-portability-repair-plan.md) · [可复制的开发提示词](../../edk/docs/edk-portability-repair-prompt.md)
 - [A19 依赖记录完整性实板验收](edk-portability-a19-repair-validation.md) · [工程记录](../../edk/docs/edk-portability-a19-repair-validation.md)
 - [A20 所选构建清单实板验收](edk-portability-a20-repair-validation.md) · [工程记录](../../edk/docs/edk-portability-a20-repair-validation.md)
+- [A21 无 memfd 兼容及实板 OTA 验收](edk-portability-a21-repair-validation.md) · [工程记录](../../edk/docs/edk-portability-a21-repair-validation.md)
 
 固件生成和板级布局见 BSP 的
 [板级说明](../../bsp-base-external/board/ti/am625/README.md)、
