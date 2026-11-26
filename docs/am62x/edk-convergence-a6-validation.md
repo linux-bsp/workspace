@@ -62,3 +62,31 @@ E3=`output/edk-convergence-a6-3-20261126-225712-JxSIoN/`，F3=E3/final/。[工�
 邻近健康历史流每项均继续推进，原文及证明文件身份不变。板上专项是隔离模拟，不是切换正式 SOL；`bash "$F3/board-receiver.sh" "$E3" candidate` 与 installed 只为测试进程注入故障。未改变正式接收配置、原始文件或其他真实服务器。未刷 bootloader，kernel/DTB 和 bootloader 输入与上次逐字一致。
 
 安装后 `bash "$F3/board-receiver.sh" "$E3" installed` 使用实际 /usr/bin/logctl 与实装库，全部自然 23/23、ENOSYS 23/23；每个新/旧关键断言再现，F3/board-installed-{natural,no-memfd}.log、board-installed-files.log。2026-11-26 23:12:47 最终可信 SSH 只读复核同一新 boot、slot B confirmed successful=1、完整 ID、health-check、0 failed、logctl sync ok，所有本次测试临时目录已清理（F3/board-after-installed-tests.log）。最终正式独立候选与常规 images 逐字同步，保留上一阶段原 images 于 F3/previous-default-images；F3/default-images-check.log、E3/git-verification.log。
+
+## A6.4 实机专项与 OTA
+
+E4=`output/edk-convergence-a6-4-20261126-232237-mt1odS/`，F4=E4/final/。[本次工程记录](../../edk/docs/edk-convergence-a6-validation.md#a64多份旧凭据下的续传归属判定)。历史 A6、A6.3 事务留存，不覆盖。
+
+| 项目 | 本次实际证据 |
+| --- | --- |
+| 起始身份 | 指定 AM625 IP 192.168.10.211、MAC `1c:63:49:22:c4:f7`、HWID `1010001000110000`；可信 SSH key，2026-11-26 23:22:53，boot `be5b3125-acb3-4dda-960b-781541ba800a`、slot B、confirmed successful=1，运行 ID `c66895a6daf3871fbe7323e15eaacc003231043909e2d1cdc8390029131ba9b4`，health-check、logctl sync ok。E4/board-before.log。 |
+| 正式候选 | 完整 ID `8672e4f422a72f4a3213b9a0e855817abfb5b0fcd1d406edb9610deccf525d46`，tag v0.0.1 packed 1；OTA SHA `b18e9be6914346c9679e4c515153cdc2e57bf10cb93dc1004fd168730b38c1e3`；kernel FIT 12940585 bytes `a9d7052d1319223926c6597ae7f8913806aab002a5aca81d76fc12ec2de95be4`，rootfs payload 30429184 bytes `8a95ab30187400bc8d0f472d1f4894aea4a1eb64c067c342438037ef0001ec37`。F4/ota.sha256、release-files.sha256。 |
+| 候选专项 | 正式 rootfs 取得实际 ARM64 程序与所需运行时库；原 A21 和 A6 真实二进制的 libbsl/libserver/libcrypto/libz 与候选逐字同，独立上传文件逐一 SHA 核对。自然 33/33、ENOSYS 33/33。F4/board-candidate-files.log、board-candidate-{natural,no-memfd}.log、old-library-match.log；E4/old-binaries.sha256。 |
+| 发布 | publication `draft-MENQBi`，2026-11-26 23:33:54+08:00；唯一 target device/HWID/channel，relay 限该板 .211/32，草稿 exact ID、非隔离、packed 1。F4/publication.log、publication-time.txt、server-draft-state.json。 |
+| 设备事务 | 安装、boot-testing 后 23:35:45 catalog `success`，running=version=1，未隔离。F4/ota-timeline.log、ota-success.json、device-transaction.json。 |
+| 重启与实装 | 实际串口核对新 SSH key；boot `7e70ae57-f8dd-4203-b6b9-3e44d4308f2e`，slot A kernel/rootfs confirmed successful=1，FWCHECK1 match、health-check 成功、8 服务 active、0 failed；9/9 实装 artifact SHA 同正式 rootfs，/usr/bin/logctl SHA `44f9a8951b5f333027d45ed49d4de8bff8e44f233d1b182db9b8bf3017050578`。F4/board-check.log、board-package-compare.log、serial-key.log。 |
+| PDM 来源 | 实际 dmesg revision `68639a8c336da036780ea3cb81f523d58d436509-dirty`，与本次候选 metadata 一致，F4/board-pdm-source.log。 |
+
+正式 v2 路径：活动 DT 与最终 FIT `bsp,bootlog-v2`、memory-region/phandle 0x3f、reg 0x9c900000/0x100000 一致（F4/board-verify.log）；collector 持久化、sync-state=ok、verify-boot、archive-pending=0、RAM 两 buffer acknowledged。新 boot 的正式归档 capture `711ea8e2-4a27-41fb-909e-3456128f372e`：r5-spl 418 bytes CRC cf4e43cc、a53-spl 455 CRC 43f6a353、uboot 3027 CRC 02ea924b、kernel 24705 CRC f7e88eba，均 dropped=0，前三段本地与接收字节相等，kernel early 0-byte prefix 与 sealed CRC 一致。F4/archive-verified.log、board-check.log。
+
+| 关键专项 | 候选实际回环结果（自然/ENOSYS） |
+| --- | --- |
+| 两份旧 A6，当前匹配一份 | 4096 前缀及更换创建顺序各两次发送者重启轮次，4096→4096、1→1 块，0 新请求、前缀及全部文件不变、明确 identity-state-ambiguous，普通历史流 73 bytes 继续。 |
+| A1/A6 混合匹配 | A1 匹配、A6 匹配两个方向，均在 4096 前缀时拒绝追加；全部旧文件字节/inode/mtime/ctime 相同。 |
+| 已满 8273 | 旧 A6 双记录及 A1/A6 混合三个场景，两次轮次均 8273、3 块、0 新正文，明确歧义，无伪造可信凭据。 |
+| 三个新增正例 | 两份同身份、其他明确 v2 流/其他 stage、已有本流明确 v2，均 4096→8273（新增 4177 字节/2 块）逐字一致、原记录不变。 |
+| 原 A6.1–A6.3 专项 | 原 46 项全部通过：两个独立接收端切换、单份 A1 及实际旧 A6 匹配、实际 A21 已满无证明后至少两轮正常（无重复正文、无警告、无新证明）、order 更正冲突、容量、错误/未知游标等。 |
+
+候选板验使用 `bash "$F4/board-receiver.sh" "$E4" candidate`，每项独立临时日志树和网络 namespace 仅 loopback，无外部路由；故障注入仅对测试进程。基线可能拼接的现象仅在主机合成夹具观测，此次不修改真实接收数据库或正式 SOL 转发配置，其他真实服务器仅只读。原 .config、VERSION、实际 kernel Image.gz/DTB/bootloader 输入保持，未刷写 bootloader。
+
+安装后 `bash "$F4/board-receiver.sh" "$E4" installed` 使用实际 /usr/bin/logctl 与实装库检验，原 46 项和新增 20 项均通过（自然 33/33、ENOSYS 33/33）；候选的各项正负断言全部重现，F4/board-installed-{natural,no-memfd}.log、board-installed-files.log。2026-11-26 23:40:56 再用可信 SSH 只读复核同一 boot、slot A confirmed successful=1、运行完整 ID、health-check、0 failed、logctl sync ok，专属测试目录清理完毕（F4/board-after-installed-tests.log）。最终独立候选与常规 images 逐字同步，前次原目录保留于 F4/previous-default-images；F4/default-images-check.log、E4/git-verification.log。
