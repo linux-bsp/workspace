@@ -1,7 +1,7 @@
 # AM625 A7 测试装配边界与启动日志制品实板验收
 
 2026-11-26，北京时间。最终 V6 通过；下列初次失败证据原样保留。E=`output/edk-standalone-test-boundary-20261126-104403/`。
-[EDK 开发记录](../../edk/docs/edk-standalone-test-boundary-validation.md)。
+[EDK 开发记录](../../../../edk/docs/archive/2026-11-26-module-audit/edk-standalone-test-boundary-validation.md)。
 
 | 项目 | 实测 |
 | --- | --- |

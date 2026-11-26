@@ -1,12 +1,12 @@
 # A1 板级验收与交付
 
 2026-11-25，23:27:06–23:27:10+08:00。
-[EDK A1 实施与验证记录](../../edk/docs/edk-module-audit-a1-validation.md)。
+[EDK A1 实施与验证记录](../../../../edk/docs/archive/2026-11-26-module-audit/edk-module-audit-a1-validation.md)。
 证据 `output/edk-module-audit-a1-20261125-2323/`。
 
 指定 AM625 MAC 1c:63:49:22:c4:f7、HWID 1010001000110000、
 boot `542e6381-e300-41b7-ae2b-41dddbbd0583`。沿用
-[Redfish 成功发布](edk-redfish-recovery-validation.md)，A 槽，版本 0.0.1，
+[Redfish 成功发布](../../edk-redfish-recovery-validation.md)，A 槽，版本 0.0.1，
 full ID `683e05eaa30726d7d54eced37f55f0c446f3ddcb7b366d75a9fcca935fa9bfed`。
 纯主机验收变更，无正式目标输入变动，不重新发布；
 严格 pinned SSH、fwctl version/ota-status/ota-check/health-check，

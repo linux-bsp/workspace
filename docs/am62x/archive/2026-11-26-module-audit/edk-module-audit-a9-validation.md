@@ -1,7 +1,7 @@
 # A9：AM625 安装冲突拒绝与候选 SDK 实机验证
 
 2026-11-26，证据 E=`output/edk-module-audit-a9-20261126-134647-J5AxT5/`。
-[EDK A9 开发记录](../../edk/docs/edk-module-audit-a9-validation.md)。
+[EDK A9 开发记录](../../../../edk/docs/archive/2026-11-26-module-audit/edk-module-audit-a9-validation.md)。
 
 正式部署沿用 A7；仅测试 SDK 在指定板 /tmp 运行，不覆盖板端安装库。
 通过 A7 经串口确认的固定 SSH ED25519 主机密钥，先断言 am625、aarch64、MAC

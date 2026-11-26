@@ -1,6 +1,6 @@
 # A3：SDK 安装拒绝保护 AM625 验收
 
-2026-11-25。[EDK 实施与验证](../../edk/docs/edk-module-audit-a3-validation.md)。
+2026-11-25。[EDK 实施与验证](../../../../edk/docs/archive/2026-11-26-module-audit/edk-module-audit-a3-validation.md)。
 原始证据 `output/edk-module-audit-a3-20261125-2342/`，正式制品 `formal-final/`。
 
 | 验收项目 | 实测 |

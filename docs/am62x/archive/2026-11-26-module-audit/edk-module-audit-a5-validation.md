@@ -1,7 +1,7 @@
 # AM625 A5 历史 Satellite 库清理实板验收
 
 2026-11-26（北京时间）。本轮 AI 验证人。证据 E=`output/edk-module-audit-a5-20261126-0017/`。
-[EDK A5 开发记录](../../edk/docs/edk-module-audit-a5-validation.md)。
+[EDK A5 开发记录](../../../../edk/docs/archive/2026-11-26-module-audit/edk-module-audit-a5-validation.md)。
 
 ## 初审：A4 成功发布物（清理前）
 

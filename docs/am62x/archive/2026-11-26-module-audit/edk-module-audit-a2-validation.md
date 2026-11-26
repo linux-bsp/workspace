@@ -1,7 +1,7 @@
 # A2 AM625 实板验收：PDI 私有契约与 hwmon
 
 2026-11-25；23:32:59–23:33:03、23:33:36–23:33:37+08:00。
-[EDK A2 开发记录](../../edk/docs/edk-module-audit-a2-validation.md)。
+[EDK A2 开发记录](../../../../edk/docs/archive/2026-11-26-module-audit/edk-module-audit-a2-validation.md)。
 证据 `output/edk-module-audit-a2-20261125-2330/`。
 
 设备 MAC 1c:63:49:22:c4:f7、HWID 1010001000110000，A 槽、boot

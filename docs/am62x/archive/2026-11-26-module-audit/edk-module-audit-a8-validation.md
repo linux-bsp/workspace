@@ -1,7 +1,7 @@
 # A8：AM625 文档交接与已发布固件复核
 
 2026-11-26 13:37:18–13:37:25+08:00，证据 E=`output/edk-module-audit-a8-20261126-133648-Sbh7B8/`。
-[EDK 文档专项验收](../../edk/docs/edk-module-audit-a8-validation.md)。
+[EDK 文档专项验收](../../../../edk/docs/archive/2026-11-26-module-audit/edk-module-audit-a8-validation.md)。
 
 A8 只交付文档，未改变 A7 正式镜像或版本；不创建新发布。
 使用 A7 的物理串口核实的 ED25519 主机密钥（SHA256:FwGx3XSb7Ex8dm3hFyAGwWFbX8Jg5mZdTqDT1TCks4U）严格 SSH。在 A7 的只读 V6 脚本中先断言 hostname、架构、MAC、HWID，再核对实际运行制品与健康。命令与检查内容见 A7 `bootlog-repair/board-v6.sh`，E/board-v6.log 是本阶段实际执行，末尾历史脚本标签 A7 不代表重用旧日志。

@@ -20,7 +20,8 @@
 - [构建框架优化验收](build-framework-validation.md)
 
 - [EDK 历次板级验收](edk-module-refactoring-validation.md) · [2026-11-25 子系统重构 M0–M7 实机记录](archive/2026-11-25-edk-subsystem-validation.md)
-- [EDK 审计问题开发计划与结果](../../edk/docs/edk-module-audit-followup-plan.md) · 当轮板验：[A8](edk-module-audit-a8-validation.md)、[A9](edk-module-audit-a9-validation.md)、[A10](edk-module-audit-a10-validation.md)、[A11](edk-module-audit-a11-validation.md)、[A12](edk-module-audit-a12-validation.md)
+- [A1–A12 板级验收归档](archive/2026-11-26-module-audit/README.md) · [对应 EDK 开发记录](../../edk/docs/archive/2026-11-26-module-audit/README.md)
+- [A13–A18 多项目移植与修改边界优化计划](../../edk/docs/edk-portability-boundary-plan.md) · [A13 板级验收](edk-portability-a13-validation.md)
 - [固件下载、事务与恢复优化验证](firmware-upgrade-optimization-validation.md)
 - [OTA 启动失败日志实机验证](ota-boot-failure-log-validation.md)
 - [历史功能验收](validation-history.md)

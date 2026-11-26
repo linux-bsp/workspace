@@ -1,7 +1,7 @@
 # A12：AM625 最小 hwmon SDK 实板与最终验收
 
 2026-11-26 14:51:11+08:00 V6 结束，E=`output/edk-module-audit-a12-20261126-143843-I9pIn0/`。
-[EDK 最终开发和回归记录](../../edk/docs/edk-module-audit-a12-validation.md)。
+[EDK 最终开发和回归记录](../../../../edk/docs/archive/2026-11-26-module-audit/edk-module-audit-a12-validation.md)。
 
 严格使用 A7 串口核实的固定 SSH 主机 key；实际 hostname am625、aarch64、MAC `1c:63:49:22:c4:f7`、
 HWID `1010001000110000` 断言成功。boot ID `8fb95921-66b5-431b-b5b5-1074e58148c3`，

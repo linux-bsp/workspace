@@ -1,6 +1,6 @@
 # A4 AM625 项目装配验收
 
-2026-11-26。[EDK 开发记录](../../edk/docs/edk-module-audit-a4-validation.md)；
+2026-11-26。[EDK 开发记录](../../../../edk/docs/archive/2026-11-26-module-audit/edk-module-audit-a4-validation.md)；
 证据 `output/edk-module-audit-a4-20261126-0005/`。
 
 | 项目 | 实测 |

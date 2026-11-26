@@ -17,7 +17,7 @@
 | `output/` | 本地构建、测试与发布产物，Git 忽略 |
 
 EDK 子仓提供设备工具、PMC 主机服务和共享协议。载荷服务器的 BMC 和 PMC 客户端统一由 `libserver` 提供。
-当前模块与构建基线见 [EDK 架构](edk/docs/architecture.md)、[软件架构框图](edk/docs/软件架构设计.drawio) 和 [M0–M7 实机验收](docs/am62x/archive/2026-11-25-edk-subsystem-validation.md)。EDK A8–A12 整改及验收见 [审计开发计划与结果](edk/docs/edk-module-audit-followup-plan.md) 和 [续作/复验提示词](edk/docs/edk-module-audit-development-prompt.md)。
+当前模块与构建基线见 [EDK 架构](edk/docs/architecture.md)、[软件架构框图](edk/docs/软件架构设计.drawio) 和 [M0–M7 实机验收](docs/am62x/archive/2026-11-25-edk-subsystem-validation.md)。新项目移植见 [A13–A18 优化计划](edk/docs/edk-portability-boundary-plan.md)。上一轮的计划、实现和板验见 [A1–A12 归档](edk/docs/archive/2026-11-26-module-audit/README.md)。
 
 ## 拉取与构建
 

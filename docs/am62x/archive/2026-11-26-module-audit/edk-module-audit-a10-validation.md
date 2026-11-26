@@ -1,7 +1,7 @@
 # A10：AM625 实板 runtime-only 拒绝与完整 SDK 更新
 
 2026-11-26，E=`output/edk-module-audit-a10-20261126-141044-5WQUzn/`。
-[EDK A10 验收](../../edk/docs/edk-module-audit-a10-validation.md)。
+[EDK A10 验收](../../../../edk/docs/archive/2026-11-26-module-audit/edk-module-audit-a10-validation.md)。
 
 14:21:04+08:00 当次 V6 结束且通过。严格固定 A7 经串口核实的 SSH key，
 先断言设备 am625/aarch64、MAC `1c:63:49:22:c4:f7` 和 HWID `1010001000110000`。

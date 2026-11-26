@@ -3,8 +3,8 @@
 2026-11-26（北京时间）。用户因无真人测试者授权新独立会话模拟。模块修改与局部测试由
 `/root/a6_first_maintainer` 独立 AI 执行，实板验证由本轮主维护者执行；不冒充真人。
 证据 E=`output/edk-module-audit-a6-20261126-0950/`。
-[EDK A6 开发记录](../../edk/docs/edk-module-audit-a6-validation.md) ·
-[独立维护者原始报告](../../edk/docs/edk-module-audit-a6-maintainer.md)。
+[EDK A6 开发记录](../../../../edk/docs/archive/2026-11-26-module-audit/edk-module-audit-a6-validation.md) ·
+[独立维护者原始报告](../../../../edk/docs/archive/2026-11-26-module-audit/edk-module-audit-a6-maintainer.md)。
 
 | 项目 | 实测 |
 | --- | --- |

@@ -1,7 +1,7 @@
 # A11：活动 DTB 引用与四段启动日志实板验收
 
 2026-11-26 14:32:52–14:32:56+08:00，E=`output/edk-module-audit-a11-20261126-142758-63i8KG/`。
-[EDK/BSP A11 验收](../../edk/docs/edk-module-audit-a11-validation.md)。
+[EDK/BSP A11 验收](../../../../edk/docs/archive/2026-11-26-module-audit/edk-module-audit-a11-validation.md)。
 
 使用 A7 串口核实的固定 SSH key；先断言 am625/aarch64、MAC `1c:63:49:22:c4:f7`、HWID `1010001000110000`。
 boot `8fb95921-66b5-431b-b5b5-1074e58148c3`，A 槽 confirmed successful=1，v0.0.1 packed 1，

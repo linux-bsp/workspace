@@ -658,4 +658,4 @@ U-Boot 出厂值、FIT 白名单及 AM625 实机身份一致。86 项原生回�
 
 ## EDK 子系统重构 M0–M7（2026-11-25）
 
-各阶段实机记录、发布身份与最终提交核查见 [M0–M7 板级验收归档](archive/2026-11-25-edk-subsystem-validation.md)。后续整改见 [EDK 审计问题开发计划](../../edk/docs/edk-module-audit-followup-plan.md)。
+各阶段实机记录、发布身份与最终提交核查见 [M0–M7 板级验收归档](archive/2026-11-25-edk-subsystem-validation.md)。随后开展的整改见 [EDK A1–A12 计划与记录归档](../../edk/docs/archive/2026-11-26-module-audit/README.md)。
