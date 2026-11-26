@@ -1,6 +1,6 @@
 # A21：AM625 无 memfd 兼容专项及正式 OTA 验收
 
-2026-11-26 20:20:10+08:00 正式板验通过，随后实装二进制自然/ENOSYS 两组隔离接收通过。E=`output/edk-portability-a21-20261126-200433-e8tkel/`，F=E/final/。[EDK 回归](../../edk/docs/edk-portability-a21-repair-validation.md)。
+2026-11-26 20:20:10+08:00 正式板验通过，随后实装二进制自然/ENOSYS 两组隔离接收通过。E=`output/edk-portability-a21-20261126-200433-e8tkel/`，F=E/final/。[EDK 回归](../../../../edk/docs/archive/2026-11-26-portability-repair/edk-portability-a21-repair-validation.md)。
 
 | 项目 | 实际证据 |
 | --- | --- |

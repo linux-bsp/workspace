@@ -1,6 +1,6 @@
 # A20：AM625 所选构建清单及实际运行版本验收
 
-2026-11-26 20:00:29+08:00 PASS。E=`output/edk-portability-a20-20261126-195335-GXMpg3/`，F=E/final/。[工程回归](../../edk/docs/edk-portability-a20-repair-validation.md)。
+2026-11-26 20:00:29+08:00 PASS。E=`output/edk-portability-a20-20261126-195335-GXMpg3/`，F=E/final/。[工程回归](../../../../edk/docs/archive/2026-11-26-portability-repair/edk-portability-a20-repair-validation.md)。
 
 指定 AM625 固定先前可信 SSH key，MAC `1c:63:49:22:c4:f7`、HWID `1010001000110000`，Linux `7.0.0 #1 SMP PREEMPT Wed Mar 4 08:06:40 UTC 2026 aarch64`，boot `83613296-b1de-42c5-822d-11bd14637d11`、B 槽 confirmed successful=1、FWCHECK1 match。catalog 上次 `draft-V54AKR` 对应该运行完整 ID `0971e5b329bc717a96389b0f529a9e4da481b3faf45d224e67d0162086f79a13` success/running=1，8 unit active、0 failed、9/9 制品匹配。F/board-check.log、board-kernel.log、board-identity-check.log、catalog.json、board-package-compare.log。
 

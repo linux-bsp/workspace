@@ -17,4 +17,4 @@
 
 A13–A15 沿用 A7 正式固件，A17、A18 沿用 A16 正式固件。A16 和两轮复查修复的记录分别保留了当次 kernel/rootfs OTA 的设备事务与健康确认结果。
 
-后续开发入口见[本轮复查后的修复计划](../../../../edk/docs/edk-portability-repair-plan.md)和[新会话执行提示词](../../../../edk/docs/edk-portability-repair-prompt.md)。
+后续 A19–A21 的修复计划、执行提示词及阶段结果已归档。[AM625 板验记录](../2026-11-26-portability-repair/README.md) · [开发记录](../../../../edk/docs/archive/2026-11-26-portability-repair/README.md)

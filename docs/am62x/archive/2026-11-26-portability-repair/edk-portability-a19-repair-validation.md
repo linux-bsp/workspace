@@ -1,7 +1,7 @@
 # A19：AM625 最终 FIT 与完整依赖记录专项板验
 
 2026-11-26 19:50:36+08:00 PASS。E=`output/edk-portability-a19-20261126-194700-pHFcqu/`，F=E/final/。
-[工程与回归](../../edk/docs/edk-portability-a19-repair-validation.md)。指定板固定上次串口核实的 key，MAC `1c:63:49:22:c4:f7`、HWID `1010001000110000`、Linux `7.0.0`、boot ID `83613296-b1de-42c5-822d-11bd14637d11`。版本 v0.0.1 packed 1，B 槽 confirmed successful=1，完整 firmware_id `0971e5b329bc717a96389b0f529a9e4da481b3faf45d224e67d0162086f79a13`，catalog 上次 `draft-V54AKR` 对应该运行身份 success/running=1；FWCHECK1 match、8 unit active、0 failed、9/9 运行文件与上次相同正式 rootfs 匹配。E/board-before.log、F/board-check.log、board-package-compare.log、catalog.json。
+[工程与回归](../../../../edk/docs/archive/2026-11-26-portability-repair/edk-portability-a19-repair-validation.md)。指定板固定上次串口核实的 key，MAC `1c:63:49:22:c4:f7`、HWID `1010001000110000`、Linux `7.0.0`、boot ID `83613296-b1de-42c5-822d-11bd14637d11`。版本 v0.0.1 packed 1，B 槽 confirmed successful=1，完整 firmware_id `0971e5b329bc717a96389b0f529a9e4da481b3faf45d224e67d0162086f79a13`，catalog 上次 `draft-V54AKR` 对应该运行身份 success/running=1；FWCHECK1 match、8 unit active、0 failed、9/9 运行文件与上次相同正式 rootfs 匹配。E/board-before.log、F/board-check.log、board-package-compare.log、catalog.json。
 
 | 核验项 | 结果 |
 | --- | --- |
