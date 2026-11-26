@@ -21,7 +21,7 @@
 - [systemd 服务与健康检查](system-services.md)
 - [可靠性与验证边界](reliability-boundaries.md)
 - [TFTP 配置](tftp-server.md)、[电源串口连接](power-control.md)
-- 本轮 A1–A6 已完成实机验收。[边界收敛与架构精简计划](../../edk/docs/edk-portability-integrity-plan.md) · [历史接续开发提示词](../../edk/docs/edk-portability-integrity-prompt.md)
+- 本轮 A1–A6（含 A6.3）已完成实机验收，A5 自动重建回归已补齐。[边界收敛与架构精简计划](../../edk/docs/edk-portability-integrity-plan.md) · [历史 A6.3 开发提示词](../../edk/docs/edk-portability-integrity-prompt.md)
 
 固件生成和板级布局见 BSP 的
 [板级说明](../../bsp-base-external/board/ti/am625/README.md)、

@@ -18,7 +18,8 @@
 
 EDK 子仓提供设备工具、PMC 主机服务和共享协议。载荷服务器的 BMC 和 PMC 客户端统一由 `libserver` 提供。
 当前模块与构建基线见 [EDK 架构](edk/docs/architecture.md)、[软件架构框图](edk/docs/软件架构设计.drawio) 和 [M0–M7 实机验收](docs/am62x/archive/2026-11-25-edk-subsystem-validation.md)。
-本轮边界收敛与架构精简 A1–A6 已验收。见[A1–A4 规则所有权与 ABI 核验](edk/docs/edk-convergence-a4-validation.md)、[A5 包来源验收](edk/docs/edk-convergence-a5-validation.md)、[A6 续传验收](edk/docs/edk-convergence-a6-validation.md)及[最新 AM625 实机记录](docs/am62x/edk-convergence-a6-validation.md)。[工作计划](edk/docs/edk-portability-integrity-plan.md) · [历史开发提示词](edk/docs/edk-portability-integrity-prompt.md)
+本轮 A1–A6（含 A6.3）已验收，历史 boot 的 `order` 更正后漏报续传冲突已修复并通过指定 AM625 实机验收，A5 自动重建回归已补齐。[工作计划](edk/docs/edk-portability-integrity-plan.md) · [历史 A6.3 开发提示词](edk/docs/edk-portability-integrity-prompt.md)
+既有验收记录见 [A1–A4 规则所有权与 ABI 核验](edk/docs/edk-convergence-a4-validation.md) · [A5 包来源验收](edk/docs/edk-convergence-a5-validation.md) · [A6 续传验收](edk/docs/edk-convergence-a6-validation.md) · [A6 AM625 实机记录](docs/am62x/edk-convergence-a6-validation.md)。
 A19–A21 的开发结果见 [修复计划与回归记录](edk/docs/archive/2026-11-26-portability-repair/README.md) 和 [AM625 实机记录](docs/am62x/archive/2026-11-26-portability-repair/README.md)。
 A13–A18 及两轮复查修复的历史资料见 [EDK 计划与过程记录](edk/docs/archive/2026-11-26-portability/README.md) 和 [AM625 实机记录](docs/am62x/archive/2026-11-26-portability/README.md)。更早的模块复核见 [A1–A12 归档](edk/docs/archive/2026-11-26-module-audit/README.md)。
 
