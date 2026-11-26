@@ -2,6 +2,8 @@
 
 ## 当前使用
 
+- 本轮 A5：[包配置来源与 OTA 实机验收](edk-convergence-a5-validation.md) · [工程回归](../../edk/docs/edk-convergence-a5-validation.md)
+
 - 本轮 A4：[Kconfig 正常候选及最终实板验收](edk-convergence-a4-validation.md) · [四阶段收尾审计](../../edk/docs/edk-convergence-a4-validation.md)
 
 - 本轮 A3：[EDK 包来源、清单与实板 OTA 验收](edk-convergence-a3-validation.md) · [工程回归](../../edk/docs/edk-convergence-a3-validation.md)
@@ -17,7 +19,7 @@
 - [systemd 服务与健康检查](system-services.md)
 - [可靠性与验证边界](reliability-boundaries.md)
 - [TFTP 配置](tftp-server.md)、[电源串口连接](power-control.md)
-- [本轮边界收敛与架构精简计划（A1–A4）](../../edk/docs/edk-portability-integrity-plan.md) · [新会话开发提示词](../../edk/docs/edk-portability-integrity-prompt.md)
+- 本轮 A1–A4 已完成实机验收，复查后的 A5–A6 待开发。[边界收敛与架构精简计划](../../edk/docs/edk-portability-integrity-plan.md) · [从 A5 开始的新会话提示词](../../edk/docs/edk-portability-integrity-prompt.md)
 
 固件生成和板级布局见 BSP 的
 [板级说明](../../bsp-base-external/board/ti/am625/README.md)、
