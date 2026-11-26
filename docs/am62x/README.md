@@ -2,6 +2,8 @@
 
 ## 当前使用
 
+- 本轮 A3：[EDK 包来源、清单与实板 OTA 验收](edk-convergence-a3-validation.md) · [工程回归](../../edk/docs/edk-convergence-a3-validation.md)
+
 - 本轮 A2：[DTB 依赖与活动设备树实板验收](edk-convergence-a2-validation.md) · [BSP 回归](../../edk/docs/edk-convergence-a2-validation.md)
 
 - 本轮 A1：[旧 SOL 续传内容身份专项及正式 OTA 验收](edk-convergence-a1-validation.md) · [EDK 回归](../../edk/docs/edk-convergence-a1-validation.md)
