@@ -7,4 +7,4 @@
 | 阶段 | 实机验收 | 工程验收 | 状态 |
 | --- | --- | --- | --- |
 | A1 SDK 分装契约 | [实机记录](a1-validation.md) | [工程记录](../../../../edk/docs/archive/sdk-install-contract/a1-validation.md) | 已验收 |
-| A2 绝对目录与整轮回归 | 待验收 | 待验收 | 待开发 |
+| A2 绝对目录与整轮回归 | [实机记录](a2-validation.md) | [工程记录](../../../../edk/docs/archive/sdk-install-contract/a2-validation.md) | 已验收 |
