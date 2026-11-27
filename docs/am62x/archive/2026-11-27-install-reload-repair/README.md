@@ -15,3 +15,4 @@
 | A9 | [私有参考锁、ARM64 胜出前缀及正式 OTA](a9-validation.md) |
 | A10 | [受保护和恢复的真实布局及正式 OTA](a10-validation.md) |
 | A11 | [真实 SDK、命令别名和正式 OTA](a11-validation.md) |
+| A12 | [双 SDK 消费、工具矩阵、范围复用实机](a12-validation.md) |
