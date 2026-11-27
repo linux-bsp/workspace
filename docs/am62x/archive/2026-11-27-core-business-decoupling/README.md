@@ -7,3 +7,4 @@
 | A1 | [旧 SDK 与现役产品专项](edk-core-business-decoupling-a1-validation.md) |
 | A2 | [三套 SDK 与遥测契约专项](edk-core-business-decoupling-a2-validation.md) |
 | A3 | [独立 A/B 装配与正式 ABI 专项](edk-core-business-decoupling-a3-validation.md) |
+| A4 | [真实本机属性、节点夹具及正式只读/OTA 专项](edk-core-business-decoupling-a4-validation.md) |
