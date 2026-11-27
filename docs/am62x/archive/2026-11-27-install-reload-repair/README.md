@@ -7,3 +7,4 @@
 | A1 | [BSL 兼容性与 OTA 实机验收](a1-validation.md) |
 | A2 | [同字节脚本与 BusyBox 实机专项](a2-validation.md) |
 | A3 | [真实本机采样、节点保护及正式 OTA](a3-validation.md) |
+| A4 | [受保护原工具及正式 OTA](a4-validation.md) |

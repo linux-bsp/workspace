@@ -11,3 +11,7 @@
 | 清理与镜像 | 脚本临时文件/socket 路径在本次独立目录，结束空目录且 /proc 无本次 fixture ELF；只向本次 PID 发 HUP。A1 原 publication `draft-g8EWNz`，完整 ID `47ccc5cdfaad628497513a9c3a051764f18acba6246615ae430844c8745e4173`，kernel/rootfs 完整摘要与 A1 一致；未改变生产制品、不重新发布。 |
 
 A2 实机专项通过。
+
+## 2026-11-27 A4 复查补记
+
+历史 A2 的同字节脚本、真实板验和已确认 A1 publication `draft-g8EWNz` 仍有效；当时验证的是 A1 原包完整摘要与设备身份，未构建 A2 正式候选、没有两版候选摘要逐字比较。PDM 的 EDK_GIT_COMMIT 构建标识进入模块，复查元数据日志 `output/edk-review-install-reload-g1GhndWw/pdm-metadata.log`；详见[工程补记](../../../../edk/docs/archive/2026-11-27-install-reload-repair/a2-validation.md)。本次不向设备补发历史镜像。
