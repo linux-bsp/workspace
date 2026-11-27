@@ -12,3 +12,4 @@
 | A6 | [ARM64 安装胜出前缀及正式 OTA](a6-validation.md) |
 | A7 | [实际温度、超时判定、节点保护及正式 OTA](a7-validation.md) |
 | A8 | [工具与运行库最终组合及正式 OTA](a8-validation.md) |
+| A9 | [私有参考锁、ARM64 胜出前缀及正式 OTA](a9-validation.md) |
