@@ -2,6 +2,8 @@
 
 ## 当前使用
 
+- EDK 核心 SDK 与业务库解耦 · [阶段计划](../../edk/docs/edk-core-business-decoupling-plan.md) · [新会话提示词](../../edk/docs/edk-core-business-decoupling-prompt.md) · [实机验收](archive/2026-11-27-core-business-decoupling/README.md)
+
 - 本轮 A6：[旧 SOL 续传与 OTA 实机验收](edk-convergence-a6-validation.md) · [工程回归](../../edk/docs/edk-convergence-a6-validation.md)
 
 - 本轮 A5：[包配置来源与 OTA 实机验收](edk-convergence-a5-validation.md) · [工程回归](../../edk/docs/edk-convergence-a5-validation.md)
