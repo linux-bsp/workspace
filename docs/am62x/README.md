@@ -21,7 +21,7 @@
 - [systemd 服务与健康检查](system-services.md)
 - [可靠性与验证边界](reliability-boundaries.md)
 - [TFTP 配置](tftp-server.md)、[电源串口连接](power-control.md)
-- A1–A6（含 A6.4）已完成实机验收，logctl 多份旧凭据下的续传归属判定已修复。[边界收敛与架构精简计划](../../edk/docs/edk-portability-integrity-plan.md) · [历史 A6.4 开发提示词](../../edk/docs/edk-portability-integrity-prompt.md)
+- A1–A6（含 A6.5 收口）已完成实机验收，logctl 多份旧凭据下的续传归属和零游标 v2 绑定均验证通过。[边界收敛与架构精简计划](../../edk/docs/edk-portability-integrity-plan.md) · [历史 A6.4 开发提示词](../../edk/docs/edk-portability-integrity-prompt.md)
 
 固件生成和板级布局见 BSP 的
 [板级说明](../../bsp-base-external/board/ti/am625/README.md)、
