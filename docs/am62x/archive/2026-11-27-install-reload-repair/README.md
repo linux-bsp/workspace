@@ -8,3 +8,4 @@
 | A2 | [同字节脚本与 BusyBox 实机专项](a2-validation.md) |
 | A3 | [真实本机采样、节点保护及正式 OTA](a3-validation.md) |
 | A4 | [受保护原工具及正式 OTA](a4-validation.md) |
+| A5 | [运行时接口与架构保护及正式 OTA](a5-validation.md) |
