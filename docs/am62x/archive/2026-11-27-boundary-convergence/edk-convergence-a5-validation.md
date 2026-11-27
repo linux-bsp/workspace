@@ -1,6 +1,6 @@
 # A5：AM625 正式包配置来源与 OTA 实机验收
 
-E=`output/edk-convergence-a5-20261126-221458-eOMKEr/`，F=E/final/。[工程验证](../../edk/docs/edk-convergence-a5-validation.md)。
+E=`output/edk-convergence-a5-20261126-221458-eOMKEr/`，F=E/final/。[工程验证](../../../../edk/docs/archive/2026-11-27-boundary-convergence/edk-convergence-a5-validation.md)。
 
 | 项目 | 实际证据 |
 | --- | --- |

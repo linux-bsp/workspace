@@ -1,6 +1,6 @@
 # A4：AM625 Kconfig 模式及最终正常候选实机验收
 
-E=`output/edk-convergence-a4-20261126-214421-nn8tCz/`，F=E/final/。[工程与本轮四阶段边界复核](../../edk/docs/edk-convergence-a4-validation.md)。
+E=`output/edk-convergence-a4-20261126-214421-nn8tCz/`，F=E/final/。[工程与本轮四阶段边界复核](../../../../edk/docs/archive/2026-11-27-boundary-convergence/edk-convergence-a4-validation.md)。
 
 - 指定板可信 SSH，MAC `1c:63:49:22:c4:f7`、HWID `1010001000110000`、boot `fba8a8cf-97fa-42f5-8376-bf992e784687`，slot A，`v0.0.1` packed 1，完整 firmware ID `8472924c9470022a7ae05db552e5db077c641ee7a646ce46c845c4313a2a468a`。E/board-before.log、F/board-check.log，独立 catalog 当前 `draft-THfIe5` success、running=version=1、未隔离、confirmed successful=1；`FWCHECK1 match`、8 服务 active、0 failed、健康通过。
 - 正式 AM625 正常候选重打，Buildroot `BR2_TARGET_UBOOT_BUILD_SYSTEM_KCONFIG=y`，清单 `uboot_build.mode=kconfig`，实际 U-Boot `.config` SHA256 `e186e35d68ff08b5db900bf189a562f82b6421788aca7729dc9074783c85695d`，R5 `.config` SHA `7dba14ebdd3b0297e99d30d801a0942071f5a9af5990cd0c6cd9543c25024b39`，与独立计算一致（F/manifest-uboot-verify.log）。保留实际包 build-info f5875140，打包时 checkout 557d33a2 另有记录，没有覆盖旧包 metadata。

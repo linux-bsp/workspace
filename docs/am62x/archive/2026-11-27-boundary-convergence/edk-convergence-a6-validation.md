@@ -1,6 +1,6 @@
 # A6：AM625 旧 SOL 续传切换、升级兼容与 OTA 实机验收
 
-E=`output/edk-convergence-a6-20261126-222810-6Br8uw/`，F=E/final/。[工程验证](../../edk/docs/edk-convergence-a6-validation.md)。
+E=`output/edk-convergence-a6-20261126-222810-6Br8uw/`，F=E/final/。[工程验证](../../../../edk/docs/archive/2026-11-27-boundary-convergence/edk-convergence-a6-validation.md)。
 
 ## 正式运行与设备事务
 
@@ -35,7 +35,7 @@ E=`output/edk-convergence-a6-20261126-222810-6Br8uw/`，F=E/final/。[工程验�
 
 ## A6.3 实机专项与 OTA
 
-E3=`output/edk-convergence-a6-3-20261126-225712-JxSIoN/`，F3=E3/final/。[工程验证](../../edk/docs/edk-convergence-a6-validation.md#a63历史-order-更正后的冲突检测并补齐-a5-重建回归)。上次 A6 设备事务与文件保留，不覆盖。
+E3=`output/edk-convergence-a6-3-20261126-225712-JxSIoN/`，F3=E3/final/。[工程验证](../../../../edk/docs/archive/2026-11-27-boundary-convergence/edk-convergence-a6-validation.md#a63历史-order-更正后的冲突检测并补齐-a5-重建回归)。上次 A6 设备事务与文件保留，不覆盖。
 
 | 项目 | 实际证据 |
 | --- | --- |
@@ -65,7 +65,7 @@ E3=`output/edk-convergence-a6-3-20261126-225712-JxSIoN/`，F3=E3/final/。[工�
 
 ## A6.4 实机专项与 OTA
 
-E4=`output/edk-convergence-a6-4-20261126-232237-mt1odS/`，F4=E4/final/。[本次工程记录](../../edk/docs/edk-convergence-a6-validation.md#a64多份旧凭据下的续传归属判定)。历史 A6、A6.3 事务留存，不覆盖。
+E4=`output/edk-convergence-a6-4-20261126-232237-mt1odS/`，F4=E4/final/。[本次工程记录](../../../../edk/docs/archive/2026-11-27-boundary-convergence/edk-convergence-a6-validation.md#a64多份旧凭据下的续传归属判定)。历史 A6、A6.3 事务留存，不覆盖。
 
 | 项目 | 本次实际证据 |
 | --- | --- |
@@ -93,7 +93,7 @@ E4=`output/edk-convergence-a6-4-20261126-232237-mt1odS/`，F4=E4/final/。[本�
 
 ## A6.5 实机专项与 OTA
 
-E5=`output/edk-convergence-a6-5-20261127-084329-hbVhE0/`，F5=E5/final/。[工程回归](../../edk/docs/edk-convergence-a6-validation.md#a65零游标歧义时先保存-v2-再发送a6-收口)。前次 A6.4 及其他历史事务保留。
+E5=`output/edk-convergence-a6-5-20261127-084329-hbVhE0/`，F5=E5/final/。[工程回归](../../../../edk/docs/archive/2026-11-27-boundary-convergence/edk-convergence-a6-validation.md#a65零游标歧义时先保存-v2-再发送a6-收口)。前次 A6.4 及其他历史事务保留。
 
 | 项目 | 本次实际证据 |
 | --- | --- |

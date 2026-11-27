@@ -1,6 +1,6 @@
 # AM625 实机验收归档（EDK A19–A21）
 
-三次阶段验收均使用 MAC `1c:63:49:22:c4:f7`、HWID `1010001000110000` 的指定 AM625。各记录保存当时的 boot ID、固件身份、健康与专项验证结果。[EDK 开发归档](../../../../edk/docs/archive/2026-11-26-portability-repair/README.md) · [原开发计划](../../../../edk/docs/archive/2026-11-26-portability-repair/edk-portability-repair-plan.md) · [原开发提示词](../../../../edk/docs/archive/2026-11-26-portability-repair/edk-portability-repair-prompt.md)
+三次阶段验收均使用 MAC `1c:63:49:22:c4:f7`、HWID `1010001000110000` 的指定 AM625。各记录保存当时的 boot ID、固件身份、健康与专项验证结果。[EDK 开发归档](../../../../edk/docs/archive/2026-11-26-portability-repair/README.md)
 
 | 阶段 | AM625 实机记录 | 对应开发记录 | 工作区关闭提交 |
 | --- | --- | --- | --- |
@@ -10,4 +10,4 @@
 
 A19、A20 沿用已确认的 `draft-V54AKR`。A21 在 `draft-EP71gS` 安装后确认 A 槽及健康，再使用实装程序验证正常与进程内注入 `ENOSYS` 两条路径。原始命令和输出目录保留在各阶段板验记录中。
 
-下一轮入口见[开发计划](../../../../edk/docs/edk-portability-integrity-plan.md)和[新会话提示词](../../../../edk/docs/edk-portability-integrity-prompt.md)。此前实机记录见 [A13–A18 及两轮复查板验归档](../2026-11-26-portability/README.md)。
+后续边界收敛工作的历史资料见[阶段验收索引](../../../../edk/docs/archive/2026-11-27-boundary-convergence/README.md)。此前实机记录见 [A13–A18 及两轮复查板验归档](../2026-11-26-portability/README.md)。

@@ -1,6 +1,6 @@
 # A1：AM625 旧 SOL 续传内容身份专项与正式 OTA
 
-E=`output/edk-convergence-a1-20261126-210418-pRRwFC/`，F=E/final/。[EDK 回归和修改边界](../../edk/docs/edk-convergence-a1-validation.md)。
+E=`output/edk-convergence-a1-20261126-210418-pRRwFC/`，F=E/final/。[EDK 回归和修改边界](../../../../edk/docs/archive/2026-11-27-boundary-convergence/edk-convergence-a1-validation.md)。
 
 | 验收项 | 实际证据 |
 | --- | --- |

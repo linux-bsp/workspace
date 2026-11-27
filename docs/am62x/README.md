@@ -2,20 +2,7 @@
 
 ## 当前使用
 
-- EDK 核心 SDK 与业务库解耦 · [阶段计划](../../edk/docs/edk-core-business-decoupling-plan.md) · [新会话提示词](../../edk/docs/edk-core-business-decoupling-prompt.md) · [实机验收](archive/2026-11-27-core-business-decoupling/README.md)
-
-- 本轮 A6：[旧 SOL 续传与 OTA 实机验收](edk-convergence-a6-validation.md) · [工程回归](../../edk/docs/edk-convergence-a6-validation.md)
-
-- 本轮 A5：[包配置来源与 OTA 实机验收](edk-convergence-a5-validation.md) · [工程回归](../../edk/docs/edk-convergence-a5-validation.md)
-
-- 本轮 A4：[Kconfig 正常候选及最终实板验收](edk-convergence-a4-validation.md) · [四阶段收尾审计](../../edk/docs/edk-convergence-a4-validation.md)
-
-- 本轮 A3：[EDK 包来源、清单与实板 OTA 验收](edk-convergence-a3-validation.md) · [工程回归](../../edk/docs/edk-convergence-a3-validation.md)
-
-- 本轮 A2：[DTB 依赖与活动设备树实板验收](edk-convergence-a2-validation.md) · [BSP 回归](../../edk/docs/edk-convergence-a2-validation.md)
-
-- 本轮 A1：[旧 SOL 续传内容身份专项及正式 OTA 验收](edk-convergence-a1-validation.md) · [EDK 回归](../../edk/docs/edk-convergence-a1-validation.md)
-
+- EDK 安装兼容性与遥测重载修复 · [阶段计划](../../edk/docs/edk-install-reload-repair-plan.md) · [新会话提示词](../../edk/docs/edk-install-reload-repair-prompt.md) · [上轮核心与业务解耦板验](archive/2026-11-27-core-business-decoupling/README.md)
 - [工作区拉取和构建](../../README.md)
 - [固件升级、槽位与恢复操作](firmware-upgrade-guide.md)
 - [固件包 HWID 与自动发布](firmware-hwid-publication.md)
@@ -23,7 +10,6 @@
 - [systemd 服务与健康检查](system-services.md)
 - [可靠性与验证边界](reliability-boundaries.md)
 - [TFTP 配置](tftp-server.md)、[电源串口连接](power-control.md)
-- A1–A6（含 A6.5 收口）已完成实机验收，logctl 多份旧凭据下的续传归属和零游标 v2 绑定均验证通过。[边界收敛与架构精简计划](../../edk/docs/edk-portability-integrity-plan.md) · [历史 A6.4 开发提示词](../../edk/docs/edk-portability-integrity-prompt.md)
 
 固件生成和板级布局见 BSP 的
 [板级说明](../../bsp-base-external/board/ti/am625/README.md)、
@@ -32,6 +18,7 @@
 
 ## 验证与溯源
 
+- 边界收敛 A1–A6（含 A6.5）的[工程与 AM625 实机验收索引](../../edk/docs/archive/2026-11-27-boundary-convergence/README.md)
 - [构建框架优化验收](build-framework-validation.md)
 
 - [EDK 历次板级验收](edk-module-refactoring-validation.md) · [2026-11-25 子系统重构 M0–M7 实机记录](archive/2026-11-25-edk-subsystem-validation.md)

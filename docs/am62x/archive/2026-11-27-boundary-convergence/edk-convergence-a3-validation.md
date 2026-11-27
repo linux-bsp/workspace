@@ -1,6 +1,6 @@
 # A3：AM625 正式包来源、清单与 OTA 实机验收
 
-E=`output/edk-convergence-a3-20261126-212838-XI4MfJ/`，F=E/final/。[工程回归及六种独立角色验证](../../edk/docs/edk-convergence-a3-validation.md)。
+E=`output/edk-convergence-a3-20261126-212838-XI4MfJ/`，F=E/final/。[工程回归及六种独立角色验证](../../../../edk/docs/archive/2026-11-27-boundary-convergence/edk-convergence-a3-validation.md)。
 
 | 事项 | 实际证据 |
 | --- | --- |
