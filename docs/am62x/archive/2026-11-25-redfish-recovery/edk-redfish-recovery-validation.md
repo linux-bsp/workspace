@@ -1,7 +1,7 @@
 # AM625 节点 1 Redfish 冷启动超时整改验收
 
 2026-11-25，独立于 A1–A6 后续审计阶段。
-[EDK 开发与主机回归](../../edk/docs/edk-redfish-recovery-validation.md)。
+[EDK 开发与主机回归](../../../../edk/docs/archive/2026-11-25-redfish-recovery/edk-redfish-recovery-validation.md)。
 证据目录 `output/edk-redfish-recovery-20261125-2306/`，
 故障基线 `output/bmc-node1-timeout-20261125-2256/`。
 

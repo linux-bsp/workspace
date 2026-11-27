@@ -2,7 +2,7 @@
 
 八份板验记录列出指定 AM625 上的实测项、运行固件身份与原始证据位置。
 
-[A13–A18 原计划](../../../../edk/docs/archive/2026-11-26-portability/edk-portability-boundary-plan.md) · [EDK 开发归档](../../../../edk/docs/archive/2026-11-26-portability/README.md) · [A1–A12 板验归档](../2026-11-26-module-audit/README.md)
+[EDK 开发归档](../../../../edk/docs/archive/2026-11-26-portability/README.md) · [A1–A12 板验归档](../2026-11-26-module-audit/README.md)
 
 | 阶段 | AM625 实机记录 | EDK 开发记录 | 工作区关闭提交 |
 | --- | --- | --- | --- |
@@ -17,4 +17,4 @@
 
 A13–A15 沿用 A7 正式固件，A17、A18 沿用 A16 正式固件。A16 和两轮复查修复的记录分别保留了当次 kernel/rootfs OTA 的设备事务与健康确认结果。
 
-后续 A19–A21 的修复计划、执行提示词及阶段结果已归档。[AM625 板验记录](../2026-11-26-portability-repair/README.md) · [开发记录](../../../../edk/docs/archive/2026-11-26-portability-repair/README.md)
+后续 A19–A21 的修复及阶段验收结果已归档。[AM625 板验记录](../2026-11-26-portability-repair/README.md) · [开发记录](../../../../edk/docs/archive/2026-11-26-portability-repair/README.md)

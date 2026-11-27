@@ -18,7 +18,7 @@
 
 EDK 子仓提供设备工具、PMC 主机服务和共享协议。载荷服务器的 BMC 和 PMC 客户端统一由 `libserver` 提供。
 当前模块与构建基线见 [EDK 架构](edk/docs/architecture.md)、[软件架构框图](edk/docs/软件架构设计.drawio) 和 [M0–M7 实机验收](docs/am62x/archive/2026-11-25-edk-subsystem-validation.md)。
-EDK 安装兼容性与遥测重载 A1–A3 已交付，续修 A4–A7 从工具组件单装保护开始。[开发计划](edk/docs/edk-install-reload-repair-plan.md) · [阶段验收](edk/docs/archive/2026-11-27-install-reload-repair/README.md) · [新会话提示词](edk/docs/edk-install-reload-repair-prompt.md) · [上轮核心与业务解耦验收](edk/docs/archive/2026-11-27-core-business-decoupling/README.md)
+EDK 安装兼容性与遥测重载 A1–A7 均已验收交付。[开发计划](edk/docs/edk-install-reload-repair-plan.md) · [阶段验收](edk/docs/archive/2026-11-27-install-reload-repair/README.md) · [新会话提示词](edk/docs/edk-install-reload-repair-prompt.md) · [上轮核心与业务解耦验收](edk/docs/archive/2026-11-27-core-business-decoupling/README.md)
 
 上一轮边界收敛 A1–A6（含 A6.5）已验收。[阶段验收归档](edk/docs/archive/2026-11-27-boundary-convergence/README.md)
 既有验收记录见 [A1–A4 规则所有权与 ABI 核验](edk/docs/archive/2026-11-27-boundary-convergence/edk-convergence-a4-validation.md) · [A5 包来源验收](edk/docs/archive/2026-11-27-boundary-convergence/edk-convergence-a5-validation.md) · [A6 续传验收](edk/docs/archive/2026-11-27-boundary-convergence/edk-convergence-a6-validation.md) · [A6 AM625 实机记录](docs/am62x/archive/2026-11-27-boundary-convergence/edk-convergence-a6-validation.md)。

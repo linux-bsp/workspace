@@ -521,7 +521,7 @@ OTA 成功记录、串口验收及提交记录。
   `2ab9c3dc-2882-42ca-b413-38676a6a8c93`，原 NFS 根路径和参考固件 ID 已核对。
 
 证据目录为 `output/edk-adapter-refactor.4lYyiI/`。适配器与执行器边界见
-[星务与执行器协议](../../edk/docs/satellite-protocol.md)。
+[星务与执行器协议](../../edk/docs/protocols/satellite-protocol.md)。
 
 ## 适配边界与部署收尾（2026-11-19）
 
@@ -555,7 +555,7 @@ OTA 成功记录、串口验收及提交记录。
   `4980c92a-bf0e-4bb6-8a9a-9c63102c45d1`，参考构建和服务状态与验证前一致。
 
 证据目录为 `output/edk-layer-completion.KJqFMy/`，包括两份实机包、原始回执、
-源码快照和运行日志。[星务与执行器协议](../../edk/docs/satellite-protocol.md)
+源码快照和运行日志。[星务与执行器协议](../../edk/docs/protocols/satellite-protocol.md)
 
 ## 完成状态
 
@@ -658,4 +658,4 @@ U-Boot 出厂值、FIT 白名单及 AM625 实机身份一致。86 项原生回�
 
 ## EDK 子系统重构 M0–M7（2026-11-25）
 
-各阶段实机记录、发布身份与最终提交核查见 [M0–M7 板级验收归档](archive/2026-11-25-edk-subsystem-validation.md)。随后开展的整改见 [EDK A1–A12 计划与记录归档](../../edk/docs/archive/2026-11-26-module-audit/README.md)。
+各阶段实机记录、发布身份与最终提交核查见 [M0–M7 板级验收归档](archive/2026-11-25-edk-subsystem-validation.md)。随后开展的整改见 [EDK A1–A12 工程与实机验收索引](../../edk/docs/archive/2026-11-26-module-audit/README.md)。

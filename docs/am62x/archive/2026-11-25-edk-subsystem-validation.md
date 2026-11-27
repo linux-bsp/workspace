@@ -223,8 +223,7 @@
 ## EDK 子系统整改结果与最终关闭确认（2026-11-25）
 
 本节是 M0–M7 已关闭后的交接索引与复核记录，不开启新实施阶段，也不变更
-已验收固件、子仓版本或产品配置。按 [整改计划](../../../edk/docs/archive/2026-11-25-subsystem-refactoring/edk-subsystem-refactoring-plan.md)
-第 6、9 节，八个阶段均在完成适用 V1–V5、当次指定 AM625 V6 和适用的正式 OTA 验收后，
+已验收固件、子仓版本或产品配置。依照当时整改计划第 6、9 节的验收要求，八个阶段均在完成适用 V1–V5、当次指定 AM625 V6 和适用的正式 OTA 验收后，
 依次提交、推送并确认远端可达；正式固件未变化的阶段使用当时已确认的运行制品及隔离候选。
 
 ### 整改目标落实情况
@@ -248,11 +247,11 @@
 `/root/http_receive_new_maintainer`，按授权无父轮开发上下文接手，实际修改和测试；
 最终指南复走通过。不将 AI 练习表述为人类维护者验收。
 
-后续开发以 [模块契约](../../../edk/docs/module-contracts.md) 的接口所有者和直接依赖为边界，
-按 [新人维护指南](../../../edk/docs/maintainer-guide.md) 执行局部测试，
-通过 [项目装配指南](../../../edk/docs/project-assembly.md) 扩展项目表或裁剪功能。
+后续开发以 [模块契约](../../../edk/docs/guides/module-contracts.md) 的接口所有者和直接依赖为边界，
+按 [新人维护指南](../../../edk/docs/guides/maintainer-guide.md) 执行局部测试，
+通过 [项目装配指南](../../../edk/docs/guides/project-assembly.md) 扩展项目表或裁剪功能。
 [架构图](../../../edk/docs/软件架构设计.drawio)、[架构说明](../../../edk/docs/architecture.md)、
-[接口与需求手册](../../../edk/docs/EDK_接口与需求手册.xlsx) 已同步。
+[接口与需求手册](../../../edk/docs/requirements/EDK_接口与需求手册.xlsx) 已同步。
 
 ### 原板端报错的整改与复验
 
@@ -283,7 +282,7 @@
 | M2 | `b5310a8b016aeac7955ad6dfc793d268e1a4b900` | `400aa0a39193592e1cdfcf887598357c220c7b04` |
 | M3 | `9aad7b8e6896b0ded47d397110c4c040d7a6fff2` | `0cb4199c6134d8d3b3b3be4536ba443c3f0ef39b` |
 | M4 | `a6fb8efaa2c9216fc6aa477ac22eb2d0abced6dd` | `6ff91c570c4be14194635bcadb30f5b146b90b11` |
-| M5 | `e77465985e273f6206d2a9b0d86fcfe0f9f59551` | `b4079f539dc800b339ffb8653bc327aeaa039a69` |
+| M5 | HTTP 接收、下载、断点、采样及路由责任分离；真实首次接手 AI 维护者与局部增量回归通过，关闭两条 HTTP 临时例外 | 21:36:16–35，通过 | [M5](../../../edk/docs/archive/2026-11-25-subsystem-refactoring/edk-subsystem-m5-validation.md)、[维护练习](../../../edk/docs/archive/2026-11-25-subsystem-refactoring/edk-subsystem-m5-maintainer.md) |
 | M6 | `d392a20d845aa01d4b71a0b7d66b9cefd58d828e` | `e5a0dbf1e76f9fe2d08cd17c1afe0f5e77fbb926` |
 | M7 | `489673305d6c862870f7c8fe4c309755d84def24` | `d214bccc15597003da9e924fe838f8fdc4353c5f` |
 

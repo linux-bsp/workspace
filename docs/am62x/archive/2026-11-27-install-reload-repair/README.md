@@ -10,3 +10,4 @@
 | A4 | [受保护原工具及正式 OTA](a4-validation.md) |
 | A5 | [运行时接口与架构保护及正式 OTA](a5-validation.md) |
 | A6 | [ARM64 安装胜出前缀及正式 OTA](a6-validation.md) |
+| A7 | [实际温度、超时判定、节点保护及正式 OTA](a7-validation.md) |

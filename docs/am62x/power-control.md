@@ -62,4 +62,4 @@ do not query again after `pdebug power local dc_power` when returning the panel
 to local control.
 
 Build and validate through Buildroot as described in
-[the EDK RS485 power protocol](../../edk/docs/power-protocol.md).
+[the EDK RS485 power protocol](../../edk/docs/protocols/power-protocol.md).
