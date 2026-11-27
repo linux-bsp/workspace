@@ -2,7 +2,7 @@
 
 ## 当前使用
 
-- EDK 安装兼容性与遥测重载修复 · [阶段计划](../../edk/docs/edk-install-reload-repair-plan.md) · [新会话提示词](../../edk/docs/edk-install-reload-repair-prompt.md) · [上轮核心与业务解耦板验](archive/2026-11-27-core-business-decoupling/README.md)
+- EDK 安装兼容性与遥测重载修复 A1–A3 已验收 · [阶段计划](../../edk/docs/edk-install-reload-repair-plan.md) · [本轮实机验收](archive/2026-11-27-install-reload-repair/README.md) · [新会话提示词](../../edk/docs/edk-install-reload-repair-prompt.md) · [上轮核心与业务解耦板验](archive/2026-11-27-core-business-decoupling/README.md)
 - [工作区拉取和构建](../../README.md)
 - [固件升级、槽位与恢复操作](firmware-upgrade-guide.md)
 - [固件包 HWID 与自动发布](firmware-hwid-publication.md)
