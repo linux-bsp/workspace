@@ -5,3 +5,4 @@
 | 阶段 | 记录 |
 | --- | --- |
 | A1 | [BSL 兼容性与 OTA 实机验收](a1-validation.md) |
+| A2 | [同字节脚本与 BusyBox 实机专项](a2-validation.md) |
