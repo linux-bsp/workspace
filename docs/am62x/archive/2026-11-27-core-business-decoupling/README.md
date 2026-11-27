@@ -5,3 +5,4 @@
 | 阶段 | 验收记录 |
 | --- | --- |
 | A1 | [旧 SDK 与现役产品专项](edk-core-business-decoupling-a1-validation.md) |
+| A2 | [三套 SDK 与遥测契约专项](edk-core-business-decoupling-a2-validation.md) |
