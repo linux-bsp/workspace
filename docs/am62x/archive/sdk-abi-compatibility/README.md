@@ -7,4 +7,4 @@
 | 阶段 | 实机验收 | 工程验收 | 状态 |
 | --- | --- | --- | --- |
 | A1 公共枚举布局 | [实机记录](a1-validation.md) | [工程记录](../../../../edk/docs/archive/sdk-abi-compatibility/a1-validation.md) | 已验收 |
-| A2 严格告警与整轮回归 | 待验收 | 待验收 | 待开发 |
+| A2 严格告警与整轮回归 | [实机记录](a2-validation.md) | [工程记录](../../../../edk/docs/archive/sdk-abi-compatibility/a2-validation.md) | 已验收 |
