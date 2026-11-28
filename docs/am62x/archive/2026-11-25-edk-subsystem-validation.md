@@ -235,7 +235,7 @@
 | M2 | hwmon 通过模块 API 与独立 SDK 使用；真实首次接手 AI 维护者完成修改、局部测试和补正，正式关闭配置保持兼容 | 18:02:40，通过 | [M2](../../../edk/docs/archive/2026-11-25-subsystem-refactoring/edk-subsystem-m2-validation.md) |
 | M3 | PDM 公共诊断与 LED/MCU 私有实现隔离，真实 Kbuild 开关两态通过并删除相应临时例外 | 20:27:25，通过 | [M3](../../../edk/docs/archive/2026-11-25-subsystem-refactoring/edk-subsystem-m3-validation.md) |
 | M4 | BSL 共用机制、Server/BMC 业务接口及 collector 关闭兼容界定；保留已有公共库及接口 | 21:21:02，通过 | [M4](../../../edk/docs/archive/2026-11-25-subsystem-refactoring/edk-subsystem-m4-validation.md) |
-| M5 | HTTP 接收、下载、断点、采样及路由责任分离；真实首次接手 AI 维护者与局部增量回归通过，关闭两条 HTTP 临时例外 | 21:36:16–35，通过 | [M5](../../../edk/docs/archive/2026-11-25-subsystem-refactoring/edk-subsystem-m5-validation.md)、[维护练习](../../../edk/docs/archive/2026-11-25-subsystem-refactoring/edk-subsystem-m5-maintainer.md) |
+| M5 | HTTP 接收、下载、断点、采样及路由责任分离；真实首次接手 AI 维护者与局部增量回归通过，关闭两条 HTTP 临时例外 | 21:36:16–35，通过 | [M5 工程与接手验收](../../../edk/docs/archive/2026-11-25-subsystem-refactoring/edk-subsystem-m5-validation.md) |
 | M6 | 独立项目表装配、功能裁剪与配置冲突提前拒绝；A/B 与双 HWID SDK、干净/复用安装及真实 Buildroot staging 验证 | 21:59:34，通过 | [M6](../../../edk/docs/archive/2026-11-25-subsystem-refactoring/edk-subsystem-m6-validation.md) |
 | M7 | 最终依赖回归、架构图、接口需求手册、新人指南、复用 CI 与交接完成；三条 M1 临时例外全部关闭 | 22:25:11–22:26:04，通过 | [M7](../../../edk/docs/archive/2026-11-25-subsystem-refactoring/edk-subsystem-m7-validation.md) |
 
@@ -282,7 +282,7 @@
 | M2 | `b5310a8b016aeac7955ad6dfc793d268e1a4b900` | `400aa0a39193592e1cdfcf887598357c220c7b04` |
 | M3 | `9aad7b8e6896b0ded47d397110c4c040d7a6fff2` | `0cb4199c6134d8d3b3b3be4536ba443c3f0ef39b` |
 | M4 | `a6fb8efaa2c9216fc6aa477ac22eb2d0abced6dd` | `6ff91c570c4be14194635bcadb30f5b146b90b11` |
-| M5 | HTTP 接收、下载、断点、采样及路由责任分离；真实首次接手 AI 维护者与局部增量回归通过，关闭两条 HTTP 临时例外 | 21:36:16–35，通过 | [M5](../../../edk/docs/archive/2026-11-25-subsystem-refactoring/edk-subsystem-m5-validation.md)、[维护练习](../../../edk/docs/archive/2026-11-25-subsystem-refactoring/edk-subsystem-m5-maintainer.md) |
+| M5 | `e77465985e273f6206d2a9b0d86fcfe0f9f59551` | `b4079f539dc800b339ffb8653bc327aeaa039a69` |
 | M6 | `d392a20d845aa01d4b71a0b7d66b9cefd58d828e` | `e5a0dbf1e76f9fe2d08cd17c1afe0f5e77fbb926` |
 | M7 | `489673305d6c862870f7c8fe4c309755d84def24` | `d214bccc15597003da9e924fe838f8fdc4353c5f` |
 
