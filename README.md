@@ -18,6 +18,8 @@
 
 EDK 子仓提供设备工具、PMC 主机服务和共享协议。载荷服务器的 BMC 和 PMC 客户端统一由 `libserver` 提供。
 当前模块与构建基线见 [EDK 架构](edk/docs/architecture.md)、[软件架构框图](edk/docs/软件架构设计.drawio) 和 [M0–M7 实机验收](docs/am62x/archive/2026-11-25-edk-subsystem-validation.md)。
+EDK 整体模块重构 A1–A5 已全部验收。[开发计划](edk/docs/edk-framework-module-refactoring-plan.md) · [模块契约与维护入口](edk/docs/guides/module-contracts.md) · [工程记录](edk/docs/archive/framework-modules/README.md) · [AM625 实机记录](docs/am62x/archive/framework-modules/README.md)
+
 BSL 公共 ABI 与 SDK 安装预检 A1–A4 已验收，本轮完成。[本轮工程验收](edk/docs/archive/sdk-abi-boundary/README.md) · [本轮实机验收](docs/am62x/archive/sdk-abi-boundary/README.md) ·[上轮 ABI 工程验收](edk/docs/archive/sdk-abi-compatibility/README.md) · [上轮 ABI 实机验收](docs/am62x/archive/sdk-abi-compatibility/README.md) · [开发计划](edk/docs/edk-sdk-abi-boundary-plan.md) · [新会话提示词](edk/docs/edk-sdk-abi-boundary-prompt.md) · [SDK 分装与安装路径工程验收](edk/docs/archive/sdk-install-contract/README.md) · [SDK 安装实机验收](docs/am62x/archive/sdk-install-contract/README.md) · [安装与遥测验收](edk/docs/archive/2026-11-27-install-reload-repair/README.md) · [核心与业务解耦验收](edk/docs/archive/2026-11-27-core-business-decoupling/README.md)
 
 上一轮边界收敛 A1–A6（含 A6.5）已验收。[阶段验收归档](edk/docs/archive/2026-11-27-boundary-convergence/README.md)
