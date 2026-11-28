@@ -2,7 +2,7 @@
 
 ## 当前使用
 
-- EDK 整体重构 A1–A8 已完成：[计划](../../edk/docs/edk-framework-module-refactoring-plan.md) · [执行提示词（已完成）](../../edk/docs/edk-framework-module-refactoring-prompt.md) · [模块契约](../../edk/docs/guides/module-contracts.md) · [逐阶段 AM625 实机记录](archive/framework-modules/README.md) · [工程记录](../../edk/docs/archive/framework-modules/README.md)
+- EDK 整体模块重构 · [计划与阶段状态](../../edk/docs/edk-framework-module-refactoring-plan.md) · [执行提示词](../../edk/docs/edk-framework-module-refactoring-prompt.md) · [模块契约](../../edk/docs/guides/module-contracts.md) · [逐阶段 AM625 实机记录](archive/framework-modules/README.md) · [工程记录](../../edk/docs/archive/framework-modules/README.md)
 - [工作区拉取和构建](../../README.md)
 - [固件升级、槽位与恢复操作](firmware-upgrade-guide.md)
 - [固件包 HWID 与自动发布](firmware-hwid-publication.md)

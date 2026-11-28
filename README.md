@@ -18,7 +18,7 @@
 
 EDK 子仓提供设备工具、PMC 主机服务和共享协议。载荷服务器的 BMC 和 PMC 客户端统一由 `libserver` 提供。
 当前模块与构建基线见 [EDK 架构](edk/docs/architecture.md)、[软件架构框图](edk/docs/软件架构设计.drawio) 和 [M0–M7 实机验收](docs/am62x/archive/2026-11-25-edk-subsystem-validation.md)。
-EDK 整体模块重构 A1–A8 已全部验收。[开发计划](edk/docs/edk-framework-module-refactoring-plan.md) · [执行提示词（已完成）](edk/docs/edk-framework-module-refactoring-prompt.md) · [模块契约与维护入口](edk/docs/guides/module-contracts.md) · [工程记录](edk/docs/archive/framework-modules/README.md) · [AM625 实机记录](docs/am62x/archive/framework-modules/README.md)
+EDK 整体模块重构的当前阶段与状态见[开发计划](edk/docs/edk-framework-module-refactoring-plan.md) · [执行提示词](edk/docs/edk-framework-module-refactoring-prompt.md) · [模块契约与维护入口](edk/docs/guides/module-contracts.md) · [工程记录](edk/docs/archive/framework-modules/README.md) · [AM625 实机记录](docs/am62x/archive/framework-modules/README.md)
 
 [核心与业务解耦验收](edk/docs/archive/2026-11-27-core-business-decoupling/README.md)。
 
