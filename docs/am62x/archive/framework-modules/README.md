@@ -5,3 +5,5 @@
 [A2 核心与管理业务](a2-validation.md)
 
 [A3 Server 子系统](a3-validation.md)
+
+[A4 遥测域与 provider](a4-validation.md)
