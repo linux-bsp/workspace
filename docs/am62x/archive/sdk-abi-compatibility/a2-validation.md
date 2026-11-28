@@ -1,6 +1,6 @@
 # 新轮次 A2：严格 BSL 构建与整轮 SDK ABI AM625 验收
 
-2026-11-28。[工程记录](../../../../edk/docs/archive/sdk-abi-compatibility/a2-validation.md) · [本轮计划](../../../../edk/docs/edk-sdk-abi-compatibility-plan.md) · [A1 板验](a1-validation.md)。E=`output/edk-sdk-abi-compatibility-a2-20261128-103128-y8DQ5D/`，F=E/final/。
+2026-11-28。[工程记录](../../../../edk/docs/archive/sdk-abi-compatibility/a2-validation.md) · [本轮板验索引](README.md) · [A1 板验](a1-validation.md)。E=`output/edk-sdk-abi-compatibility-a2-20261128-103128-y8DQ5D/`，F=E/final/。
 
 指定 MAC `1c:63:49:22:c4:f7`，HWID `1010001000110000`，aarch64，可信 A1 SSH key。开工 boot `9df4b3ce-4fa4-4a10-a2c8-9aec3a8c3e16`，B 槽确认，完整现役 ID `1bab5b05507f357b4dbf15f3892cc6f22746384f45976d528f53b999ebc7e5ea`，fwctl version、ota-status、health-check 通过（E/board-start.log）。
 

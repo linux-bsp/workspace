@@ -1,6 +1,6 @@
 # 新轮次 A1：公共 SDK 日志策略数据布局 AM625 验收
 
-2026-11-28。[工程记录](../../../../edk/docs/archive/sdk-abi-compatibility/a1-validation.md) · [本轮计划](../../../../edk/docs/edk-sdk-abi-compatibility-plan.md)。E=`output/edk-sdk-abi-compatibility-a1-20261128-095705-o6ZDzN/`，C=E/candidate2/，F=C/final/。
+2026-11-28。[工程记录](../../../../edk/docs/archive/sdk-abi-compatibility/a1-validation.md) · [本轮板验索引](README.md)。E=`output/edk-sdk-abi-compatibility-a1-20261128-095705-o6ZDzN/`，C=E/candidate2/，F=C/final/。
 
 指定 MAC `1c:63:49:22:c4:f7`，HWID `1010001000110000`，aarch64，可信上一轮 SSH key。开工 boot `fa7a815f-b166-4c3a-87bb-2cf9e53468cd`，A 槽确认，现役完整 ID `452a56bde73f16133dd32557b5785dd8d5ec5714cd7b46ef92229547b3004fc9`，fwctl version、ota-status、health-check 通过（C/board-start.log）。
 
