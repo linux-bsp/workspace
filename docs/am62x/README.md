@@ -2,7 +2,6 @@
 
 ## 当前使用
 
-- EDK 整体模块重构 · [计划与阶段状态](../../edk/docs/edk-framework-module-refactoring-plan.md) · [执行提示词](../../edk/docs/edk-framework-module-refactoring-prompt.md) · [模块契约](../../edk/docs/guides/module-contracts.md) · [逐阶段 AM625 实机记录](archive/framework-modules/README.md) · [工程记录](../../edk/docs/archive/framework-modules/README.md)
 - [工作区拉取和构建](../../README.md)
 - [固件升级、槽位与恢复操作](firmware-upgrade-guide.md)
 - [固件包 HWID 与自动发布](firmware-hwid-publication.md)
@@ -18,23 +17,9 @@
 
 ## 验证与溯源
 
-已完成的安装、重载与 SDK ABI 专项记录可在工作区根目录按版本查阅。用 `git -C edk ls-tree -r --name-only fefe92fe -- docs/archive` 和 `git ls-tree -r --name-only f97d525 -- docs/am62x/archive` 列出路径，再用 `git -C edk show fefe92fe:<工程记录路径>` 或 `git show f97d525:<板验记录路径>` 查看原文。
-
-- [核心与业务解耦板验](archive/2026-11-27-core-business-decoupling/README.md)
-- 边界收敛 A1–A6（含 A6.5）的[工程与 AM625 实机验收索引](../../edk/docs/archive/2026-11-27-boundary-convergence/README.md)
-- Redfish 冷启动超时整改 · [AM625 实机验收](archive/2026-11-25-redfish-recovery/edk-redfish-recovery-validation.md) · [工程回归](../../edk/docs/archive/2026-11-25-redfish-recovery/edk-redfish-recovery-validation.md)
+已完成的 EDK 开发专项、工程回归和 AM625 实机验收（含发布身份、设备事务和提交）见
+[EDK 历史索引](../../edk/docs/history.md)，按固定 Git 提交回读原文。
 - [构建框架优化验收](build-framework-validation.md)
-
-- [EDK 历次板级验收](edk-module-refactoring-validation.md) · [2026-11-25 子系统重构 M0–M7 实机记录](archive/2026-11-25-edk-subsystem-validation.md)
-- [历史模块复核 A1–A12 板级验收归档](archive/2026-11-26-module-audit/README.md) · [对应 EDK 开发记录](../../edk/docs/archive/2026-11-26-module-audit/README.md)
-- A13–A18 多项目移植与修改边界优化、两轮复查修复及 OTA 验收 · [AM625 实机记录归档](archive/2026-11-26-portability/README.md) · [EDK/BSP 回归记录](../../edk/docs/archive/2026-11-26-portability/README.md)
-  - [A13](archive/2026-11-26-portability/edk-portability-a13-validation.md) · [A14](archive/2026-11-26-portability/edk-portability-a14-validation.md) · [A15](archive/2026-11-26-portability/edk-portability-a15-validation.md) · [A16](archive/2026-11-26-portability/edk-portability-a16-validation.md) · [A17](archive/2026-11-26-portability/edk-portability-a17-validation.md) · [A18](archive/2026-11-26-portability/edk-portability-a18-validation.md)
-  - [A14–A18 复查修复及正式 AM625 OTA 验收](archive/2026-11-26-portability/edk-portability-remediation-validation.md) · [EDK/BSP 回归记录](../../edk/docs/archive/2026-11-26-portability/edk-portability-remediation-validation.md)
-  - [A16/A18 二次复查修复及 AM625 实机验收](archive/2026-11-26-portability/edk-portability-followup-validation.md) · [EDK/BSP 回归记录](../../edk/docs/archive/2026-11-26-portability/edk-portability-followup-validation.md)
-- A19–A21 移植复查修复 · [AM625 实机记录归档](archive/2026-11-26-portability-repair/README.md) · [EDK/BSP 回归记录](../../edk/docs/archive/2026-11-26-portability-repair/README.md)
-  - [A19 依赖记录完整性实板验收](archive/2026-11-26-portability-repair/edk-portability-a19-repair-validation.md) · [工程记录](../../edk/docs/archive/2026-11-26-portability-repair/edk-portability-a19-repair-validation.md)
-  - [A20 所选构建清单实板验收](archive/2026-11-26-portability-repair/edk-portability-a20-repair-validation.md) · [工程记录](../../edk/docs/archive/2026-11-26-portability-repair/edk-portability-a20-repair-validation.md)
-  - [A21 无 memfd 兼容及实板 OTA 验收](archive/2026-11-26-portability-repair/edk-portability-a21-repair-validation.md) · [工程记录](../../edk/docs/archive/2026-11-26-portability-repair/edk-portability-a21-repair-validation.md)
 - [固件下载、事务与恢复优化验证](firmware-upgrade-optimization-validation.md)
 - [OTA 启动失败日志实机验证](ota-boot-failure-log-validation.md)
 - [历史功能验收](validation-history.md)

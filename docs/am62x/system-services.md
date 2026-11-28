@@ -50,4 +50,4 @@ timectl status
 
 历史 systemd 迁移与故障注入结果见
 [历史验收](validation-history.md#systemd-migration)，最新版本见
-[模块重构验收](edk-module-refactoring-validation.md)。
+[模块重构历史验收](../../edk/docs/history.md)。
