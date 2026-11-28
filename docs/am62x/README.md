@@ -2,6 +2,7 @@
 
 ## 当前使用
 
+- EDK 目录结构与命名重构 · [计划](../../edk/docs/edk-structure-naming-refactoring-plan.md) · [执行提示词](../../edk/docs/edk-structure-naming-refactoring-prompt.md)
 - [工作区拉取和构建](../../README.md)
 - [固件升级、槽位与恢复操作](firmware-upgrade-guide.md)
 - [固件包 HWID 与自动发布](firmware-hwid-publication.md)
