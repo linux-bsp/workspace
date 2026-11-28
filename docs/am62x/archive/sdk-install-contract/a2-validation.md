@@ -1,6 +1,6 @@
 # 新轮次 A2：普通绝对命令目录与整轮 AM625 验收
 
-2026-11-27。[工程记录](../../../../edk/docs/archive/sdk-install-contract/a2-validation.md) · [本轮计划](../../../../edk/docs/edk-sdk-install-contract-plan.md) · [A1 板验](a1-validation.md)。E=`output/edk-sdk-install-contract-a2-20261127-181711-DiIvF6/`，F=E/final/。
+2026-11-27。[工程记录](../../../../edk/docs/archive/sdk-install-contract/a2-validation.md) · [本轮板验索引](README.md) · [A1 板验](a1-validation.md)。E=`output/edk-sdk-install-contract-a2-20261127-181711-DiIvF6/`，F=E/final/。
 
 指定 MAC `1c:63:49:22:c4:f7`，HWID `1010001000110000`，aarch64，可信 A1 SSH key。开工 boot `279c4734-de74-4ca5-b0bf-f6e70f0e0a0a`，B 槽确认，完整现役固件 ID `79086d3bf65f2ea2b7f0171f370e7aa1b24c12944833da4af301c641776d8e4d`，fwctl version、ota-status、health-check 通过（E/board-start.log，F/board-candidate.log）。
 

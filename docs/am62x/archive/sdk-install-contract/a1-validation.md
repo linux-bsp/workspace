@@ -1,6 +1,6 @@
 # 新轮次 A1：SDK 双向分装 AM625 验收
 
-2026-11-27。[工程记录](../../../../edk/docs/archive/sdk-install-contract/a1-validation.md) · [本轮计划](../../../../edk/docs/edk-sdk-install-contract-plan.md)。E=`output/edk-sdk-install-contract-a1-20261127-172532-WHvHyv/`，C=E/candidate4/，F=C/final/。
+2026-11-27。[工程记录](../../../../edk/docs/archive/sdk-install-contract/a1-validation.md) · [本轮板验索引](README.md)。E=`output/edk-sdk-install-contract-a1-20261127-172532-WHvHyv/`，C=E/candidate4/，F=C/final/。
 
 指定 MAC `1c:63:49:22:c4:f7`，HWID `1010001000110000`，aarch64，可信 SSH key。修前 boot `d87217b2-c6bb-4ead-a790-e435dfa18802`，A 槽确认，完整现役固件 ID `e85826657468ad6d048ec954e8f2a367da455b0f9b50b59017edee0931a97b3c`，fwctl version、ota-status、health-check 通过（C/board-start.log，F/board-candidate.log）。
 

@@ -2,7 +2,7 @@
 
 ## 当前使用
 
-- EDK SDK 分装与安装路径整改 · A1、A2 均已验收 · [本轮实机验收](archive/sdk-install-contract/README.md) · [本轮阶段计划](../../edk/docs/edk-sdk-install-contract-plan.md) · [新会话提示词](../../edk/docs/edk-sdk-install-contract-prompt.md) · [上轮 AM625 实机验收](archive/2026-11-27-install-reload-repair/README.md) · [上轮核心与业务解耦板验](archive/2026-11-27-core-business-decoupling/README.md)
+- EDK SDK 公共 ABI 与严格编译配置 · A1 已验收 · [本轮实机验收](archive/sdk-abi-compatibility/README.md) · [本轮阶段计划](../../edk/docs/edk-sdk-abi-compatibility-plan.md) · [新会话提示词](../../edk/docs/edk-sdk-abi-compatibility-prompt.md) · [上轮 SDK 安装实机验收](archive/sdk-install-contract/README.md) · [安装与遥测板验](archive/2026-11-27-install-reload-repair/README.md) · [核心与业务解耦板验](archive/2026-11-27-core-business-decoupling/README.md)
 - [工作区拉取和构建](../../README.md)
 - [固件升级、槽位与恢复操作](firmware-upgrade-guide.md)
 - [固件包 HWID 与自动发布](firmware-hwid-publication.md)
