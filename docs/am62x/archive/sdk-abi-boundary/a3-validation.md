@@ -1,0 +1,9 @@
+# A3：真实预包含类型布局 AM625 验收
+
+2026-11-28。[工程记录](../../../../edk/docs/archive/sdk-abi-boundary/a3-validation.md) · [本轮计划](../../../../edk/docs/edk-sdk-abi-boundary-plan.md) · [A2 板验](a2-validation.md)。E=`output/edk-sdk-abi-boundary-a3-20261128-121247-s3aGTe/`，F=E/final。
+
+指定 MAC `1c:63:49:22:c4:f7`、HWID `1010001000110000`、aarch64，可信 A2 SSH key，开始 boot `0d062456-105c-4664-b680-878dd4ad6a55`，A 槽确认，现役 ID `5eecf33fe086df3b74da6c554dd2c6af39a7069c492dcf441ee8c1919f737a53`。fwctl version、ota-status、health-check、路由和正式旧 V2 libbsl SHA（E/board-start.log）。E/legacy-v2-board.log：旧正式 target/rootfs 和 staging 两个 V2 ELF 与独立冻结旧 ARM64 程序确切 SHA、加载路径、真实日志/进程成功，作为有限迁移证据；旧错配 V2 仅在主机拒绝。
+
+F/manifest.sha256、links.manifest 逐项核对 1903 文件及 296 链接。77 个最终 ARM64 配套（22 布局及历史迁移、5 严格/空格/旧 include、3 正常当前/空格/旧兼容预包含、47 安装边界及双工具迁移），每个前缀经 CMake、pkg-config 独立编译消费者与 A1 前冻结程序，合计 231 次真实调用。新 V3 配套的进程 layout launch=112 io=56、/bin/true API rc=0、exit=0、signal=0、exec_error=0、pending=0；日志 enum=4 policy=84，输入/落盘/读回均 review 42 2 3 25，set/list=0 count=1。临时 0700 策略路径，实际加载库和 SHA、路由、健康、清理（F/board-candidate.log）。无真实错配调用、设备控制或其他服务器写入。
+
+正式候选完整 ID `b87a08f3acc3d0cef56383bfc81d4e6cdcc2bf7b2ac2a2fc9909bae14ec6c8d1`，kernel SHA `ec86b40c9dcf1c74721f283f4c0e1df432374895464d59120452f66cc7787f84`，rootfs SHA `b0d07d8cf8cc4888d6bbebcf5835c5138f80c6538b0a93394d98a5f5597ee99b`，OTA SHA `2d5ff2545c8c4fadab9241d8c299faf54678067cc3bf81cb7a337cf3895ad4b8`。v0.0.1 packed 1；2026-11-28T12:33:44+08:00 发布 `draft-gnqXyg`，指定设备报告 `2026-11-28T12:35:22.278525+08:00 id=b87a08f3acc3d0cef56383bfc81d4e6cdcc2bf7b2ac2a2fc9909bae14ec6c8d1 phase=success running=1 target=1 quarantined=False`。可信串口 SSH key，新 boot `0d59eab1-2f08-4c22-9b2f-b6066d39b848`，B 槽确认，FWCHECK1 match，健康、8 active/0 failed、实装 9/9 SHA 匹配。F/board-installed.log 发布后原样复跑 231 次，F/official-consumer.log 直接加载正式 /usr/lib/libbsl.so.2 的冻结消费者通过。F/serial-key.log、board-check.log、board-package-compare.log、device-transaction.json、ota-timeline.log 保留实测记录。A3 指定 AM625 验收通过。

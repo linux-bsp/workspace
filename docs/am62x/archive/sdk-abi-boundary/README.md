@@ -6,3 +6,5 @@
 | --- | --- | --- | --- |
 | A1 构建候选 | [验收](a1-validation.md) | [验收](../../../../edk/docs/archive/sdk-abi-boundary/a1-validation.md) | 已验收 |
 | A2 安装候选 | [验收](a2-validation.md) | [验收](../../../../edk/docs/archive/sdk-abi-boundary/a2-validation.md) | 已验收 |
+| A3 预包含旧 SDK 头 | [验收](a3-validation.md) | [验收](../../../../edk/docs/archive/sdk-abi-boundary/a3-validation.md) | 已验收 |
+| A4 增量重配置 | 待验收 | 待验收 | 待开发 |
