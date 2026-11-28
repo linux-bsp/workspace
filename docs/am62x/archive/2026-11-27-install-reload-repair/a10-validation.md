@@ -1,7 +1,0 @@
-# A10：安装前缀布局及链恢复 AM625 实机验收
-
-[工程记录](../../../../edk/docs/archive/2026-11-27-install-reload-repair/a10-validation.md)。E=`output/edk-install-reload-a10-20261127-153545-feonWA/`，F=E/final/，2026-11-27。
-
-可信 A9 key 核验 MAC 1c:63:49:22:c4:f7、HWID 1010001000110000，旧 boot a36943e6-b9f1-4f3a-8cd1-cf9b8c1d9d8e、A 槽、完整 ID 6a268233332f4ff8b1703c27b917f776f2f7887dc496fa997c16d54f763dfeb1，健康。主机 ARM64 误装全部写前拒绝，前缀树、链接与 SHA 保留。F/board-probes.tar 包含实际受保护原树（E/board-protected.tree、board-help.tree）及实际恢复配套库后的树，板端临时目录逐一核验实体 SHA 和链接。layout-help、layout-link 的原/恢复 ptelemetryd --help 显示 Usage、正常退出 1；layout-protected、layout-bindir、layout-canonical-alias、custom-tools-first、custom-libraries-first、custom-target 的配置查询均返回 0、project=phytium-s5000c，实际 libbsl/libserver 等 EDK 加载路径对应临时 lib 或 lib64，不使用正式同名库代替。F/board-candidate.log。首轮实际断言通过后回收 scratch 的 SSH banner 超时，F/board-candidate-first.log；通过可信连接回收精确 scratch、健康检查并完整复跑成功，F/board-cleanup-retry.log。
-
-正式 OTA SHA d69ea4d28e460e691c1d97b8f85dfbb7cdb4eb89e2c3219d28818ebd0c1a3f90。2026-11-27T15:46:20+08:00 发布 draft-Ar553n；2026-11-27T15:48:11.792962+08:00 完整 ID 48d914b138ee77b45a38fca52ea3bb7934742c1d951341b6dcf116b1aa728a0b phase=success running=1 target=1 quarantined=False。新 boot c82ab7c4-f473-4a5b-8d00-5fa3d267878a，B 槽确认、FWCHECK1 match、健康、8 active、0 failed、9/9 实装 SHA 与正式镜像匹配。发布后同批八组实际消费者及旧 A1 查询、正式服务仅读、整板路由核对通过，F/board-installed.log、board-check.log、board-package-compare.log、serial-key.log、device-transaction.json、post-ota-verify.log。其他真实服务器没有控制操作，无 bootloader 安装。A10 实机通过。

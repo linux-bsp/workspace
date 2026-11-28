@@ -14,4 +14,6 @@
 
 [A7 遥测 provider 查询契约](a7-validation.md)
 
-A1–A7 全部通过指定 AM625 的逐阶段实装验收；各次 publication、完整身份、槽位及健康记录见各阶段。
+[A8 文档与实机只读校验](a8-validation.md)
+
+A1–A7 全部通过指定 AM625 的逐阶段实装验收；A8 复用 A7 已验固件并通过只读验收；各次 publication、完整身份、槽位及健康记录见各阶段。

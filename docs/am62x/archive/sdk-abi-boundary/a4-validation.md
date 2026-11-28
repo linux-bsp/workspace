@@ -1,9 +1,0 @@
-# A4：增量 libdir 重配 SDK AM625 实机验收
-
-2026-11-28。[工程记录](../../../../edk/docs/archive/sdk-abi-boundary/a4-validation.md) · [本轮计划](../../../../edk/docs/edk-sdk-abi-boundary-plan.md) · [A3 板验](a3-validation.md)。E=`output/edk-sdk-abi-boundary-a4-20261128-123725-Mb3Tox/`、F=E/final。
-
-指定 MAC `1c:63:49:22:c4:f7`、HWID `1010001000110000`、aarch64，可信 A3 SSH key。开工 boot `0d59eab1-2f08-4c22-9b2f-b6066d39b848`，B 槽确认，完整现役 ID `b87a08f3acc3d0cef56383bfc81d4e6cdcc2bf7b2ac2a2fc9909bae14ec6c8d1`，fwctl version、ota-status、health-check、路由通过（E/board-start.log）。
-
-E/arm-reconfigure 真实既有 Buildroot ARM64 工具链，同一 build 的 lib→lib64→lib/重复、Debug lib64 与 Release、干净对照；实际缺当前主/配置文件拒绝恢复的前缀、源码移走后的实际运行库前缀。F/board-probes.tar、manifest.sha256、links.manifest 逐项核验 341 文件及 69 链接；23 个前缀（6 路 lib、17 路 lib64），每个前缀真实 CMake/pc 消费者与同一个 A1 前冻结 ARM64 程序，69 次真实调用。对应 lib 或 lib64 的实际加载路径及 SHA，日志 enum=4 policy=84、set/list=0 count=1、review 42 2 3 25 落盘及读回一致；进程 launch=112 io=56、API rc=0、/bin/true exit=0、signal/exec_error/pending=0。独立临时 0700 策略目录，路由不变、健康及清理通过。F/board-candidate.log；错配、工具异常及文件移除仅主机隔离环境。
-
-正式候选完整 ID `350c153fc8b01eda49fadb31d69280099a9365c53b260232bad69e9e7f450c85`，kernel SHA `b4abb1db9cd67f8b88cdb22f9860aeaca6d9b6880eb1058d542da8807d4fc14e`，rootfs SHA `830d766fa8b9fc8aac673ff86fb8c04156fd26675507dcbb077e88119429f5b4`，OTA SHA `994fc314f98a661c84ec9218e164280902a287f66e22ff6766d7b44442825264`。v0.0.1 packed 1；发布 `draft-SYRbXU`，2026-11-28T12:59:59+08:00；设备报告 `2026-11-28T13:01:44.670714+08:00 id=350c153fc8b01eda49fadb31d69280099a9365c53b260232bad69e9e7f450c85 phase=success running=1 target=1 quarantined=False`。可信串口确认 SSH key，新 boot `82171404-370b-4054-8ed8-561de940af8b`、A 槽确认；FWCHECK1 match、健康、8 active、0 failed、9 项正式实际安装 SHA 与 rootfs.tar 匹配（F/serial-key.log、board-check.log、board-package-compare.log、device-transaction.json）。F/board-installed.log 原样复跑 69 次，F/official-consumer.log 直接实际正式 /usr/lib/libbsl.so.2 冻结旧程序调用也通过。其他真实服务器未写入或控制。A4 实机验收及本轮结束。
