@@ -2,7 +2,7 @@
 
 ## 当前使用
 
-- BSL 公共 ABI 与 SDK 配置、安装预检 · [上轮 ABI 实机验收](archive/sdk-abi-compatibility/README.md) · [本轮阶段计划](../../edk/docs/edk-sdk-abi-boundary-plan.md) · [新会话提示词](../../edk/docs/edk-sdk-abi-boundary-prompt.md) · [SDK 安装实机验收](archive/sdk-install-contract/README.md) · [安装与遥测板验](archive/2026-11-27-install-reload-repair/README.md) · [核心与业务解耦板验](archive/2026-11-27-core-business-decoupling/README.md)
+- BSL 公共 ABI 与 SDK 配置、安装预检 · A1、A2 已验收 · [本轮实机验收](archive/sdk-abi-boundary/README.md) · [上轮 ABI 实机验收](archive/sdk-abi-compatibility/README.md) · [本轮阶段计划](../../edk/docs/edk-sdk-abi-boundary-plan.md) · [新会话提示词](../../edk/docs/edk-sdk-abi-boundary-prompt.md) · [SDK 安装实机验收](archive/sdk-install-contract/README.md) · [安装与遥测板验](archive/2026-11-27-install-reload-repair/README.md) · [核心与业务解耦板验](archive/2026-11-27-core-business-decoupling/README.md)
 - [工作区拉取和构建](../../README.md)
 - [固件升级、槽位与恢复操作](firmware-upgrade-guide.md)
 - [固件包 HWID 与自动发布](firmware-hwid-publication.md)

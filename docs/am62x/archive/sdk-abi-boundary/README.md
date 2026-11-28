@@ -5,4 +5,4 @@
 | 阶段 | 当期记录 | 对应记录 | 状态 |
 | --- | --- | --- | --- |
 | A1 构建候选 | [验收](a1-validation.md) | [验收](../../../../edk/docs/archive/sdk-abi-boundary/a1-validation.md) | 已验收 |
-| A2 安装候选 | 待验收 | 待验收 | 待开发 |
+| A2 安装候选 | [验收](a2-validation.md) | [验收](../../../../edk/docs/archive/sdk-abi-boundary/a2-validation.md) | 已验收 |
